@@ -14,3 +14,6 @@ file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "src/*.cpp")
 add_executable(${PROG_NAME} ${SOURCES})
 
 target_include_directories(${PROG_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include)
+
+enable_testing()
+add_subdirectory(tests)
