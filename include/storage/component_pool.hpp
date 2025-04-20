@@ -4,7 +4,6 @@
 #include <cstddef>
 #include <utility>
 #include <vector>
-#include <iostream>
 
 template<typename ComponentType>
 class ComponentPool {
