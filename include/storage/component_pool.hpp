@@ -11,7 +11,7 @@ class ComponentPool {
         using EntityID = size_t;
 
         ComponentType& GetComponent(const EntityID& entity) {
-            assert(HasComponent(entity));
+            assert(HasComponent(entity) && "No entity with such component");
 
             const size_t& denseComponentLocation = mComponentLocation[entity];
 
