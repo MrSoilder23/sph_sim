@@ -17,7 +17,7 @@ class ComponentPool {
 
             return mDenseComponents[denseComponentLocation];
         }
-        bool HasComponent(const EntityID& entity) {
+        inline bool HasComponent(const EntityID& entity) const noexcept {
             return entity < mComponentLocation.size() && 
                    mComponentLocation[entity] != INVALID_INDEX;
         }
@@ -36,7 +36,7 @@ class ComponentPool {
             mDenseComponents.push_back(std::move(component));
             mDenseEntities.push_back(entity);
         }
-        void RemoveComponent(const EntityID& entity) {
+        void RemoveComponent(const EntityID& entity) noexcept {
             if(!HasComponent(entity)) {
                 return;
             }
@@ -45,14 +45,19 @@ class ComponentPool {
             const size_t& lastComponentIndex = mDenseComponents.size() - 1;
             const size_t& lastEntity = mDenseEntities[lastComponentIndex];
 
-            std::swap(mDenseComponents[index], mDenseComponents[lastComponentIndex]);
-            std::swap(mDenseEntities[index], mDenseEntities[lastComponentIndex]);
+            if(index != lastComponentIndex)  {
+                mDenseComponents[index] = std::move(mDenseComponents[lastComponentIndex]);
+                mDenseEntities[index] = lastEntity;
+                mComponentLocation[lastEntity] = index;
+            }
 
             mDenseComponents.pop_back();
             mDenseEntities.pop_back();
+
+            mComponentLocation[entity] = INVALID_INDEX;
         }
 
-        void Reserve(const size_t& capacity) {
+        inline void Reserve(const size_t& capacity) {
             mComponentLocation.resize(capacity+1, INVALID_INDEX);
             mDenseComponents.reserve(capacity);
             mDenseEntities.reserve(capacity);

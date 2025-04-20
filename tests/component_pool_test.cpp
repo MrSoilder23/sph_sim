@@ -19,5 +19,9 @@ int main() {
         a += i;
     }
 
+    for(int i = 0; i < 100'000'000; i++) {
+        intPool.RemoveComponent(i);
+    }
+
     std::cout << "FINISHED" << std::endl;
 }
