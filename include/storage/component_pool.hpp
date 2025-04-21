@@ -28,6 +28,21 @@ class ComponentPool : public IComponentPool{
                    mComponentLocation[entity] != INVALID_INDEX;
         }
 
+        template<typename... Args>
+        void AddComponent(const EntityID& entity, Args&&... args) {
+            if(HasComponent(entity)) {
+                mDenseComponents[mComponentLocation[entity]] = ComponentType(std::forward<Args>(args)...);
+                return;
+            }
+
+            if(entity >= mComponentLocation.size()) {
+                mComponentLocation.resize(entity+1, INVALID_INDEX);
+            }
+
+            mComponentLocation[entity] = mDenseComponents.size();
+            mDenseComponents.push_back(ComponentType(std::forward<Args>(args)...));
+            mDenseEntities.push_back(entity);
+        }
         void AddComponent(const EntityID& entity, ComponentType& component) {
             if(HasComponent(entity)) {
                 mDenseComponents[mComponentLocation[entity]] = std::move(component);
@@ -42,6 +57,7 @@ class ComponentPool : public IComponentPool{
             mDenseComponents.push_back(std::move(component));
             mDenseEntities.push_back(entity);
         }
+
         void RemoveComponent(const EntityID& entity) noexcept {
             if(!HasComponent(entity)) {
                 return;
