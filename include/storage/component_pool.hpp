@@ -5,8 +5,10 @@
 #include <utility>
 #include <vector>
 
+class IComponentPool {};
+
 template<typename ComponentType>
-class ComponentPool {
+class ComponentPool : public IComponentPool{
     public:
         using EntityID = size_t;
 
