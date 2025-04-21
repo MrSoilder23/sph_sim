@@ -55,6 +55,12 @@ class Registry {
             
             pool.AddComponent(entityID, component);
         }
+        template<typename ComponentName, typename... Args>
+        void EmplaceComponent(const size_t& entityID, Args&&... args) {
+            auto& pool = GetComponentPool<ComponentName>();
+            
+            pool.AddComponent(entityID, args...);
+        }
 
         template<typename ComponentName>
         bool HasComponent(const size_t& entityID) {

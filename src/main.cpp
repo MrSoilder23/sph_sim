@@ -3,6 +3,12 @@
 
 // Own libraries
 #include "./registry.hpp"
+#include "storage/component_pool.hpp"
+
+struct PositionComponent {
+    int x;
+    int y;
+};
 
 int main() {
     Registry registry;
@@ -12,10 +18,14 @@ int main() {
     const size_t entity3 = registry.CreateEntity();
     int i = 5;
 
-    registry.EmplaceComponent<int>(entity, i);
+    registry.EmplaceComponent<PositionComponent>(entity, 4, 2);
     registry.EmplaceComponent<int>(entity2, i);
 
-    std::cout << registry.HasComponent<int>(entity)   << std::endl;
+    std::cout << registry.HasComponent<PositionComponent>(entity)   << std::endl;
     std::cout << registry.HasComponent<float>(entity) << std::endl;
     std::cout << registry.HasComponent<int>(entity3)  << std::endl;
+
+    ComponentPool<PositionComponent> posPool;
+    posPool.AddComponent(10, 4,2);
+    std::cout << posPool.GetComponent(10).x << " " << posPool.GetComponent(10).y << std::endl;
 }
