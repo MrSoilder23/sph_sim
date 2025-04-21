@@ -15,7 +15,7 @@ int main() {
     registry.EmplaceComponent<int>(entity, i);
     registry.EmplaceComponent<int>(entity2, i);
 
-    std::cout << registry.HasComponent<int>(entity)   << std::endl;
+    std::cout << registry.HasComponent<int>(entity) << std::endl;
     std::cout << registry.HasComponent<float>(entity) << std::endl;
-    std::cout << registry.HasComponent<int>(entity3)  << std::endl;
+    std::cout << registry.HasComponent<int>(entity3) << std::endl;
 }
