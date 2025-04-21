@@ -7,20 +7,25 @@
 int main() {
     ComponentPool<int> intPool;
 
-    intPool.Reserve(100'000'000);
+    int someComponent = 3;
+    intPool.AddComponent(0, someComponent);
+    intPool.AddComponent(2, someComponent);
+    intPool.AddComponent(6, someComponent);
+    
+    auto& entityDenseArray = intPool.GetDenseEntities();
 
-    for(int i = 0; i < 100'000'000; i++) {
-        int a = 5;
-        intPool.AddComponent(i, a);
+    std::cout << "Entities: ";
+    for(auto& entityID : entityDenseArray) {
+        std::cout << entityID << " ";
     }
 
-    for(int i = 0; i < 100'000'000; i++) {
-        int& a = intPool.GetComponent(i);
-        a += i;
+    std::cout << std::endl;
+    int i = 2;
+    for(auto it = intPool.ComponentBegin(); it != intPool.ComponentEnd(); ++it) {
+        *it += i++;
     }
-
-    for(int i = 0; i < 100'000'000; i++) {
-        intPool.RemoveComponent(i);
+    for(auto it = intPool.ComponentBegin(); it != intPool.ComponentEnd(); ++it) {
+        std::cout << *it << std::endl;
     }
 
     std::cout << "FINISHED" << std::endl;

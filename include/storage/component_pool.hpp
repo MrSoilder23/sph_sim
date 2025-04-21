@@ -17,6 +17,10 @@ class ComponentPool {
 
             return mDenseComponents[denseComponentLocation];
         }
+        const std::vector<size_t>& GetDenseEntities() {
+            return mDenseEntities;
+        }
+
         inline bool HasComponent(const EntityID& entity) const noexcept {
             return entity < mComponentLocation.size() && 
                    mComponentLocation[entity] != INVALID_INDEX;
@@ -62,6 +66,13 @@ class ComponentPool {
             mDenseComponents.reserve(capacity);
             mDenseEntities.reserve(capacity);
         }    
+
+        std::vector<ComponentType>::iterator ComponentBegin() {
+            return mDenseComponents.begin();
+        }
+        std::vector<ComponentType>::iterator ComponentEnd() {
+            return mDenseComponents.end();
+        }
 
     private:
         static constexpr size_t INVALID_INDEX = std::numeric_limits<size_t>::max();
