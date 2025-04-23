@@ -1,0 +1,2 @@
+cmake -S . -B build "-DCMAKE_C_COMPILER:FILEPATH=C:\Program Files\LLVM\bin\clang-cl.exe" "-DCMAKE_CXX_COMPILER:FILEPATH=C:\Program Files\LLVM\bin\clang-cl.exe" "-DCMAKE_TOOLCHAIN_FILE=./vcpkg/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=x64-windows -DVCPKG_MANIFEST_INSTALL=ON -G Ninja 
+cmake --build build
