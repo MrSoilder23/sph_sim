@@ -3,6 +3,7 @@
         "title": "SPH-sim",
         "width": 640,
         "height": 480,
-        "fullscreen": false
+        "fullscreen": false,
+        "vsync": true
     }
 }
