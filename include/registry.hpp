@@ -1,11 +1,13 @@
 #pragma once
 // C++ standard libraries
+#include <array>
 #include <cstddef>
 #include <memory>
 #include <vector>
 
 // Own libraries
 #include "./storage/component_pool.hpp"
+#include "storage/component_view.hpp"
 
 namespace internal_id_gen {
     static size_t id = 0;
@@ -51,26 +53,48 @@ class Registry {
 
         template<typename ComponentName>
         void EmplaceComponent(const size_t& entityID, ComponentName& component) {
-            auto& pool = GetComponentPool<ComponentName>();
+            static ComponentPool<ComponentName>& pool = GetComponentPool<ComponentName>();
             
             pool.AddComponent(entityID, component);
+            mEntities[entityID] = true;
         }
         template<typename ComponentName, typename... Args>
         void EmplaceComponent(const size_t& entityID, Args&&... args) {
-            auto& pool = GetComponentPool<ComponentName>();
+            static ComponentPool<ComponentName>& pool = GetComponentPool<ComponentName>();
             
             pool.AddComponent(entityID, args...);
+            mEntities[entityID] = true;
         }
 
         template<typename ComponentName>
         bool HasComponent(const size_t& entityID) {
-            static size_t type_id = GetPoolID<ComponentName>();
+            return GetComponentPool<ComponentName>().HasComponent(entityID);
+        }
 
-            return entityID < mEntities.size() &&
-                   GetComponentPool<ComponentName>().HasComponent(entityID);
+        template<typename ComponentName>
+        void RemoveComponent(const size_t& entityID) {
+            static ComponentPool<ComponentName>& pool = GetComponentPool<ComponentName>();
+
+            pool.RemoveComponent(entityID);
+        }
+
+        void RemoveEntity(const size_t& entityID) {
+            if(entityID >= mEntities.size()) {
+                return;
+            }
+
+            for(auto& pool : mComponentPool) {
+                pool->RemoveComponent(entityID);
+            }
+            mEntities[entityID] = false;
+        }
+
+        template<typename... ComponentName>
+        ComponentView<ComponentName...> GetView() {
+            return ComponentView<ComponentName...>(GetComponentPool<ComponentName>()...);
         }
 
     private:
         std::vector<bool> mEntities;
-        std::vector<std::unique_ptr<IComponentPool>> mComponentPool;
+        std::vector<std::unique_ptr<ISparseSet>> mComponentPool;
 };

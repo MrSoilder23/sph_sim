@@ -5,10 +5,16 @@
 #include <utility>
 #include <vector>
 
-class IComponentPool {};
+class ISparseSet {
+    public:
+        using EntityID = size_t;
+
+        virtual ~ISparseSet() = default;
+        virtual void RemoveComponent(const EntityID& entity) = 0;
+};
 
 template<typename ComponentType>
-class ComponentPool : public IComponentPool{
+class ComponentPool : public ISparseSet{
     public:
         using EntityID = size_t;
 
@@ -58,7 +64,7 @@ class ComponentPool : public IComponentPool{
             mDenseEntities.push_back(entity);
         }
 
-        void RemoveComponent(const EntityID& entity) noexcept {
+        void RemoveComponent(const EntityID& entity) override {
             if(!HasComponent(entity)) {
                 return;
             }
