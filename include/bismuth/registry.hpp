@@ -1,13 +1,14 @@
 #pragma once
 // C++ standard libraries
-#include <array>
 #include <cstddef>
 #include <memory>
 #include <vector>
 
 // Own libraries
-#include "./storage/component_pool.hpp"
-#include "storage/component_view.hpp"
+#include "./bismuth/storage/component_pool.hpp"
+#include "./bismuth/storage/component_view.hpp"
+
+namespace bismuth {
 
 namespace internal_id_gen {
     static size_t id = 0;
@@ -98,3 +99,5 @@ class Registry {
         std::vector<bool> mEntities;
         std::vector<std::unique_ptr<ISparseSet>> mComponentPool;
 };
+
+}

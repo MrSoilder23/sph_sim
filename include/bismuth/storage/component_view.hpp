@@ -7,7 +7,9 @@
 #include <vector>
 
 // Own libraries
-#include "component_pool.hpp"
+#include "./bismuth/storage/component_pool.hpp"
+
+namespace bismuth {
 
 template<typename... ComponentName>
 class ComponentView {
@@ -109,3 +111,5 @@ class ComponentView {
         std::tuple<ComponentPool<ComponentName>&...> mComponentPools;
         const std::vector<size_t>* mDenseEntities; // Smallest array of entities
 };
+
+}

@@ -2,10 +2,10 @@
 #include <iostream>
 
 // Own libraries
-#include "./storage/component_pool.hpp"
+#include "./bismuth/storage/component_pool.hpp"
 
 int main() {
-    ComponentPool<int> intPool;
+    bismuth::ComponentPool<int> intPool;
 
     int amountOfEntities = 100'000'000;
 

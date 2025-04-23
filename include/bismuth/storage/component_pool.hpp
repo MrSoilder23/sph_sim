@@ -5,6 +5,8 @@
 #include <utility>
 #include <vector>
 
+namespace bismuth {
+
 class ISparseSet {
     public:
         using EntityID = size_t;
@@ -105,3 +107,5 @@ class ComponentPool : public ISparseSet{
         std::vector<ComponentType> mDenseComponents;
         std::vector<size_t> mDenseEntities;
 };
+
+}

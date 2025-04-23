@@ -2,7 +2,7 @@
 #include <iostream>
 
 // Own libraries
-#include "./registry.hpp"
+#include "./bismuth/registry.hpp"
 
 struct PositionComponent {
     int x;
@@ -14,7 +14,7 @@ struct OtherComponent {
 };
 
 int main() {
-    Registry registry;
+    bismuth::Registry registry;
 
     auto entity0 = registry.CreateEntity();
     auto entity1 = registry.CreateEntity();
