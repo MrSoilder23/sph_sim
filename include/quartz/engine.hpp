@@ -36,6 +36,8 @@ class Engine {
         int mScreenWidth;
         int mScreenHeight;
 
+        Uint64 mLastTime = 0;
+
         bool mQuit = false;
 };
 

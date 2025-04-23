@@ -1,5 +1,7 @@
 #include "./quartz/engine.hpp"
 #include "glad/glad.h"
+#include <SDL3/SDL_stdinc.h>
+#include <SDL3/SDL_timer.h>
 #include <SDL3/SDL_video.h>
 
 void quartz::Engine::Initialize(const std::string& configPath) {
@@ -71,7 +73,10 @@ void quartz::Engine::Initialize(const std::string& configPath) {
 void quartz::Engine::Run() {
     
     while (!mQuit) {
-        float deltaTime = 1;
+        Uint64 now = SDL_GetPerformanceCounter();
+        double deltaTime = (now - mLastTime) / double(SDL_GetPerformanceFrequency());
+        mLastTime = now;
+        
         mEventCallback(deltaTime);
 
         glEnable(GL_DEPTH_TEST);
