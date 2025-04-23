@@ -11,12 +11,19 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "src/*.cpp")
 
+add_library(glad STATIC third_party/glad/glad.c)
 find_package(SDL3 CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
 
 add_executable(${PROG_NAME} ${SOURCES})
 
+target_include_directories(glad PUBLIC third_party)
 target_include_directories(${PROG_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include)
-target_link_libraries(${PROG_NAME} PRIVATE SDL3::SDL3)
+target_link_libraries(${PROG_NAME} PRIVATE 
+    glad    
+    nlohmann_json::nlohmann_json
+    SDL3::SDL3
+)
 
 enable_testing()
 add_subdirectory(tests)

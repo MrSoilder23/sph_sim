@@ -5,7 +5,6 @@
 
 // Third_party libraries
 #include <SDL3/SDL.h>
-#include <nlohmann/json.hpp>
 
 quartz::Engine gEngine;
 

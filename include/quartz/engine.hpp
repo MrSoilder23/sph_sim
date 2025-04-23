@@ -1,5 +1,6 @@
 #pragma once
 // C++ standard libraries
+#include <SDL3/SDL_video.h>
 #include <functional>
 #include <string>
 #include <fstream>
@@ -9,6 +10,7 @@
 // Third_party libraries
 #include <SDL3/SDL.h>
 #include <nlohmann/json.hpp>
+#include <glad/glad.h>
 
 namespace quartz {
 
@@ -25,10 +27,14 @@ class Engine {
         void SetSystemCallback(const std::function<void(float)>& func);
     private:
         SDL_Window* mWindow = nullptr;
+        SDL_GLContext mOpenGLContext;
 
         std::function<void(float)> mEventCallback;
         std::function<void(float)> mUpdateCallback;
         std::function<void(float)> mSystemCallback;
+
+        int mScreenWidth;
+        int mScreenHeight;
 
         bool mQuit = false;
 };
