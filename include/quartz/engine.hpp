@@ -16,6 +16,8 @@ namespace quartz {
 
 class Engine {
     public:
+        ~Engine();
+
         void Initialize(const std::string& configPath);
         void Run();
         void Shutdown();

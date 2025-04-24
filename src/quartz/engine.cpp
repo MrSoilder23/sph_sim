@@ -4,6 +4,10 @@
 #include <SDL3/SDL_timer.h>
 #include <SDL3/SDL_video.h>
 
+quartz::Engine::~Engine() {
+    Shutdown();
+}
+
 void quartz::Engine::Initialize(const std::string& configPath) {
     // Reading Json config file
     std::ifstream configFile(configPath);
