@@ -28,7 +28,7 @@ void quartz::Engine::Initialize(const std::string& configPath) {
     mScreenWidth = config["window"]["width"];
     mScreenHeight = config["window"]["height"];
     bool fullscreen = config["window"]["fullscreen"];
-    bool vsync = config["window"]["vsync"];
+    bool vsync = config["rendering"]["vsync"];
     
     // Flags
     Uint32 windowFlags = SDL_WINDOW_OPENGL;

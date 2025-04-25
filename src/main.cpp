@@ -1,10 +1,11 @@
 // C++ standard libraries
-#include "quartz/engine.hpp"
 #include <iostream>
-#include <fstream>
 
 // Third_party libraries
 #include <SDL3/SDL.h>
+
+// Own libraries
+#include "quartz/engine.hpp"
 
 quartz::Engine gEngine;
 
