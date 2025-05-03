@@ -7,13 +7,19 @@
 // Own libraries
 #include "bismuth/registry.hpp"
 #include "quartz/core/components/camera_component.hpp"
+#include "quartz/core/components/instance_component.hpp"
+#include "quartz/core/components/sphere_component.hpp"
 #include "quartz/core/components/transform_component.hpp"
 #include "quartz/core/systems/camera_system.hpp"
 #include "quartz/engine.hpp"
 #include "quartz/graphics/instanced_renderer_system.hpp"
+#include "quartz/graphics/shader.hpp"
+#include "sapphire/test.hpp"
 
 quartz::Engine gEngine;
 bismuth::Registry gRegistry;
+
+quartz::InstancedRendererSystem gInstanceRenderer;
 
 void InitEntities() {
     size_t entity = gRegistry.CreateEntity();
@@ -24,6 +30,13 @@ void InitEntities() {
 
     gRegistry.EmplaceComponent<CameraComponent>(entity, camera);
     gRegistry.EmplaceComponent<TransformComponent>(entity, transform);
+
+    
+    size_t sphereEntity = gRegistry.CreateEntity();
+
+    gRegistry.EmplaceComponent<InstanceComponent>(sphereEntity);
+    gRegistry.EmplaceComponent<SphereComponent>(sphereEntity, glm::vec4(0,0,-10,1));
+
 }
 
 void Event(float deltaTime) {
@@ -39,10 +52,12 @@ void Event(float deltaTime) {
 
 void System(float deltaTime) {
     static quartz::CameraSystem cameraSystem;
-    static quartz::InstancedRendererSystem instanceRenderer;
+    static TestSystem test;
 
     cameraSystem.Update(gRegistry);
-    instanceRenderer.Update(gRegistry);
+    test.Update(gRegistry);
+
+    gInstanceRenderer.Update(gRegistry);
 }
 
 void FpsCounter(float deltaTime) {
@@ -62,7 +77,10 @@ int main(int argc, char* argv[]) {
     InitEntities();
     
     gEngine.Initialize("./config/config.json");
-    
+
+    GLuint shaderProgram = shader::CreateGraphicsPipeline("./shaders/sphereVert.glsl", "./shaders/instancedFrag.glsl");
+    gInstanceRenderer.Init(shaderProgram);
+
     gEngine.SetEventCallback(Event);
     gEngine.SetSystemCallback(System);
     gEngine.SetUpdateCallback(Loop);

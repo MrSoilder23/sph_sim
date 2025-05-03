@@ -85,6 +85,7 @@ void quartz::Engine::Run() {
 
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
+        glEnable(GL_PROGRAM_POINT_SIZE);
 
         glViewport(0,0, mScreenWidth, mScreenHeight);
         glClearColor(0.1f, 0.4f, 0.2f, 1.0f);
