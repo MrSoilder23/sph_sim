@@ -100,6 +100,10 @@ class ComponentView {
         };
 
         Iterator begin() const {
+            if (mDenseEntities->empty()) { // Early exit if empty
+                return end();
+            }
+            
             return {this, 0, true};
         }
 
