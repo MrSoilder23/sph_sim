@@ -31,11 +31,12 @@ void InitEntities() {
     gRegistry.EmplaceComponent<CameraComponent>(entity, camera);
     gRegistry.EmplaceComponent<TransformComponent>(entity, transform);
 
+    for(int i = 0; i < 1'000; i++) {
+        size_t sphereEntity = gRegistry.CreateEntity();
     
-    size_t sphereEntity = gRegistry.CreateEntity();
-
-    gRegistry.EmplaceComponent<InstanceComponent>(sphereEntity);
-    gRegistry.EmplaceComponent<SphereComponent>(sphereEntity, glm::vec4(0,0,-10,1));
+        gRegistry.EmplaceComponent<InstanceComponent>(sphereEntity);
+        gRegistry.EmplaceComponent<SphereComponent>(sphereEntity, glm::vec4(0,i*0.5f,-10,1));
+    }
 
 }
 
