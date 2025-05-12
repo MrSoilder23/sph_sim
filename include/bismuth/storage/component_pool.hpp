@@ -20,15 +20,14 @@ template<typename ComponentType>
 class ComponentPool : public ISparseSet{
     public:
         using EntityID = size_t;
+        static constexpr size_t INVALID_INDEX = std::numeric_limits<size_t>::max();
 
         ComponentType& GetComponent(const EntityID& entity) {
             assert(HasComponent(entity) && "No entity with such component");
 
-            const size_t& denseComponentLocation = mComponentLocation[entity];
-
-            return mDenseComponents[denseComponentLocation];
+            return mDenseComponents[mComponentLocation[entity]];
         }
-        const std::vector<size_t>& GetDenseEntities() {
+        const std::vector<size_t>& GetDenseEntities() const noexcept{
             return mDenseEntities;
         }
 
@@ -68,19 +67,12 @@ class ComponentPool : public ISparseSet{
         }
 
         void RemoveComponent(const EntityID& entity) override {
-            if(!HasComponent(entity)) {
-                return;
-            }
-
             const size_t& index = mComponentLocation[entity];
-            const size_t& lastComponentIndex = mDenseComponents.size() - 1;
-            const size_t& lastEntity = mDenseEntities[lastComponentIndex];
+            const size_t& lastEntity = mDenseEntities.back();
 
-            if(index != lastComponentIndex)  {
-                mDenseComponents[index] = std::move(mDenseComponents[lastComponentIndex]);
-                mDenseEntities[index] = lastEntity;
-                mComponentLocation[lastEntity] = index;
-            }
+            mDenseComponents[index] = std::move(mDenseComponents.back());
+            mDenseEntities[index] = lastEntity;
+            mComponentLocation[lastEntity] = index;
 
             mDenseComponents.pop_back();
             mDenseEntities.pop_back();
@@ -92,7 +84,12 @@ class ComponentPool : public ISparseSet{
             mComponentLocation.resize(capacity+1, INVALID_INDEX);
             mDenseComponents.reserve(capacity);
             mDenseEntities.reserve(capacity);
-        }    
+        }
+
+        // For efficient reading/sending data to gpu
+        const std::vector<ComponentType>& GetDenseComponents() const {
+            return mDenseComponents;
+        }
 
         std::vector<ComponentType>::iterator ComponentBegin() {
             return mDenseComponents.begin();
@@ -102,8 +99,6 @@ class ComponentPool : public ISparseSet{
         }
 
     private:
-        static constexpr size_t INVALID_INDEX = std::numeric_limits<size_t>::max();
-
         std::vector<size_t> mComponentLocation;
         std::vector<ComponentType> mDenseComponents;
         std::vector<size_t> mDenseEntities;

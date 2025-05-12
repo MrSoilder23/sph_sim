@@ -1,5 +1,6 @@
 #pragma once
 // C++ standard libraries
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <iterator>
@@ -18,16 +19,14 @@ class ComponentView {
     public:
 
         ComponentView(ComponentPool<ComponentName>&... componentPool) : mComponentPools(componentPool...) {
-            std::array<const std::vector<size_t>*, sizeof...(ComponentName)> array = {
+            std::array<const std::vector<size_t>*, sizeof...(ComponentName)> pools = {
                 &componentPool.GetDenseEntities()...
             };
 
-            mDenseEntities = array[0];
-            for(auto ptr : array) {
-                if(ptr->size() < mDenseEntities->size()) {
-                    mDenseEntities = ptr;
-                }
-            }
+            auto minDenseIter = std::min_element(pools.begin(), pools.end(),
+                [](const auto* a, const auto* b){ return a->size() < b->size(); }
+            );
+            mDenseEntities = *minDenseIter;
         }
 
         struct Iterator {
@@ -72,9 +71,9 @@ class ComponentView {
             }
 
             Iterator operator++(int) {
-                Iterator tmp = *this;
+                Iterator temp = *this;
                 ++(*this);
-                return tmp;
+                return temp;
             }
 
             bool operator==(Iterator const& other) const {
@@ -109,6 +108,14 @@ class ComponentView {
 
         Iterator end() const {
             return {this, mDenseEntities->size(), false};
+        }
+
+        const size_t SizeHint() {
+            return mDenseEntities->size();
+        }
+
+        const std::vector<size_t>* GetSmallestDense() {
+            return mDenseEntities;
         }
 
     private:

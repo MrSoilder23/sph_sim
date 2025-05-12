@@ -31,7 +31,7 @@ void InitEntities() {
     gRegistry.EmplaceComponent<CameraComponent>(entity, camera);
     gRegistry.EmplaceComponent<TransformComponent>(entity, transform);
 
-    for(int i = 0; i < 1'000; i++) {
+    for(int i = 0; i < 1'000'000; i++) {
         size_t sphereEntity = gRegistry.CreateEntity();
     
         gRegistry.EmplaceComponent<InstanceComponent>(sphereEntity);

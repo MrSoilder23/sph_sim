@@ -14,6 +14,7 @@ file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "src/*.cpp")
 add_library(glad STATIC third_party/glad/glad.c)
 find_package(SDL3 CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
+find_package(OpenMP REQUIRED)
 
 add_executable(${PROG_NAME} ${SOURCES})
 
@@ -26,6 +27,8 @@ target_link_libraries(${PROG_NAME} PRIVATE
     glad    
     nlohmann_json::nlohmann_json
     SDL3::SDL3
+    OpenMP::OpenMP_C
+    OpenMP::OpenMP_CXX
 )
 
 enable_testing()

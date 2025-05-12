@@ -1,4 +1,6 @@
 #include "./quartz/graphics/instanced_renderer_system.hpp"
+#include "quartz/core/components/instance_component.hpp"
+#include "quartz/core/components/sphere_component.hpp"
 
 void quartz::InstancedRendererSystem::Init(GLuint shaderProgram) {
     glGenVertexArrays(1, &mDummyVAO);
@@ -9,24 +11,15 @@ void quartz::InstancedRendererSystem::Init(GLuint shaderProgram) {
 
 void quartz::InstancedRendererSystem::Update(bismuth::Registry& registry) {
     const auto cameraView = registry.GetView<CameraComponent, TransformComponent>();
-    auto modelView = registry.GetView<InstanceComponent, SphereComponent>();
 
-    float sphereRadius;
-    std::vector<glm::vec4> instances;
-    for(auto [entities, _, sphere] : modelView) {
-        instances.push_back(sphere.positionAndRadius);
-        sphereRadius = sphere.positionAndRadius.w;
-    }
-
-    if(instances.empty()) {
-        return;
-    }
+    auto& spherePool = registry.GetComponentPool<SphereComponent>();
+    const auto& sphereData = spherePool.GetDenseComponents();
 
     glBindBuffer(GL_ARRAY_BUFFER, mInstanceVBO);
     glBufferData(
         GL_ARRAY_BUFFER,
-        sizeof(glm::vec4)*instances.size(),
-        instances.data(),
+        sizeof(glm::vec4)*sphereData.size(),
+        sphereData.data(),
         GL_STREAM_DRAW  
     );
 
@@ -46,11 +39,11 @@ void quartz::InstancedRendererSystem::Update(bismuth::Registry& registry) {
 
     GLint projectionMatrix = shader::FindUniformLocation(mShaderProgram, "uProjectionMatrix");
     GLint cameraPosition = shader::FindUniformLocation(mShaderProgram, "uCameraPosition");
-    for(auto [entity, camera, transform] : cameraView) {
+    for(const auto& [entity, camera, transform] : cameraView) {
         glUniformMatrix4fv(projectionMatrix, 1, GL_FALSE, glm::value_ptr(camera.viewProjection));
         glUniformMatrix4fv(cameraPosition, 1, GL_FALSE, glm::value_ptr(transform.position));
     }
 
-    glDrawArraysInstanced(GL_POINTS, 0, 32*32,instances.size());
+    glDrawArraysInstanced(GL_POINTS, 0, 1,sphereData.size());
 
 }
