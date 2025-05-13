@@ -1,9 +1,11 @@
 # **Sph Simulation** ***(IN PROGRESS)***
 Offers planetary collision simulations (IN PROGRESS). Powered by my own bismuth ECS engine. 
 
+&nbsp;
 # **Description**
 Made in custom ECS, bismuth, which depending of loop type offers 30% efficiency boost compared to entt or 10% decrease (implemented tuple for loop).
 
+&nbsp;
 # **Installation**
 
 ## **Build**
