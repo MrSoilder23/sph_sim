@@ -1,9 +1,10 @@
-# **Sph Simulation** ***(IN PROGRESS)***
-Offers planetary collision simulations (IN PROGRESS). Powered by my own bismuth ECS engine. 
+# **Sph Simulation**
+SPH planetary collision simulation (IN PROGRESS). Built on Bismuth, a custom Entity-Component-System (ECS) engine.
 
 &nbsp;
 # **Description**
-Made in custom ECS, bismuth, which depending of loop type offers 30% efficiency boost compared to entt or 10% decrease (implemented tuple for loop).
+Simulation is built on Bismuth, custom ECS library. Depending on choice of iteration pattern, Bismuth can be up to 30% faster than EnTT or 10% slower (Tuple for loop).
+Currently it renders a basic animation of 1 milion particles falling down, using SDL3 and glad for rendering.
 
 &nbsp;
 # **Installation**
@@ -15,6 +16,8 @@ cmake --build build
 ```
 
 ## **Usage**
+To change window size open ./config/config.json
+
 ```
 ./bin/prog
 ```
