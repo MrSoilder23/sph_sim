@@ -1,46 +1,93 @@
 // C++ standard libraries
 #include <iostream>
 
+// Third_party libraries
+#include <SDL3/SDL.h>
+
 // Own libraries
-#include "./bismuth/registry.hpp"
+#include "bismuth/registry.hpp"
+#include "quartz/core/components/camera_component.hpp"
+#include "quartz/core/components/instance_component.hpp"
+#include "quartz/core/components/sphere_component.hpp"
+#include "quartz/core/components/transform_component.hpp"
+#include "quartz/core/systems/camera_system.hpp"
+#include "quartz/engine.hpp"
+#include "quartz/graphics/instanced_renderer_system.hpp"
+#include "quartz/graphics/shader.hpp"
+#include "sapphire/test.hpp"
 
-struct PositionComponent {
-    int x;
-    int y;
-};
-struct OtherComponent {
-    int x;
-    int y;
-};
+quartz::Engine gEngine;
+bismuth::Registry gRegistry;
 
-int main() {
-    bismuth::Registry registry;
+quartz::InstancedRendererSystem gInstanceRenderer;
 
-    auto entity0 = registry.CreateEntity();
-    auto entity1 = registry.CreateEntity();
-    auto entity2 = registry.CreateEntity();
-    auto entity3 = registry.CreateEntity();
-    auto entity4 = registry.CreateEntity();
+void InitEntities() {
+    size_t entity = gRegistry.CreateEntity();
+    CameraComponent camera;
+    TransformComponent transform;
 
-    registry.EmplaceComponent<OtherComponent>(entity0, 1,2);
-    registry.EmplaceComponent<OtherComponent>(entity2, 1,2);
-    registry.EmplaceComponent<OtherComponent>(entity3, 1,2);
+    camera.aspectRatio = 640.0f/480.0f;
 
-    registry.EmplaceComponent<PositionComponent>(entity0, 1,2);
-    registry.EmplaceComponent<PositionComponent>(entity1, 1,2);
-    registry.EmplaceComponent<PositionComponent>(entity2, 1,2);
-    registry.EmplaceComponent<PositionComponent>(entity3, 1,2);
+    gRegistry.EmplaceComponent<CameraComponent>(entity, camera);
+    gRegistry.EmplaceComponent<TransformComponent>(entity, transform);
 
-    auto view = registry.GetView<PositionComponent, OtherComponent>();
-
-    for(auto [entity, a, b] : view) {
-        std::cout << "entity: " << entity << " component1: " << a.x << ":" << a.y << " component2: " << b.x << ":" << b.y << std::endl;
-    }
+    for(int i = 0; i < 1'000'000; i++) {
+        size_t sphereEntity = gRegistry.CreateEntity();
     
-    registry.RemoveEntity(entity2);
-    std::cout << std::endl;
-
-    for(auto [entity, a, b] : view) {
-        std::cout << "entity: " << entity << " component1: " << a.x << ":" << a.y << " component2: " << b.x << ":" << b.y << std::endl;
+        gRegistry.EmplaceComponent<InstanceComponent>(sphereEntity);
+        gRegistry.EmplaceComponent<SphereComponent>(sphereEntity, glm::vec4(0,i*0.5f,-10,1));
     }
+
+}
+
+void Event(float deltaTime) {
+    SDL_Event e;
+
+    while (SDL_PollEvent(&e)) {
+        // User requests quit
+        if (e.type == SDL_EVENT_QUIT) {
+            gEngine.Quit();
+        }
+    }
+}
+
+void System(float deltaTime) {
+    static quartz::CameraSystem cameraSystem;
+    static TestSystem test;
+
+    cameraSystem.Update(gRegistry);
+    test.Update(gRegistry);
+
+    gInstanceRenderer.Update(gRegistry);
+}
+
+void FpsCounter(float deltaTime) {
+    static float smoothedFPS = 0.0f;
+    static float alpha = 0.1f;  
+
+    float fps = 1.0f/deltaTime;
+    smoothedFPS = alpha * fps + (1.0f - alpha) * smoothedFPS;
+    std::cout << "\rFPS: " << static_cast<int>(smoothedFPS) << std::flush;
+}
+
+void Loop(float deltaTime) {
+    FpsCounter(deltaTime);
+}
+
+int main(int argc, char* argv[]) {
+    InitEntities();
+    
+    gEngine.Initialize("./config/config.json");
+
+    GLuint shaderProgram = shader::CreateGraphicsPipeline("./shaders/sphereVert.glsl", "./shaders/instancedFrag.glsl");
+    gInstanceRenderer.Init(shaderProgram);
+
+    gEngine.SetEventCallback(Event);
+    gEngine.SetSystemCallback(System);
+    gEngine.SetUpdateCallback(Loop);
+
+    gEngine.Run();
+    gEngine.Shutdown();
+
+    return 0;
 }

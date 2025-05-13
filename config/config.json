@@ -1,0 +1,11 @@
+{
+    "window": {
+        "title": "SPH-sim",
+        "width": 640,
+        "height": 480,
+        "fullscreen": false
+    },
+    "rendering": {
+        "vsync": true
+    }
+}

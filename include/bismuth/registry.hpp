@@ -11,7 +11,7 @@
 namespace bismuth {
 
 namespace internal_id_gen {
-    static size_t id = 0;
+    inline size_t id = 0;
     
     template<typename>
     size_t generate_id() {
