@@ -21,14 +21,13 @@ void quartz::InstancedRendererSystem::Update(bismuth::Registry& registry) {
         glBufferData(
             GL_ARRAY_BUFFER,
             sizeof(glm::vec4)*sphereSize,
-            sphereData.data(),
+            nullptr,
             GL_STREAM_DRAW  
         );
-        
+
         mDataSize = sphereSize;
-    } else {
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec4)*sphereSize, sphereData.data());
     }
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec4)*sphereSize, sphereData.data());
 
 
     glUseProgram(mShaderProgram);

@@ -21,6 +21,8 @@ class InstancedRendererSystem {
         GLuint mInstanceVBO;
         GLuint mDummyVAO;
         GLuint mShaderProgram;
+
+        size_t mDataSize;
 };
 
 }
