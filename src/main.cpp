@@ -53,20 +53,23 @@ void InitEntities() {
     gRegistry.EmplaceComponent<CameraComponent>(entity, camera);
     gRegistry.EmplaceComponent<TransformComponent>(entity, transform);
 
-    float coordOffset = 5*0.5f;
+    // Initial data
+    float spacing = 0.5f;
+
+    float coordOffset = 5*spacing;
 
     for(int x = 0; x < 10; x++) {
         for(int y = 0; y < 10; y++) {
             size_t sphereEntity = gRegistry.CreateEntity();
         
             gRegistry.EmplaceComponent<InstanceComponent>(sphereEntity);
-            gRegistry.EmplaceComponent<SphereComponent>(sphereEntity, glm::vec4(x*0.5f-coordOffset,y*0.5f-coordOffset,-10,1));
+            gRegistry.EmplaceComponent<SphereComponent>(sphereEntity, glm::vec4(x*spacing-coordOffset,y*spacing-coordOffset,-10,1));
 
-            gRegistry.EmplaceComponent<DensityComponent>(sphereEntity,  0);
+            gRegistry.EmplaceComponent<DensityComponent>(sphereEntity);
+            gRegistry.EmplaceComponent<PressureComponent>(sphereEntity);
             gRegistry.EmplaceComponent<MassComponent>(sphereEntity,     10.0f);
-            gRegistry.EmplaceComponent<PressureComponent>(sphereEntity, 0);
-            gRegistry.EmplaceComponent<ForceComponent>(sphereEntity,    glm::vec3(0,0,0));
-            gRegistry.EmplaceComponent<VelocityComponnet>(sphereEntity, glm::vec3(0,0,0));
+            gRegistry.EmplaceComponent<ForceComponent>(sphereEntity,    glm::vec3(0.0f));
+            gRegistry.EmplaceComponent<VelocityComponnet>(sphereEntity, glm::vec3(0.0f));
         }
     }
 }
