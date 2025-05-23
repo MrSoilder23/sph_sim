@@ -13,11 +13,11 @@ namespace sapphire {
         return std::exp(-0.5f * radiusSquared / smoothingSquared) / (2.0f * PI * smoothingSquared);
     }
 
-    float ComputeDensity(const glm::vec2& point, const std::vector<glm::vec2*>& neighbors, float smoothingLength, float mass) {
+    float ComputeDensity(const glm::vec4& point, const std::vector<glm::vec4*>& neighbors, float smoothingLength, float mass) {
         float density = 0.0f;
 
         for(const auto& neighbor : neighbors) {
-            glm::vec2 diff = point - *neighbor;
+            glm::vec3 diff = point - *neighbor;
             float radiusSquared = glm::dot(diff, diff);
             if(radiusSquared < smoothingLength * smoothingLength) {
                 density += mass * GaussianKernel2D(radiusSquared, smoothingLength);

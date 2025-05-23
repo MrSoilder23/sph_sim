@@ -22,8 +22,6 @@
 #include "sapphire/components/pressure_component.hpp"
 #include "sapphire/components/velocity_component.hpp"
 
-#include "sapphire/systems/neighbour_search_system.hpp"
-
 quartz::Engine gEngine;
 bismuth::Registry gRegistry;
 
@@ -87,7 +85,6 @@ void Event(float deltaTime) {
 
 void System(float deltaTime) {
     static quartz::CameraSystem cameraSystem;
-    static NeighbourSearchSystem neighbourSystem;
 
     cameraSystem.Update(gRegistry);
 
