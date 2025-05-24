@@ -8,6 +8,7 @@
 #include "sapphire/components/density_component.hpp"
 #include "sapphire/components/force_component.hpp"
 #include "sapphire/components/pressure_component.hpp"
+#include "sapphire/components/velocity_component.hpp"
 #include "quartz/core/components/sphere_component.hpp"
 
 class SphereDataSystem {

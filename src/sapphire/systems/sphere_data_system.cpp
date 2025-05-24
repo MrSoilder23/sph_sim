@@ -1,22 +1,55 @@
 #include "sapphire/systems/sphere_data_system.hpp"
 
-std::vector<glm::vec4*> GetNeighbors(
+std::vector<const size_t*> GetNeighbors(
     glm::vec4& position, bismuth::ComponentPool<SphereComponent>& spherePositions, float radius
 ) {
-    std::vector<glm::vec4*> neighbors;
+    std::vector<const size_t*> neighbors;
     float radiusSquared = radius * radius;
 
-    auto endIt = spherePositions.ComponentEnd();
-    for(auto it = spherePositions.ComponentBegin(); it != endIt; ++it) {
-        const glm::vec3 point = position - it->positionAndRadius;
+    for(auto& entityID : spherePositions.GetDenseEntities()) {
+        const glm::vec3 point = position - spherePositions.GetComponent(entityID).positionAndRadius;
         if(glm::dot(point, point) <= radiusSquared) {
-            neighbors.push_back(&it->positionAndRadius);
+            neighbors.push_back(&entityID);
         }
     }
     return neighbors;
 }
 float ComputePressure(float& density, float restDensity = 1000.0f, float stiffness = 500.0f) {
     return stiffness * (density - restDensity);
+}
+
+glm::vec3 ComputeForces(
+    glm::vec4& point, std::vector<const size_t*>& neighbors,
+    size_t& currentPointID,
+    bismuth::ComponentPool<SphereComponent> spherePool, bismuth::ComponentPool<PressureComponent> pressurePool,
+    bismuth::ComponentPool<DensityComponent> densityPool, bismuth::ComponentPool<VelocityComponnet> velocityPool, 
+    float smoothingLength
+) {
+    glm::vec3 pressureForce(0.0f);
+    glm::vec3 viscosityForce(0.0f);
+
+    auto& currentPointPressure = pressurePool.GetComponent(currentPointID).p;
+    auto& currentPointDensity = densityPool.GetComponent(currentPointID).d;
+    auto& currentPointVelocity = velocityPool.GetComponent(currentPointID).v;
+
+    for(const auto& neighborID : neighbors) {
+        glm::vec3 deltaPoint = point - spherePool.GetComponent(*neighborID).positionAndRadius;
+        float radius = glm::length(deltaPoint);
+
+        if(radius > 0.0f && radius < smoothingLength) {
+            glm::vec3 gradient = sapphire::CubicSplineGradient(deltaPoint, smoothingLength);
+
+            auto& neighborDensity = densityPool.GetComponent(*neighborID).d;
+
+            float pressureTerm = (currentPointPressure / (currentPointDensity * currentPointDensity)) +
+                (pressurePool.GetComponent(*neighborID).p / (neighborDensity * neighborDensity));
+            pressureForce += - pressureTerm * gradient;
+
+            glm::vec3 deltaVelocity = velocityPool.GetComponent(*neighborID).v - currentPointVelocity;
+            viscosityForce += (neighborDensity * deltaVelocity) * sapphire::QuinticKernel(radius, smoothingLength);
+        }
+    }
+    return pressureForce + viscosityForce;
 }
 
 void SphereDataSystem::Update(bismuth::Registry& registry) {
@@ -30,6 +63,7 @@ void SphereDataSystem::Update(bismuth::Registry& registry) {
     auto& densityPool = registry.GetComponentPool<DensityComponent>();
     auto& pressurePool = registry.GetComponentPool<PressureComponent>();
     auto& forcePool = registry.GetComponentPool<ForceComponent>();
+    auto& velocityPool = registry.GetComponentPool<VelocityComponnet>();
 
     #pragma omp parallel for
     for(int i = 0; i < particle.SizeHint(); i++) {
@@ -39,14 +73,22 @@ void SphereDataSystem::Update(bismuth::Registry& registry) {
             continue;
         }
 
-        // spherePool.GetComponent(entityID).positionAndRadius.y -= 0.1f;
         auto& point = spherePool.GetComponent(entityID).positionAndRadius;
-        auto neighbors = GetNeighbors(point, spherePool, radius);
+        auto neighborsIDs = GetNeighbors(point, spherePool, radius);
+        
+        std::vector<glm::vec4*> neighbors;
+        neighbors.reserve(neighborsIDs.size());
+        for(const auto& IDs : neighborsIDs) {
+            neighbors.push_back(&spherePool.GetComponent(*IDs).positionAndRadius);
+        }
 
         float& density = densityPool.GetComponent(entityID).d;
         density = sapphire::ComputeDensity(point, neighbors, radius, 10.0f);
         pressurePool.GetComponent(entityID).p = ComputePressure(density);
 
-
+        glm::vec3& force = forcePool.GetComponent(entityID).f;
+        force = ComputeForces(point, neighborsIDs, entityID,
+            spherePool, pressurePool, densityPool, velocityPool, 
+            radius);
     }
 }
