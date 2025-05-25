@@ -13,7 +13,7 @@ void ForceToPosSystem::Update(bismuth::Registry& registry, float deltaTime) {
     auto& velocityPool = registry.GetComponentPool<VelocityComponent>();
     auto& massPool = registry.GetComponentPool<MassComponent>();
 
-    // #pragma omp parallel for
+    #pragma omp parallel for
     for(int i = 0; i < particle.SizeHint(); i++) {
         size_t entityID = (*viewEntities)[i];
         if(!spherePool.HasComponent(entityID) && !densityPool.HasComponent(entityID) && 
