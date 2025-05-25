@@ -22,6 +22,9 @@
 #include "sapphire/components/pressure_component.hpp"
 #include "sapphire/components/velocity_component.hpp"
 
+#include "sapphire/systems/sphere_data_system.hpp"
+#include "sapphire/systems/force_to_pos_system.hpp"
+
 quartz::Engine gEngine;
 bismuth::Registry gRegistry;
 
@@ -52,22 +55,24 @@ void InitEntities() {
     gRegistry.EmplaceComponent<TransformComponent>(entity, transform);
 
     // Initial data
-    float spacing = 0.5f;
+    float spacing = 1.5f;
 
     float coordOffset = 5*spacing;
 
-    for(int x = 0; x < 10; x++) {
-        for(int y = 0; y < 10; y++) {
+    for(int x = 0; x < 100; x++) {
+        for(int y = 0; y < 100; y++) {
             size_t sphereEntity = gRegistry.CreateEntity();
         
             gRegistry.EmplaceComponent<InstanceComponent>(sphereEntity);
-            gRegistry.EmplaceComponent<SphereComponent>(sphereEntity, glm::vec4(x*spacing-coordOffset,y*spacing-coordOffset,-10,1));
+            gRegistry.EmplaceComponent<SphereComponent>(sphereEntity, glm::vec4(x*spacing - coordOffset, 
+                                                                                y*spacing - coordOffset,
+                                                                                -20,1));
 
-            gRegistry.EmplaceComponent<DensityComponent>(sphereEntity);
-            gRegistry.EmplaceComponent<PressureComponent>(sphereEntity);
-            gRegistry.EmplaceComponent<MassComponent>(sphereEntity,     10.0f);
+            gRegistry.EmplaceComponent<DensityComponent>(sphereEntity,  0.0f);
+            gRegistry.EmplaceComponent<PressureComponent>(sphereEntity, 0.0f);
+            gRegistry.EmplaceComponent<MassComponent>(sphereEntity,     1.0f);
             gRegistry.EmplaceComponent<ForceComponent>(sphereEntity,    glm::vec3(0.0f));
-            gRegistry.EmplaceComponent<VelocityComponnet>(sphereEntity, glm::vec3(0.0f));
+            gRegistry.EmplaceComponent<VelocityComponent>(sphereEntity, glm::vec3(0.0f, 0.0f, 0.0f));
         }
     }
 }
@@ -85,8 +90,12 @@ void Event(float deltaTime) {
 
 void System(float deltaTime) {
     static quartz::CameraSystem cameraSystem;
+    static SphereDataSystem sphereDataSystem;
+    static ForceToPosSystem forceToPosSystem;
 
     cameraSystem.Update(gRegistry);
+    sphereDataSystem.Update(gRegistry);
+    forceToPosSystem.Update(gRegistry, deltaTime);
 
     gInstanceRenderer.Update(gRegistry);
 }

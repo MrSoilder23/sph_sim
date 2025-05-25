@@ -2,6 +2,6 @@
 // Third_party libraries
 #include <glm/glm.hpp>
 
-struct VelocityComponnet {
+struct VelocityComponent {
     glm::vec3 v;    
 };
