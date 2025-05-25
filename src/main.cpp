@@ -55,18 +55,18 @@ void InitEntities() {
     gRegistry.EmplaceComponent<TransformComponent>(entity, transform);
 
     // Initial data
-    float spacing = 1.5f;
+    float spacing = 0.5f;
 
     float coordOffset = 5*spacing;
 
-    for(int x = 0; x < 100; x++) {
-        for(int y = 0; y < 100; y++) {
+    for(int x = 0; x < 10; x++) {
+        for(int y = 0; y < 10; y++) {
             size_t sphereEntity = gRegistry.CreateEntity();
         
             gRegistry.EmplaceComponent<InstanceComponent>(sphereEntity);
             gRegistry.EmplaceComponent<SphereComponent>(sphereEntity, glm::vec4(x*spacing - coordOffset, 
                                                                                 y*spacing - coordOffset,
-                                                                                -20,1));
+                                                                                -40, 1));
 
             gRegistry.EmplaceComponent<DensityComponent>(sphereEntity,  0.0f);
             gRegistry.EmplaceComponent<PressureComponent>(sphereEntity, 0.0f);
