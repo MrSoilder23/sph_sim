@@ -1,5 +1,6 @@
 // C++ standard libraries
 #include <iostream>
+#include <string>
 
 // Third_party libraries
 #include <SDL3/SDL.h>
@@ -14,30 +15,69 @@
 #include "quartz/engine.hpp"
 #include "quartz/graphics/instanced_renderer_system.hpp"
 #include "quartz/graphics/shader.hpp"
-#include "sapphire/test.hpp"
+
+#include "sapphire/components/density_component.hpp"
+#include "sapphire/components/force_component.hpp"
+#include "sapphire/components/mass_component.hpp"
+#include "sapphire/components/pressure_component.hpp"
+#include "sapphire/components/velocity_component.hpp"
+#include "sapphire/components/energy_component.hpp"
+#include "sapphire/utility/config.hpp"
+
+#include "sapphire/systems/sphere_data_system.hpp"
+#include "sapphire/systems/force_to_pos_system.hpp"
 
 quartz::Engine gEngine;
 bismuth::Registry gRegistry;
 
 quartz::InstancedRendererSystem gInstanceRenderer;
 
+std::string gConfigFilePath = "./config/config.json";
+
 void InitEntities() {
     size_t entity = gRegistry.CreateEntity();
     CameraComponent camera;
     TransformComponent transform;
 
-    camera.aspectRatio = 640.0f/480.0f;
+    std::ifstream configFile(gConfigFilePath);
+    if (!configFile) {
+        std::cerr << "Failed to open configuration file." << std::endl;
+        exit(1);
+    }
+
+    nlohmann::json config;
+    configFile >> config;
+
+    float screenWidth = config["window"]["width"];
+    float screenHeight = config["window"]["height"];
+
+    camera.aspectRatio = screenWidth/screenHeight;
 
     gRegistry.EmplaceComponent<CameraComponent>(entity, camera);
     gRegistry.EmplaceComponent<TransformComponent>(entity, transform);
 
-    for(int i = 0; i < 1'000'000; i++) {
-        size_t sphereEntity = gRegistry.CreateEntity();
-    
-        gRegistry.EmplaceComponent<InstanceComponent>(sphereEntity);
-        gRegistry.EmplaceComponent<SphereComponent>(sphereEntity, glm::vec4(0,i*0.5f,-10,1));
-    }
+    const static float spacing = sapphire_config::INITIAL_SPACING;
+    float coordOffset = 5*spacing;
 
+    for(int x = 0; x < 10; x++) {
+        for(int y = 0; y < 10; y++) {
+            for(int z = 0; z < 10; z++) {
+                size_t sphereEntity = gRegistry.CreateEntity();
+            
+                gRegistry.EmplaceComponent<InstanceComponent>(sphereEntity);
+                gRegistry.EmplaceComponent<SphereComponent>(sphereEntity, glm::vec4(x*spacing - coordOffset, 
+                                                                                    y*spacing - coordOffset,
+                                                                                    z*spacing - coordOffset -40, 1));
+
+                gRegistry.EmplaceComponent<DensityComponent>(sphereEntity,  0.0f);
+                gRegistry.EmplaceComponent<PressureComponent>(sphereEntity, 0.0f);
+                gRegistry.EmplaceComponent<EnergyComponent>(sphereEntity,   0.0f);
+                gRegistry.EmplaceComponent<MassComponent>(sphereEntity,     1.0f);
+                gRegistry.EmplaceComponent<ForceComponent>(sphereEntity,    glm::vec3(0.0f));
+                gRegistry.EmplaceComponent<VelocityComponent>(sphereEntity, glm::vec3(0.0f));
+            }
+        }
+    }
 }
 
 void Event(float deltaTime) {
@@ -53,10 +93,12 @@ void Event(float deltaTime) {
 
 void System(float deltaTime) {
     static quartz::CameraSystem cameraSystem;
-    static TestSystem test;
+    static SphereDataSystem sphereDataSystem;
+    static ForceToPosSystem forceToPosSystem;
 
     cameraSystem.Update(gRegistry);
-    test.Update(gRegistry);
+    sphereDataSystem.Update(gRegistry);
+    forceToPosSystem.Update(gRegistry, deltaTime);
 
     gInstanceRenderer.Update(gRegistry);
 }
@@ -77,7 +119,7 @@ void Loop(float deltaTime) {
 int main(int argc, char* argv[]) {
     InitEntities();
     
-    gEngine.Initialize("./config/config.json");
+    gEngine.Initialize(gConfigFilePath);
 
     GLuint shaderProgram = shader::CreateGraphicsPipeline("./shaders/sphereVert.glsl", "./shaders/instancedFrag.glsl");
     gInstanceRenderer.Init(shaderProgram);

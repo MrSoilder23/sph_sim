@@ -10,6 +10,8 @@ set(PROG_NAME sim)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "src/*.cpp")
+file(GLOB_RECURSE SHADER_FILES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/shaders/*")
+file(GLOB_RECURSE CONFIG_FILES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/config/*")
 
 add_library(glad STATIC third_party/glad/glad.c)
 find_package(SDL3 CONFIG REQUIRED)
@@ -17,6 +19,20 @@ find_package(nlohmann_json CONFIG REQUIRED)
 find_package(OpenMP REQUIRED)
 
 add_executable(${PROG_NAME} ${SOURCES})
+
+add_custom_target(
+    CopyShadersConfig ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/shaders
+        ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/shaders
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/config
+        ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/config
+    DEPENDS ${SHADER_FILES} ${CONFIG_FILES}
+    COMMENT "Copying shaders and config..."
+)
+
+add_dependencies(${PROG_NAME} CopyShadersConfig)
 
 target_include_directories(glad PUBLIC third_party)
 target_include_directories(${PROG_NAME} PRIVATE

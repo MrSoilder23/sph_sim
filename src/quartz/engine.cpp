@@ -78,7 +78,7 @@ void quartz::Engine::Run() {
     
     while (!mQuit) {
         Uint64 now = SDL_GetPerformanceCounter();
-        double deltaTime = (now - mLastTime) / double(SDL_GetPerformanceFrequency());
+        float deltaTime = (now - mLastTime) / float(SDL_GetPerformanceFrequency());
         mLastTime = now;
         
         mEventCallback(deltaTime);
