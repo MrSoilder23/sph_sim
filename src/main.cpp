@@ -21,6 +21,8 @@
 #include "sapphire/components/mass_component.hpp"
 #include "sapphire/components/pressure_component.hpp"
 #include "sapphire/components/velocity_component.hpp"
+#include "sapphire/components/energy_component.hpp"
+#include "sapphire/utility/config.hpp"
 
 #include "sapphire/systems/sphere_data_system.hpp"
 #include "sapphire/systems/force_to_pos_system.hpp"
@@ -54,25 +56,26 @@ void InitEntities() {
     gRegistry.EmplaceComponent<CameraComponent>(entity, camera);
     gRegistry.EmplaceComponent<TransformComponent>(entity, transform);
 
-    // Initial data
-    float spacing = 0.5f;
-
+    const static float spacing = sapphire_config::INITIAL_SPACING;
     float coordOffset = 5*spacing;
 
     for(int x = 0; x < 10; x++) {
         for(int y = 0; y < 10; y++) {
-            size_t sphereEntity = gRegistry.CreateEntity();
-        
-            gRegistry.EmplaceComponent<InstanceComponent>(sphereEntity);
-            gRegistry.EmplaceComponent<SphereComponent>(sphereEntity, glm::vec4(x*spacing - coordOffset, 
-                                                                                y*spacing - coordOffset,
-                                                                                -40, 1));
+            for(int z = 0; z < 10; z++) {
+                size_t sphereEntity = gRegistry.CreateEntity();
+            
+                gRegistry.EmplaceComponent<InstanceComponent>(sphereEntity);
+                gRegistry.EmplaceComponent<SphereComponent>(sphereEntity, glm::vec4(x*spacing - coordOffset, 
+                                                                                    y*spacing - coordOffset,
+                                                                                    z*spacing - coordOffset -40, 1));
 
-            gRegistry.EmplaceComponent<DensityComponent>(sphereEntity,  0.0f);
-            gRegistry.EmplaceComponent<PressureComponent>(sphereEntity, 0.0f);
-            gRegistry.EmplaceComponent<MassComponent>(sphereEntity,     1.0f);
-            gRegistry.EmplaceComponent<ForceComponent>(sphereEntity,    glm::vec3(0.0f));
-            gRegistry.EmplaceComponent<VelocityComponent>(sphereEntity, glm::vec3(0.0f, 0.0f, 0.0f));
+                gRegistry.EmplaceComponent<DensityComponent>(sphereEntity,  0.0f);
+                gRegistry.EmplaceComponent<PressureComponent>(sphereEntity, 0.0f);
+                gRegistry.EmplaceComponent<EnergyComponent>(sphereEntity,   0.0f);
+                gRegistry.EmplaceComponent<MassComponent>(sphereEntity,     1.0f);
+                gRegistry.EmplaceComponent<ForceComponent>(sphereEntity,    glm::vec3(0.0f));
+                gRegistry.EmplaceComponent<VelocityComponent>(sphereEntity, glm::vec3(0.0f));
+            }
         }
     }
 }
