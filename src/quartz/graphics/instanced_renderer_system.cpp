@@ -14,14 +14,21 @@ void quartz::InstancedRendererSystem::Update(bismuth::Registry& registry) {
 
     auto& spherePool = registry.GetComponentPool<SphereComponent>();
     const auto& sphereData = spherePool.GetDenseComponents();
+    const size_t& sphereSize = sphereData.size();
 
     glBindBuffer(GL_ARRAY_BUFFER, mInstanceVBO);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        sizeof(glm::vec4)*sphereData.size(),
-        sphereData.data(),
-        GL_STREAM_DRAW  
-    );
+    if(mDataSize != sphereSize) {
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            sizeof(glm::vec4)*sphereSize,
+            nullptr,
+            GL_STREAM_DRAW  
+        );
+
+        mDataSize = sphereSize;
+    }
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec4)*sphereSize, sphereData.data());
+
 
     glUseProgram(mShaderProgram);
     glBindVertexArray(mDummyVAO);
