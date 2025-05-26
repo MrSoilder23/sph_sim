@@ -6,6 +6,11 @@ SPH planetary collision simulation (IN PROGRESS). Built on Bismuth, a custom Ent
 Simulation is built on Bismuth, custom ECS library. Depending on choice of iteration pattern, Bismuth can be up to 30% faster than EnTT or 10% slower (Tuple for loop).
 Currently it renders a basic animation of 1 milion particles falling down, using SDL3 and glad for rendering.
 
+<p float="left">
+  <img alt="Image of Bob from different perspective" src="https://github.com/MrSoilder23/sph_sim/blob/development/assets/screenshots/screenshot1.png" width="49.5%" /> 
+  <img alt="Image of Bob" src="https://github.com/MrSoilder23/sph_sim/blob/development/assets/screenshots/screenshot2.png" width="49.5%" />
+</p>
+
 &nbsp;
 # **Installation**
 
