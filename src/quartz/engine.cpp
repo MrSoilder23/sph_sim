@@ -1,8 +1,4 @@
 #include "./quartz/engine.hpp"
-#include "glad/glad.h"
-#include <SDL3/SDL_stdinc.h>
-#include <SDL3/SDL_timer.h>
-#include <SDL3/SDL_video.h>
 
 quartz::Engine::~Engine() {
     Shutdown();
