@@ -105,7 +105,7 @@ void Event(float deltaTime) {
                 for(int x = 0; x < 3; x++) {
                     for(int y = 0; y < 3; y++) {
                         for(int z = 0; z < 3; z++) {
-                            CreateParticle(x+worldPoint.x-1, y+worldPoint.y-1, z+worldPoint.z-1, glm::vec3(-2.0f,0.0f,0.0f));
+                            CreateParticle(x+worldPoint.x-1, y+worldPoint.y-1, z+worldPoint.z-1, glm::vec3(-8.0f,0.0f,0.0f));
                         }
                     }
                 }
