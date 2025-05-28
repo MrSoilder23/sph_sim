@@ -102,7 +102,13 @@ void Event(float deltaTime) {
                 float t = -40.0f / rayWorld.z;
                 glm::vec3 worldPoint = glm::vec3(0.0f) + t * rayWorld;
 
-                CreateParticle(worldPoint.x, worldPoint.y, worldPoint.z, glm::vec3(-2.0f,0.0f,0.0f));
+                for(int x = 0; x < 3; x++) {
+                    for(int y = 0; y < 3; y++) {
+                        for(int z = 0; z < 3; z++) {
+                            CreateParticle(x+worldPoint.x-1, y+worldPoint.y-1, z+worldPoint.z-1, glm::vec3(-2.0f,0.0f,0.0f));
+                        }
+                    }
+                }
             }
         }
     }
