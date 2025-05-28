@@ -27,7 +27,7 @@ void SphereDataSystem::Update(bismuth::Registry& registry) {
         }
 
         auto& point = spherePool.GetComponent(entityID).positionAndRadius;
-        auto neighborsIDs = GetNeighbors(entityID, point, spherePool, smoothingLength);
+        auto neighborsIDs = GetNeighbors(entityID, point, spherePool, 2 * smoothingLength);
         
         std::vector<glm::vec4*> neighbors;
         neighbors.reserve(neighborsIDs.size());
@@ -38,6 +38,20 @@ void SphereDataSystem::Update(bismuth::Registry& registry) {
         float& density = densityPool.GetComponent(entityID).d;
         density = ComputeDensity(point, neighbors, smoothingLength, massPool.GetComponent(entityID).m);
         pressurePool.GetComponent(entityID).p = ComputePressure(density);
+    }
+
+    #pragma omp parallel for
+    for(int i = 0; i < particle.SizeHint(); i++) {
+        size_t entityID = (*viewEntities)[i];
+        if(!spherePool.HasComponent(entityID) && !densityPool.HasComponent(entityID) && 
+           !pressurePool.HasComponent(entityID) && !forcePool.HasComponent(entityID) &&
+            !velocityPool.HasComponent(entityID)
+        ) {
+            continue;
+        }
+
+        auto& point = spherePool.GetComponent(entityID).positionAndRadius;
+        auto neighborsIDs = GetNeighbors(entityID, point, spherePool, smoothingLength);
 
         glm::vec3& force = forcePool.GetComponent(entityID).f;
         force = ComputeForces(point, neighborsIDs, entityID,

@@ -10,7 +10,7 @@ namespace sapphire {
 
     float CubicSplineKernel(const float& radius, const float& smoothingLength);
     float CubicSplineDerivative(const float& radius, const float& smoothingLength);
-    glm::vec3 CubicSplineGradient(const glm::vec3& deltaPoint, const float& smoothingLength);
 
+    glm::vec3 CubicSplineGradient(const glm::vec3& deltaPoint, const float& smoothingLength);
     float CubicSplineLaplacian(const float& radius, const float& smoothingLength);
 }

@@ -9,6 +9,7 @@ struct CameraComponent {
     float far = 100.0f;
 
     glm::mat4 projectionMatrix = glm::mat4(1.0f);
+    glm::mat4 viewMatrix       = glm::mat4(1.0f);
     glm::mat4 viewProjection;
 
     bool isDirty = true;

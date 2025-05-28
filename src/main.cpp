@@ -23,6 +23,7 @@
 #include "sapphire/components/velocity_component.hpp"
 #include "sapphire/components/energy_component.hpp"
 #include "sapphire/utility/config.hpp"
+#include "sapphire/utility/window_data.hpp"
 
 #include "sapphire/systems/sphere_data_system.hpp"
 #include "sapphire/systems/force_to_pos_system.hpp"
@@ -30,28 +31,31 @@
 quartz::Engine gEngine;
 bismuth::Registry gRegistry;
 
+std::string gConfigFilePath = "./config/config.json";
+WindowData gWindowData(gConfigFilePath);
+
 quartz::InstancedRendererSystem gInstanceRenderer;
 
-std::string gConfigFilePath = "./config/config.json";
+void CreateParticle(float x, float y, float z, glm::vec3 velocity) {
+    size_t sphereEntity = gRegistry.CreateEntity();
+            
+    gRegistry.EmplaceComponent<InstanceComponent>(sphereEntity);
+    gRegistry.EmplaceComponent<SphereComponent>(sphereEntity, glm::vec4(x, y, z, 1));
+
+    gRegistry.EmplaceComponent<DensityComponent>(sphereEntity,  0.0f);
+    gRegistry.EmplaceComponent<PressureComponent>(sphereEntity, 0.0f);
+    gRegistry.EmplaceComponent<EnergyComponent>(sphereEntity,   0.0f);
+    gRegistry.EmplaceComponent<MassComponent>(sphereEntity,     1.0f);
+    gRegistry.EmplaceComponent<ForceComponent>(sphereEntity,    glm::vec3(0.0f));
+    gRegistry.EmplaceComponent<VelocityComponent>(sphereEntity, velocity);
+}
 
 void InitEntities() {
     size_t entity = gRegistry.CreateEntity();
     CameraComponent camera;
     TransformComponent transform;
 
-    std::ifstream configFile(gConfigFilePath);
-    if (!configFile) {
-        std::cerr << "Failed to open configuration file." << std::endl;
-        exit(1);
-    }
-
-    nlohmann::json config;
-    configFile >> config;
-
-    float screenWidth = config["window"]["width"];
-    float screenHeight = config["window"]["height"];
-
-    camera.aspectRatio = screenWidth/screenHeight;
+    camera.aspectRatio = gWindowData.mScreenWidth/gWindowData.mScreenHeight;
 
     gRegistry.EmplaceComponent<CameraComponent>(entity, camera);
     gRegistry.EmplaceComponent<TransformComponent>(entity, transform);
@@ -62,19 +66,7 @@ void InitEntities() {
     for(int x = 0; x < 10; x++) {
         for(int y = 0; y < 10; y++) {
             for(int z = 0; z < 10; z++) {
-                size_t sphereEntity = gRegistry.CreateEntity();
-            
-                gRegistry.EmplaceComponent<InstanceComponent>(sphereEntity);
-                gRegistry.EmplaceComponent<SphereComponent>(sphereEntity, glm::vec4(x*spacing - coordOffset, 
-                                                                                    y*spacing - coordOffset,
-                                                                                    z*spacing - coordOffset -40, 1));
-
-                gRegistry.EmplaceComponent<DensityComponent>(sphereEntity,  0.0f);
-                gRegistry.EmplaceComponent<PressureComponent>(sphereEntity, 0.0f);
-                gRegistry.EmplaceComponent<EnergyComponent>(sphereEntity,   0.0f);
-                gRegistry.EmplaceComponent<MassComponent>(sphereEntity,     1.0f);
-                gRegistry.EmplaceComponent<ForceComponent>(sphereEntity,    glm::vec3(0.0f));
-                gRegistry.EmplaceComponent<VelocityComponent>(sphereEntity, glm::vec3(0.0f));
+                CreateParticle(x*spacing - coordOffset, y*spacing - coordOffset, z*spacing - coordOffset - 40, glm::vec3(0.0f));
             }
         }
     }
@@ -87,6 +79,37 @@ void Event(float deltaTime) {
         // User requests quit
         if (e.type == SDL_EVENT_QUIT) {
             gEngine.Quit();
+        }
+        if(e.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
+            if(e.button.button == SDL_BUTTON_LEFT) {
+                int mouseX = e.button.x;
+                int mouseY = e.button.y;
+
+                float x = (2.0f * e.button.x / gWindowData.mScreenWidth) - 1.0f;
+                float y =-(2.0f * e.button.y / gWindowData.mScreenHeight) + 1.0f;
+
+                auto& cameraPool = gRegistry.GetComponentPool<CameraComponent>();
+                auto& camera = cameraPool.GetComponent(0);
+
+                glm::vec4 rayClip(x,y,-1.0f, 1.0f);
+                glm::vec4 rayEye = glm::inverse(camera.projectionMatrix) * rayClip;
+                rayEye.z = -1.0f;
+                rayEye.w =  0.0f;
+
+                glm::vec3 rayWorld = glm::vec3(glm::inverse(camera.viewMatrix) * rayEye);
+                rayWorld = glm::normalize(rayWorld);
+
+                float t = -40.0f / rayWorld.z;
+                glm::vec3 worldPoint = glm::vec3(0.0f) + t * rayWorld;
+
+                for(int x = 0; x < 3; x++) {
+                    for(int y = 0; y < 3; y++) {
+                        for(int z = 0; z < 3; z++) {
+                            CreateParticle(x+worldPoint.x-1, y+worldPoint.y-1, z+worldPoint.z-1, glm::vec3(-8.0f,0.0f,0.0f));
+                        }
+                    }
+                }
+            }
         }
     }
 }

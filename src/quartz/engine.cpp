@@ -1,8 +1,4 @@
 #include "./quartz/engine.hpp"
-#include "glad/glad.h"
-#include <SDL3/SDL_stdinc.h>
-#include <SDL3/SDL_timer.h>
-#include <SDL3/SDL_video.h>
 
 quartz::Engine::~Engine() {
     Shutdown();
@@ -88,7 +84,7 @@ void quartz::Engine::Run() {
         glEnable(GL_PROGRAM_POINT_SIZE);
 
         glViewport(0,0, mScreenWidth, mScreenHeight);
-        glClearColor(0.1f, 0.4f, 0.2f, 1.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 

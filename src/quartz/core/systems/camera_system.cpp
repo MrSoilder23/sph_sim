@@ -17,12 +17,12 @@ void quartz::CameraSystem::Update(bismuth::Registry& registry) {
         glm::vec3 forward = transform.rotation * glm::vec3(0.0f, 0.0f, -1.0f); 
         glm::vec3 up = transform.rotation * glm::vec3(0.0f, 1.0f, 0.0f);
 
-        glm::mat4 view = glm::lookAt(
+        camera.viewMatrix = glm::lookAt(
             transform.position,
             transform.position + forward,
             up
         );
 
-        camera.viewProjection = camera.projectionMatrix * view;
+        camera.viewProjection = camera.projectionMatrix * camera.viewMatrix;
     }
 }

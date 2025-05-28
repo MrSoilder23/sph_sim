@@ -1,6 +1,5 @@
 #pragma once
 // C++ standard libraries
-#include <SDL3/SDL_video.h>
 #include <functional>
 #include <string>
 #include <fstream>
@@ -9,6 +8,10 @@
 
 // Third_party libraries
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_video.h>
+#include <SDL3/SDL_stdinc.h>
+#include <SDL3/SDL_timer.h>
+#include <SDL3/SDL_video.h>
 #include <nlohmann/json.hpp>
 #include <glad/glad.h>
 
