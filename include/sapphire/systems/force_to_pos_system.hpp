@@ -1,7 +1,6 @@
 #pragma once
 // Own libraries
 #include "bismuth/registry.hpp"
-#include "sapphire/components/density_component.hpp"
 #include "sapphire/components/force_component.hpp"
 #include "sapphire/components/velocity_component.hpp"
 #include "sapphire/components/mass_component.hpp"
