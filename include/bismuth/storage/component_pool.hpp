@@ -67,6 +67,10 @@ class ComponentPool : public ISparseSet{
         }
 
         void RemoveComponent(const EntityID& entity) override {
+            if(!HasComponent(entity)) {
+                return;
+            }
+
             const size_t& index = mComponentLocation[entity];
             const size_t& lastEntity = mDenseEntities.back();
 
