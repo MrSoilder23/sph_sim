@@ -1,5 +1,19 @@
 #include "sapphire/systems/sphere_data_system.hpp"
 
+namespace std {
+    template<>
+    struct hash<glm::ivec3> {
+        size_t operator()(const glm::ivec3& v) const noexcept {
+            // Use large primes for good distribution
+            const size_t h1 = hash<int>{}(v.x);
+            const size_t h2 = hash<int>{}(v.y);
+            const size_t h3 = hash<int>{}(v.z);
+            return h1 ^ (h2 << 1) ^ (h3 << 2);
+        }
+    };
+}
+
+
 void SphereDataSystem::Update(bismuth::Registry& registry) {
     auto particle = registry.GetView<SphereComponent, DensityComponent, PressureComponent, ForceComponent, VelocityComponent>();
 
@@ -8,13 +22,29 @@ void SphereDataSystem::Update(bismuth::Registry& registry) {
 
     // To-Do change after bismuth iterator is improved
     // This for loop is 60% faster than provided from my class
-    const auto viewEntities = particle.GetSmallestDense();
+    const auto& viewEntities = particle.GetSmallestDense();
     auto& spherePool = registry.GetComponentPool<SphereComponent>();
     auto& densityPool = registry.GetComponentPool<DensityComponent>();
     auto& pressurePool = registry.GetComponentPool<PressureComponent>();
     auto& forcePool = registry.GetComponentPool<ForceComponent>();
     auto& velocityPool = registry.GetComponentPool<VelocityComponent>();
     auto& massPool = registry.GetComponentPool<MassComponent>();
+
+    // SpatialHash
+    auto& spatialPool = registry.GetComponentPool<SpatialHashComponent>();
+    auto& posPool = registry.GetComponentPool<PositionComponent>();
+
+    auto& sphereIDs = spherePool.GetDenseEntities();
+    
+    std::vector<std::vector<size_t>> neighborsIDs;
+    neighborsIDs.resize(sphereIDs.size());
+
+    #pragma omp parallel for
+    for(int i = 0; i < sphereIDs.size(); i++) {
+        size_t entityID = sphereIDs[i];
+        
+        GetNeighbors(neighborsIDs[i], entityID, spherePool, spatialPool, posPool, smoothingLength);
+    }
 
     #pragma omp parallel for
     for(int i = 0; i < particle.SizeHint(); i++) {
@@ -27,12 +57,11 @@ void SphereDataSystem::Update(bismuth::Registry& registry) {
         }
 
         auto& point = spherePool.GetComponent(entityID).positionAndRadius;
-        auto neighborsIDs = GetNeighbors(entityID, point, spherePool, 2 * smoothingLength);
         
         std::vector<glm::vec4*> neighbors;
-        neighbors.reserve(neighborsIDs.size());
-        for(const auto& IDs : neighborsIDs) {
-            neighbors.push_back(&spherePool.GetComponent(IDs).positionAndRadius);
+        neighbors.reserve(neighborsIDs[i].size());
+        for(const auto& IDs : neighborsIDs[i]) {
+            neighbors.emplace_back(&spherePool.GetComponent(IDs).positionAndRadius);
         }
 
         float& density = densityPool.GetComponent(entityID).d;
@@ -51,33 +80,90 @@ void SphereDataSystem::Update(bismuth::Registry& registry) {
         }
 
         auto& point = spherePool.GetComponent(entityID).positionAndRadius;
-        auto neighborsIDs = GetNeighbors(entityID, point, spherePool, smoothingLength);
 
         glm::vec3& force = forcePool.GetComponent(entityID).f;
-        force = ComputeForces(point, neighborsIDs, entityID,
+        force = ComputeForces(point, neighborsIDs[i], entityID,
             spherePool, pressurePool, densityPool, velocityPool,
             massPool, smoothingLength, softening);
     }
 }
 
-std::vector<size_t> SphereDataSystem::GetNeighbors(
-    size_t& pointID, glm::vec4& position, bismuth::ComponentPool<SphereComponent>& spherePositions, float radius
+inline void CheckNeighbor(int currentChunk, int& chunkNeighbor, int& neighbor) {
+    if(neighbor < 32 && neighbor >= 0) {
+        chunkNeighbor = currentChunk;
+    } else if(neighbor < 0) {
+        chunkNeighbor = currentChunk-1;
+        neighbor = 31;
+    } else {
+        chunkNeighbor = currentChunk+1;
+        neighbor = 0;
+    }
+}
+
+void SphereDataSystem::GetNeighbors(
+    std::vector<size_t>& neighbors, size_t& pointID, bismuth::ComponentPool<SphereComponent>& spherePositions, 
+    bismuth::ComponentPool<SpatialHashComponent>& spatialHash, bismuth::ComponentPool<PositionComponent>& posPool,
+    float radius
 ) {
-    std::vector<size_t> neighbors;
+    constexpr float spatialSize = 32*sapphire_config::SMOOTHING_LENGTH;
+    constexpr int gridRes = 32;
+
     float radiusSquared = radius * radius;
-    glm::vec3 currentPos = glm::vec3(position);
+    glm::vec3 currentPos = glm::vec3(spherePositions.GetComponent(pointID).positionAndRadius);
 
-    for(auto& entityID : spherePositions.GetDenseEntities()) {
-        if(pointID == entityID) {
-            continue;
-        }
-        const glm::vec3 point = currentPos - glm::vec3(spherePositions.GetComponent(entityID).positionAndRadius);
+    // Translate global to local spatial space
+    int chunkY = std::floor(currentPos.y / spatialSize);
+    int chunkX = std::floor(currentPos.x / spatialSize);
+    int chunkZ = std::floor(currentPos.z / spatialSize);
+    
+    float localPosX = currentPos.x - spatialSize*chunkX;
+    float localPosY = currentPos.y - spatialSize*chunkY;
+    float localPosZ = currentPos.z - spatialSize*chunkZ;
+    
+    int cubeX = std::floor(gridRes * (localPosX / spatialSize));
+    int cubeY = std::floor(gridRes * (localPosY / spatialSize));
+    int cubeZ = std::floor(gridRes * (localPosZ / spatialSize));
 
-        if(glm::dot(point, point) <= radiusSquared) {
-            neighbors.push_back(entityID);
+    for(int localX = -1; localX < 2; localX++) {
+        for(int localY = -1; localY < 2; localY++) {
+            for(int localZ = -1; localZ < 2; localZ++) {
+                int neighborX = cubeX + localX;
+                int neighborY = cubeY + localY;
+                int neighborZ = cubeZ + localZ;
+
+                int chunkNeighborX;
+                int chunkNeighborY;
+                int chunkNeighborZ;
+
+                CheckNeighbor(chunkX, chunkNeighborX, neighborX);
+                CheckNeighbor(chunkY, chunkNeighborY, neighborY);
+                CheckNeighbor(chunkZ, chunkNeighborZ, neighborZ);
+
+                glm::vec3 chunkKey(chunkNeighborX, chunkNeighborY, chunkNeighborZ);
+                
+                for(const auto& spatialID : spatialHash.GetDenseEntities()) {
+                    const auto& spatialPos = posPool.GetComponent(spatialID).position;
+
+                    if(spatialPos != chunkKey) {
+                        continue;
+                    }
+                    
+                    int flatIndex = SpatialHash::GetCoordinates(neighborX, neighborY, neighborZ);
+                    
+                    const auto& spatial = spatialHash.GetComponent(spatialID);
+                    const auto& entityArray = spatial.flatArrayIDs[flatIndex];
+                    
+                    for(const auto& ID : entityArray) {
+                        const glm::vec3 point = currentPos - glm::vec3(spherePositions.GetComponent(ID).positionAndRadius);
+                        
+                        if(glm::dot(point, point) <= radiusSquared) {
+                            neighbors.push_back(ID);
+                        }
+                    } 
+                }
+            }   
         }
     }
-    return neighbors;
 }
 float SphereDataSystem::ComputePressure(float& density) {
     return sapphire_config::STIFFNESS * (density - sapphire_config::REST_DENSITY);

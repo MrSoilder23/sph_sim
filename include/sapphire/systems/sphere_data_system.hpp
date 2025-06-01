@@ -1,4 +1,7 @@
 #pragma once
+// C++ standard libraries
+#include <unordered_map>
+
 // Third_party libraries
 #include <glm/glm.hpp>
 
@@ -13,11 +16,17 @@
 #include "sapphire/components/mass_component.hpp"
 #include "quartz/core/components/sphere_component.hpp"
 
+#include "sapphire/components/position_component.hpp"
+#include "sapphire/components/spatial_hash_component.hpp"
+
 class SphereDataSystem {
     public:
         void Update(bismuth::Registry& registry);
     private:
-        std::vector<size_t> GetNeighbors(size_t& pointID, glm::vec4& position, bismuth::ComponentPool<SphereComponent>& spherePositions, float radius);
+        void GetNeighbors(std::vector<size_t>& neighbors, size_t& pointID,
+            bismuth::ComponentPool<SphereComponent>& spherePositions,
+            bismuth::ComponentPool<SpatialHashComponent>& spatialHash, bismuth::ComponentPool<PositionComponent>& posPool,
+            float radius);
 
         float ComputePressure(float& density);
         float ComputeDensity(const glm::vec4& point, const std::vector<glm::vec4*>& neighbors, float smoothingLength, float mass);

@@ -27,6 +27,7 @@
 
 #include "sapphire/systems/sphere_data_system.hpp"
 #include "sapphire/systems/force_to_pos_system.hpp"
+#include "sapphire/systems/pos_to_spatial_system.hpp"
 
 quartz::Engine gEngine;
 bismuth::Registry gRegistry;
@@ -118,8 +119,11 @@ void System(float deltaTime) {
     static quartz::CameraSystem cameraSystem;
     static SphereDataSystem sphereDataSystem;
     static ForceToPosSystem forceToPosSystem;
+    static PosToSpatialSystem posToSpatialSystem;
 
     cameraSystem.Update(gRegistry);
+
+    posToSpatialSystem.Update(gRegistry);
     sphereDataSystem.Update(gRegistry);
     forceToPosSystem.Update(gRegistry, deltaTime);
 
