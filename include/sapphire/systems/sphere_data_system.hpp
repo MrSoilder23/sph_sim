@@ -23,13 +23,16 @@ class SphereDataSystem {
     public:
         void Update(bismuth::Registry& registry);
     private:
+        void CheckNeighbor(int currentChunk, int& chunkNeighbor, int& neighbor);
+
         void GetNeighbors(std::vector<size_t>& neighbors, size_t& pointID,
             bismuth::ComponentPool<SphereComponent>& spherePositions,
             bismuth::ComponentPool<SpatialHashComponent>& spatialHash, bismuth::ComponentPool<PositionComponent>& posPool,
             float radius);
 
         float ComputePressure(float& density);
-        float ComputeDensity(const glm::vec4& point, const std::vector<glm::vec4*>& neighbors, float smoothingLength, float mass);
+        float ComputeDensity(const glm::vec4& point, const std::vector<size_t>& neighborIDs, 
+            bismuth::ComponentPool<SphereComponent>& spherePool, float smoothingLength, float mass);
 
         glm::vec3 ComputeForces(
             glm::vec4& point, std::vector<size_t>& neighbors,

@@ -1,19 +1,5 @@
 #include "sapphire/systems/sphere_data_system.hpp"
 
-namespace std {
-    template<>
-    struct hash<glm::ivec3> {
-        size_t operator()(const glm::ivec3& v) const noexcept {
-            // Use large primes for good distribution
-            const size_t h1 = hash<int>{}(v.x);
-            const size_t h2 = hash<int>{}(v.y);
-            const size_t h3 = hash<int>{}(v.z);
-            return h1 ^ (h2 << 1) ^ (h3 << 2);
-        }
-    };
-}
-
-
 void SphereDataSystem::Update(bismuth::Registry& registry) {
     auto particle = registry.GetView<SphereComponent, DensityComponent, PressureComponent, ForceComponent, VelocityComponent>();
 
@@ -57,15 +43,9 @@ void SphereDataSystem::Update(bismuth::Registry& registry) {
         }
 
         auto& point = spherePool.GetComponent(entityID).positionAndRadius;
-        
-        std::vector<glm::vec4*> neighbors;
-        neighbors.reserve(neighborsIDs[i].size());
-        for(const auto& IDs : neighborsIDs[i]) {
-            neighbors.emplace_back(&spherePool.GetComponent(IDs).positionAndRadius);
-        }
 
         float& density = densityPool.GetComponent(entityID).d;
-        density = ComputeDensity(point, neighbors, smoothingLength, massPool.GetComponent(entityID).m);
+        density = ComputeDensity(point, neighborsIDs[i], spherePool, smoothingLength, massPool.GetComponent(entityID).m);
         pressurePool.GetComponent(entityID).p = ComputePressure(density);
     }
 
@@ -88,7 +68,7 @@ void SphereDataSystem::Update(bismuth::Registry& registry) {
     }
 }
 
-inline void CheckNeighbor(int currentChunk, int& chunkNeighbor, int& neighbor) {
+void SphereDataSystem::CheckNeighbor(int currentChunk, int& chunkNeighbor, int& neighbor) {
     if(neighbor < 32 && neighbor >= 0) {
         chunkNeighbor = currentChunk;
     } else if(neighbor < 0) {
@@ -169,11 +149,13 @@ float SphereDataSystem::ComputePressure(float& density) {
     return sapphire_config::STIFFNESS * (density - sapphire_config::REST_DENSITY);
 }
 
-float SphereDataSystem::ComputeDensity(const glm::vec4& point, const std::vector<glm::vec4*>& neighbors, float smoothingLength, float mass) {
+float SphereDataSystem::ComputeDensity(const glm::vec4& point, const std::vector<size_t>& neighborIDs,
+    bismuth::ComponentPool<SphereComponent>& spherePool, float smoothingLength, float mass
+) {
     float density = 0.0f;
 
-    for(const auto& neighbor : neighbors) {
-        glm::vec3 diff = point - *neighbor;
+    for(const auto& neighborID : neighborIDs) {
+        glm::vec3 diff = point - spherePool.GetComponent(neighborID).positionAndRadius;
         float radius = glm::length(diff);
 
         density += mass * sapphire::CubicSplineKernel(radius, smoothingLength);
