@@ -25,7 +25,7 @@ class SphereDataSystem {
     private:
         void CheckNeighbor(int currentChunk, int& chunkNeighbor, int& neighbor);
 
-        void GetNeighbors(std::vector<size_t>& neighbors, size_t& pointID,
+        void GetNeighbors(std::vector<size_t>& neighbors, size_t& pointID, size_t maxParticles,
             bismuth::ComponentPool<SphereComponent>& spherePositions,
             bismuth::ComponentPool<SpatialHashComponent>& spatialHash, bismuth::ComponentPool<PositionComponent>& posPool,
             float radius);

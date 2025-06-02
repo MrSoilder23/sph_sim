@@ -29,7 +29,7 @@ void SphereDataSystem::Update(bismuth::Registry& registry) {
     for(int i = 0; i < sphereIDs.size(); i++) {
         size_t entityID = sphereIDs[i];
         
-        GetNeighbors(neighborsIDs[i], entityID, spherePool, spatialPool, posPool, smoothingLength);
+        GetNeighbors(neighborsIDs[i], entityID, sphereIDs.size(), spherePool, spatialPool, posPool, smoothingLength);
     }
 
     #pragma omp parallel for
@@ -81,12 +81,15 @@ void SphereDataSystem::CheckNeighbor(int currentChunk, int& chunkNeighbor, int& 
 }
 
 void SphereDataSystem::GetNeighbors(
-    std::vector<size_t>& neighbors, size_t& pointID, bismuth::ComponentPool<SphereComponent>& spherePositions, 
+    std::vector<size_t>& neighbors, size_t& pointID, size_t maxParticles, bismuth::ComponentPool<SphereComponent>& spherePositions, 
     bismuth::ComponentPool<SpatialHashComponent>& spatialHash, bismuth::ComponentPool<PositionComponent>& posPool,
     float radius
 ) {
     constexpr float spatialSize = 32*sapphire_config::SMOOTHING_LENGTH;
     constexpr int gridRes = 32;
+
+    size_t count = 0;
+    neighbors.resize(maxParticles);
 
     float radiusSquared = radius * radius;
     glm::vec3 currentPos = glm::vec3(spherePositions.GetComponent(pointID).positionAndRadius);
@@ -137,13 +140,15 @@ void SphereDataSystem::GetNeighbors(
                         const glm::vec3 point = currentPos - glm::vec3(spherePositions.GetComponent(ID).positionAndRadius);
                         
                         if(glm::dot(point, point) <= radiusSquared) {
-                            neighbors.push_back(ID);
+                            neighbors[count] = ID;
+                            count++;
                         }
                     } 
                 }
             }   
         }
     }
+    neighbors.resize(count);
 }
 float SphereDataSystem::ComputePressure(float& density) {
     return sapphire_config::STIFFNESS * (density - sapphire_config::REST_DENSITY);
