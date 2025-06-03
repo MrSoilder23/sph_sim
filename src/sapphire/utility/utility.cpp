@@ -31,8 +31,7 @@ namespace sapphire {
         }
     }
 
-    glm::vec3 CubicSplineGradient(const glm::vec3& deltaPoint, const float& smoothingLength) {
-        float radius = glm::length(deltaPoint);
+    glm::vec3 CubicSplineGradient(const glm::vec3& deltaPoint, const float& radius, const float& smoothingLength) {
         if(radius == 0.0f) {
             return glm::vec3(0.0f);
         }

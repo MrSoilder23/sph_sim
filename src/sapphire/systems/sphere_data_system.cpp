@@ -96,7 +96,7 @@ void SphereDataSystem::GetNeighbors(
     size_t count = 0;
     neighbors.resize(maxParticles);
 
-    float radiusSquared = radius * radius;
+    float radiusSquaredMax = radius * radius;
     glm::vec3 currentPos = glm::vec3(spherePositions.GetComponent(pointID).positionAndRadius);
 
     // Translate global to local spatial space
@@ -143,8 +143,9 @@ void SphereDataSystem::GetNeighbors(
                     
                     for(const auto& ID : entityArray) {
                         const glm::vec3 point = currentPos - glm::vec3(spherePositions.GetComponent(ID).positionAndRadius);
+                        const float radiusSquared = sapphire::Dot(point, point);
                         
-                        if(glm::dot(point, point) <= radiusSquared) {
+                        if(radiusSquared <= radiusSquaredMax) {
                             neighbors[count] = ID;
                             count++;
                         }
@@ -165,8 +166,8 @@ float SphereDataSystem::ComputeDensity(const glm::vec4& point, const std::vector
     float density = 0.0f;
 
     for(const auto& neighborID : neighborIDs) {
-        glm::vec3 diff = point - spherePool.GetComponent(neighborID).positionAndRadius;
-        float radius = glm::length(diff);
+        glm::vec3 diff = glm::vec3(point) - glm::vec3(spherePool.GetComponent(neighborID).positionAndRadius);
+        float radius = sapphire::Length(diff, diff);
 
         density += mass * sapphire::CubicSplineKernel(radius, smoothingLength);
     }
@@ -195,11 +196,12 @@ glm::vec3 SphereDataSystem::ComputeForces(
     
     for(const auto& neighborID : neighbors) {
         glm::vec3 deltaPoint = glm::vec3(point) - glm::vec3(spherePool.GetComponent(neighborID).positionAndRadius);
-        float radius = glm::length(deltaPoint);
+        float radiusSquared = sapphire::Dot(deltaPoint, deltaPoint);
+        float radius = std::sqrt(radiusSquared);
 
         if(radius > 0.0f && radius < smoothingLength) {
             // Pressure
-            glm::vec3 gradient = sapphire::CubicSplineGradient(deltaPoint, smoothingLength);
+            glm::vec3 gradient = sapphire::CubicSplineGradient(deltaPoint, radius, smoothingLength);
 
             auto& neighborDensity = densityPool.GetComponent(neighborID).d;
             neighborDensity = std::max(neighborDensity, 1e-5f);
@@ -213,8 +215,8 @@ glm::vec3 SphereDataSystem::ComputeForces(
             viscosityForce += (neighborDensity * deltaVelocity) * sapphire::CubicSplineLaplacian(radius, smoothingLength);
 
             // Gravity
-            float distanceSquared = glm::dot(deltaPoint, deltaPoint);
-            float denominator = std::pow(distanceSquared + softeningSquared, 1.5f);
+            float distSoft = radiusSquared + softeningSquared;
+            float denominator = std::sqrt(distSoft*distSoft*distSoft);
             gravityForce += sapphire_config::G * massPool.GetComponent(neighborID).m * deltaPoint / denominator;
         }
     }
