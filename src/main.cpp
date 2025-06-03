@@ -61,13 +61,23 @@ void InitEntities() {
     gRegistry.EmplaceComponent<CameraComponent>(entity, camera);
     gRegistry.EmplaceComponent<TransformComponent>(entity, transform);
 
-    const static float spacing = sapphire_config::INITIAL_SPACING;
-    float coordOffset = 5*spacing;
+    int amountX = 10;
+    int amountY = 10;
+    int amountZ = 10;
 
-    for(int x = 0; x < 100; x++) {
-        for(int y = 0; y < 10; y++) {
-            for(int z = 0; z < 10; z++) {
-                CreateParticle(x*spacing - coordOffset*10, y*spacing - coordOffset, z*spacing - coordOffset - 40, glm::vec3(0.0f));
+    float coordOffsetX = (amountX/2)*sapphire_config::INITIAL_SPACING;
+    float coordOffsetY = (amountY/2)*sapphire_config::INITIAL_SPACING;
+    float coordOffsetZ = (amountZ/2)*sapphire_config::INITIAL_SPACING;
+
+    for(int x = 0; x < amountX; x++) {
+        for(int y = 0; y < amountY; y++) {
+            for(int z = 0; z < amountZ; z++) {
+                CreateParticle(
+                    x*sapphire_config::INITIAL_SPACING - coordOffsetX, 
+                    y*sapphire_config::INITIAL_SPACING - coordOffsetY, 
+                    z*sapphire_config::INITIAL_SPACING - coordOffsetZ - 40,
+                    glm::vec3(0.0f)
+                );
             }
         }
     }
