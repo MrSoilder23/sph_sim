@@ -22,8 +22,13 @@ void SphereDataSystem::Update(bismuth::Registry& registry) {
 
     auto& sphereIDs = spherePool.GetDenseEntities();
     
-    std::vector<std::vector<size_t>> neighborsIDs;
-    neighborsIDs.resize(sphereIDs.size());
+    static std::vector<std::vector<size_t>> neighborsIDs;
+    for(auto& neighbors : neighborsIDs) {
+        neighbors.clear();
+    }
+    if(neighborsIDs.size() != sphereIDs.size()) {
+        neighborsIDs.resize(sphereIDs.size());
+    }
 
     #pragma omp parallel for
     for(int i = 0; i < sphereIDs.size(); i++) {
