@@ -64,10 +64,10 @@ void InitEntities() {
     const static float spacing = sapphire_config::INITIAL_SPACING;
     float coordOffset = 5*spacing;
 
-    for(int x = 0; x < 10; x++) {
+    for(int x = 0; x < 100; x++) {
         for(int y = 0; y < 10; y++) {
             for(int z = 0; z < 10; z++) {
-                CreateParticle(x*spacing - coordOffset, y*spacing - coordOffset, z*spacing - coordOffset - 40, glm::vec3(0.0f));
+                CreateParticle(x*spacing - coordOffset*10, y*spacing - coordOffset, z*spacing - coordOffset - 40, glm::vec3(0.0f));
             }
         }
     }
