@@ -74,11 +74,11 @@ void SphereDataSystem::Update(bismuth::Registry& registry) {
 }
 
 void SphereDataSystem::CheckNeighbor(int currentChunk, int& chunkNeighbor, int& neighbor) {
-    if(neighbor < 32 && neighbor >= 0) {
+    if(neighbor < sapphire_config::SPATIAL_LENGTH && neighbor >= 0) {
         chunkNeighbor = currentChunk;
     } else if(neighbor < 0) {
         chunkNeighbor = currentChunk-1;
-        neighbor = 31;
+        neighbor = sapphire_config::SPATIAL_LENGTH-1;
     } else {
         chunkNeighbor = currentChunk+1;
         neighbor = 0;
@@ -90,8 +90,8 @@ void SphereDataSystem::GetNeighbors(
     bismuth::ComponentPool<SpatialHashComponent>& spatialHash, bismuth::ComponentPool<PositionComponent>& posPool,
     float radius
 ) {
-    constexpr float spatialSize = 32*sapphire_config::SMOOTHING_LENGTH;
-    constexpr int gridRes = 32;
+    using sapphire_config::SPATIAL_LENGTH;
+    using sapphire_config::SPATIAL_LENGTH_MAX;
 
     size_t count = 0;
     neighbors.resize(maxParticles);
@@ -100,17 +100,17 @@ void SphereDataSystem::GetNeighbors(
     glm::vec3 currentPos = glm::vec3(spherePositions.GetComponent(pointID).positionAndRadius);
 
     // Translate global to local spatial space
-    int chunkY = std::floor(currentPos.y / spatialSize);
-    int chunkX = std::floor(currentPos.x / spatialSize);
-    int chunkZ = std::floor(currentPos.z / spatialSize);
+    int chunkY = std::floor(currentPos.y / SPATIAL_LENGTH_MAX);
+    int chunkX = std::floor(currentPos.x / SPATIAL_LENGTH_MAX);
+    int chunkZ = std::floor(currentPos.z / SPATIAL_LENGTH_MAX);
     
-    float localPosX = currentPos.x - spatialSize*chunkX;
-    float localPosY = currentPos.y - spatialSize*chunkY;
-    float localPosZ = currentPos.z - spatialSize*chunkZ;
+    float localPosX = currentPos.x - SPATIAL_LENGTH_MAX*chunkX;
+    float localPosY = currentPos.y - SPATIAL_LENGTH_MAX*chunkY;
+    float localPosZ = currentPos.z - SPATIAL_LENGTH_MAX*chunkZ;
     
-    int cubeX = std::floor(gridRes * (localPosX / spatialSize));
-    int cubeY = std::floor(gridRes * (localPosY / spatialSize));
-    int cubeZ = std::floor(gridRes * (localPosZ / spatialSize));
+    int cubeX = std::floor(SPATIAL_LENGTH * (localPosX / SPATIAL_LENGTH_MAX));
+    int cubeY = std::floor(SPATIAL_LENGTH * (localPosY / SPATIAL_LENGTH_MAX));
+    int cubeZ = std::floor(SPATIAL_LENGTH * (localPosZ / SPATIAL_LENGTH_MAX));
 
     for(int localX = -1; localX < 2; localX++) {
         for(int localY = -1; localY < 2; localY++) {
@@ -191,7 +191,8 @@ glm::vec3 SphereDataSystem::ComputeForces(
     auto& currentPointVelocity = velocityPool.GetComponent(currentPointID).v;
 
     currentPointDensity = std::max(currentPointDensity, 1e-5f);
-
+    float softeningSquared = softening*softening;
+    
     for(const auto& neighborID : neighbors) {
         glm::vec3 deltaPoint = glm::vec3(point) - glm::vec3(spherePool.GetComponent(neighborID).positionAndRadius);
         float radius = glm::length(deltaPoint);
@@ -213,7 +214,7 @@ glm::vec3 SphereDataSystem::ComputeForces(
 
             // Gravity
             float distanceSquared = glm::dot(deltaPoint, deltaPoint);
-            float denominator = std::pow(distanceSquared + softening*softening, 1.5f);
+            float denominator = std::pow(distanceSquared + softeningSquared, 1.5f);
             gravityForce += sapphire_config::G * massPool.GetComponent(neighborID).m * deltaPoint / denominator;
         }
     }

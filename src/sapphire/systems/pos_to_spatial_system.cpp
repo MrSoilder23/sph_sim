@@ -14,9 +14,10 @@ namespace std {
 }
 
 void PosToSpatialSystem::Update(bismuth::Registry& registry) {
-    constexpr float spatialSize = 32*sapphire_config::SMOOTHING_LENGTH;
-    constexpr float invSpatialSize = 1.0f / spatialSize;
-    constexpr int gridRes = 32;
+    using sapphire_config::SPATIAL_LENGTH;
+    using sapphire_config::SPATIAL_LENGTH_MAX;
+    
+    constexpr float invSpatialSize = 1.0f / SPATIAL_LENGTH_MAX;
 
     auto& particlePool = registry.GetComponentPool<SphereComponent>();
     auto& positionPool = registry.GetComponentPool<PositionComponent>();
@@ -52,11 +53,11 @@ void PosToSpatialSystem::Update(bismuth::Registry& registry) {
             static_cast<int>(std::floor(particlePos.z * invSpatialSize))
         );
 
-        glm::vec3 localPos = particlePos - spatialSize * glm::vec3(chunkKey);
+        glm::vec3 localPos = particlePos - SPATIAL_LENGTH_MAX * glm::vec3(chunkKey);
         glm::ivec3 cubeCoords(
-            std::clamp(static_cast<int>(gridRes * localPos.x * invSpatialSize), 0, gridRes-1),
-            std::clamp(static_cast<int>(gridRes * localPos.y * invSpatialSize), 0, gridRes-1),
-            std::clamp(static_cast<int>(gridRes * localPos.z * invSpatialSize), 0, gridRes-1)
+            std::clamp(static_cast<int>(SPATIAL_LENGTH * localPos.x * invSpatialSize), 0, SPATIAL_LENGTH-1),
+            std::clamp(static_cast<int>(SPATIAL_LENGTH * localPos.y * invSpatialSize), 0, SPATIAL_LENGTH-1),
+            std::clamp(static_cast<int>(SPATIAL_LENGTH * localPos.z * invSpatialSize), 0, SPATIAL_LENGTH-1)
         );
 
         size_t binIndex = SpatialHash::GetCoordinates(cubeCoords.x, cubeCoords.y, cubeCoords.z);
