@@ -22,7 +22,7 @@ class ComponentPool : public ISparseSet{
         using EntityID = size_t;
         static constexpr size_t INVALID_INDEX = std::numeric_limits<size_t>::max();
 
-        ComponentType& GetComponent(const EntityID& entity) {
+        inline ComponentType& GetComponent(const EntityID& entity) {
             assert(HasComponent(entity) && "No entity with such component");
 
             return mDenseComponents[mComponentLocation[entity]];
