@@ -200,24 +200,28 @@ glm::vec3 SphereDataSystem::ComputeForces(
         float radius = std::sqrt(radiusSquared);
 
         if(radius > 0.0f && radius < smoothingLength) {
+            // Get neighbor components
+            auto& neighborDensity = densityPool.GetComponent(neighborID).d;
+            auto& neighborPressure = pressurePool.GetComponent(neighborID).p;
+            auto& neighborVelocity = velocityPool.GetComponent(neighborID).v;
+            auto& neighborMass = massPool.GetComponent(neighborID).m;
+
             // Pressure
             glm::vec3 gradient = sapphire::CubicSplineGradient(deltaPoint, radius, smoothingLength);
-
-            auto& neighborDensity = densityPool.GetComponent(neighborID).d;
             neighborDensity = std::max(neighborDensity, 1e-5f);
 
             float pressureTerm = (currentPointPressure / (currentPointDensity * currentPointDensity)) +
-                (pressurePool.GetComponent(neighborID).p / (neighborDensity * neighborDensity));
+                (neighborPressure / (neighborDensity * neighborDensity));
             pressureForce += -pressureTerm * gradient;
 
             // Viscosity
-            glm::vec3 deltaVelocity = velocityPool.GetComponent(neighborID).v - currentPointVelocity;
+            glm::vec3 deltaVelocity = neighborVelocity - currentPointVelocity;
             viscosityForce += (neighborDensity * deltaVelocity) * sapphire::CubicSplineLaplacian(radius, smoothingLength);
 
             // Gravity
             float distSoft = radiusSquared + softeningSquared;
             float denominator = std::sqrt(distSoft*distSoft*distSoft);
-            gravityForce += sapphire_config::G * massPool.GetComponent(neighborID).m * deltaPoint / denominator;
+            gravityForce += sapphire_config::G * neighborMass * deltaPoint / denominator;
         }
     }
     return pressureForce + viscosityForce + gravityForce;
