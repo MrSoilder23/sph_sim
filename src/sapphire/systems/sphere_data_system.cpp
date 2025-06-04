@@ -174,6 +174,7 @@ void SphereDataSystem::GetNeighbors(
                 CheckNeighbor(chunkZ, chunkNeighborZ, neighborZ);
 
                 glm::vec3 chunkKey(chunkNeighborX, chunkNeighborY, chunkNeighborZ);
+                int flatIndex = SpatialHash::GetCoordinates(neighborX, neighborY, neighborZ);
                 
                 for(const auto& spatialID : spatialDenseEntities) {
                     const auto& spatialPos = spatialPosArray[spatialPositionLoc[spatialID]].position;
@@ -182,7 +183,6 @@ void SphereDataSystem::GetNeighbors(
                         continue;
                     }
                     
-                    int flatIndex = SpatialHash::GetCoordinates(neighborX, neighborY, neighborZ);
                     
                     const auto& spatial = spatialHashArray[spatialHashLocations[spatialID]];
                     const auto& entityArray = spatial.flatArrayIDs[flatIndex];
