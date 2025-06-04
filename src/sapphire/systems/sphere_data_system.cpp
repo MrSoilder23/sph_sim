@@ -1,14 +1,9 @@
 #include "sapphire/systems/sphere_data_system.hpp"
 
 void SphereDataSystem::Update(bismuth::Registry& registry) {
-    auto particle = registry.GetView<SphereComponent, DensityComponent, PressureComponent, ForceComponent, VelocityComponent>();
+    using sapphire_config::SMOOTHING_LENGTH;
+    float softening = 0.1f * SMOOTHING_LENGTH;
 
-    const static float smoothingLength = sapphire_config::SMOOTHING_LENGTH;
-    float softening = 0.1f * smoothingLength;
-
-    // To-Do change after bismuth iterator is improved
-    // This for loop is 60% faster than provided from my class
-    const auto& viewEntities = particle.GetSmallestDense();
     auto& spherePool = registry.GetComponentPool<SphereComponent>();
     auto& densityPool = registry.GetComponentPool<DensityComponent>();
     auto& pressurePool = registry.GetComponentPool<PressureComponent>();
@@ -34,42 +29,30 @@ void SphereDataSystem::Update(bismuth::Registry& registry) {
     for(int i = 0; i < sphereIDs.size(); i++) {
         size_t entityID = sphereIDs[i];
         
-        GetNeighbors(neighborsIDs[i], entityID, sphereIDs.size(), spherePool, spatialPool, posPool, smoothingLength);
+        GetNeighbors(neighborsIDs[i], entityID, sphereIDs.size(), spherePool, spatialPool, posPool, SMOOTHING_LENGTH);
     }
 
     #pragma omp parallel for
-    for(int i = 0; i < particle.SizeHint(); i++) {
-        size_t entityID = (*viewEntities)[i];
-        if(!spherePool.HasComponent(entityID) && !densityPool.HasComponent(entityID) && 
-           !pressurePool.HasComponent(entityID) && !forcePool.HasComponent(entityID) &&
-            !velocityPool.HasComponent(entityID)
-        ) {
-            continue;
-        }
+    for(int i = 0; i < sphereIDs.size(); i++) {
+        size_t entityID = sphereIDs[i];
 
         auto& point = spherePool.GetComponent(entityID).positionAndRadius;
 
         float& density = densityPool.GetComponent(entityID).d;
-        density = ComputeDensity(point, neighborsIDs[i], spherePool, smoothingLength, massPool.GetComponent(entityID).m);
+        density = ComputeDensity(point, neighborsIDs[i], spherePool, SMOOTHING_LENGTH, massPool.GetComponent(entityID).m);
         pressurePool.GetComponent(entityID).p = ComputePressure(density);
     }
 
     #pragma omp parallel for
-    for(int i = 0; i < particle.SizeHint(); i++) {
-        size_t entityID = (*viewEntities)[i];
-        if(!spherePool.HasComponent(entityID) && !densityPool.HasComponent(entityID) && 
-           !pressurePool.HasComponent(entityID) && !forcePool.HasComponent(entityID) &&
-            !velocityPool.HasComponent(entityID)
-        ) {
-            continue;
-        }
+    for(int i = 0; i < sphereIDs.size(); i++) {
+        size_t entityID = sphereIDs[i];
 
         auto& point = spherePool.GetComponent(entityID).positionAndRadius;
 
         glm::vec3& force = forcePool.GetComponent(entityID).f;
         force = ComputeForces(point, neighborsIDs[i], entityID,
             spherePool, pressurePool, densityPool, velocityPool,
-            massPool, smoothingLength, softening);
+            massPool, SMOOTHING_LENGTH, softening);
     }
 }
 
