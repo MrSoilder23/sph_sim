@@ -7,6 +7,9 @@ void quartz::InstancedRendererSystem::Init(GLuint shaderProgram) {
     glGenBuffers(1, &mInstanceVBO);
 
     mShaderProgram = shaderProgram;
+
+    mUniformProjectionMatrix = shader::FindUniformLocation(mShaderProgram, "uProjectionMatrix");
+    mUniformCameraPosition   = shader::FindUniformLocation(mShaderProgram, "uCameraPosition");
 }   
 
 void quartz::InstancedRendererSystem::Update(bismuth::Registry& registry) {
@@ -44,11 +47,9 @@ void quartz::InstancedRendererSystem::Update(bismuth::Registry& registry) {
     );
     glVertexAttribDivisor(0,1);
 
-    GLint projectionMatrix = shader::FindUniformLocation(mShaderProgram, "uProjectionMatrix");
-    GLint cameraPosition = shader::FindUniformLocation(mShaderProgram, "uCameraPosition");
     for(const auto& [entity, camera, transform] : cameraView) {
-        glUniformMatrix4fv(projectionMatrix, 1, GL_FALSE, glm::value_ptr(camera.viewProjection));
-        glUniformMatrix4fv(cameraPosition, 1, GL_FALSE, glm::value_ptr(transform.position));
+        glUniformMatrix4fv(mUniformProjectionMatrix, 1, GL_FALSE, glm::value_ptr(camera.viewProjection));
+        glUniformMatrix4fv(mUniformCameraPosition, 1, GL_FALSE, glm::value_ptr(transform.position));
     }
 
     glDrawArraysInstanced(GL_POINTS, 0, 1,sphereData.size());
