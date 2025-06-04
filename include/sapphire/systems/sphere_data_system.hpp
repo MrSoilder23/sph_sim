@@ -25,21 +25,48 @@ class SphereDataSystem {
     private:
         void CheckNeighbor(int currentChunk, int& chunkNeighbor, int& neighbor);
 
-        void GetNeighbors(std::vector<size_t>& neighbors, size_t& pointID, size_t maxParticles,
-            bismuth::ComponentPool<SphereComponent>& spherePositions,
-            bismuth::ComponentPool<SpatialHashComponent>& spatialHash, bismuth::ComponentPool<PositionComponent>& posPool,
-            float radius);
+        void GetNeighbors(    
+            size_t               const& currentPointID,
+            float                       radius,
+            std::vector<size_t>&        neighbors, 
+            size_t               const& maxParticles,
+
+            SphereComponent      const* positionArray,
+            PositionComponent    const* spatialPosArray,
+            SpatialHashComponent const* spatialHashArray,
+            size_t               const* positionLocations,
+            size_t               const* spatialPositionLoc,
+            size_t               const* spatialHashLocations,
+
+            std::vector<size_t>  const& spatialDenseEntities
+        );
 
         float ComputePressure(float& density);
-        float ComputeDensity(const glm::vec4& point, const std::vector<size_t>& neighborIDs, 
-            bismuth::ComponentPool<SphereComponent>& spherePool, float smoothingLength, float mass);
+        float ComputeDensity(
+            size_t              const& currentPointID,
+            std::vector<size_t> const& neighborIDs,
+            float                      smoothingLength,
+            float                      mass,
+            
+            SphereComponent     const* positionArray,
+            size_t              const* positionLocations    
+        );
 
         glm::vec3 ComputeForces(
-            glm::vec4& point, std::vector<size_t>& neighbors,
-            size_t& currentPointID,
-            bismuth::ComponentPool<SphereComponent>& spherePool, bismuth::ComponentPool<PressureComponent>& pressurePool,
-            bismuth::ComponentPool<DensityComponent>& densityPool, bismuth::ComponentPool<VelocityComponent>& velocityPool,
-            bismuth::ComponentPool<MassComponent>& massPool,
-            float smoothingLength, float softening
+            size_t            const&   currentPointID,
+            float                      smoothingLength,
+            float                      softening,
+            std::vector<size_t> const& neighbors,
+            
+            SphereComponent   const*   positionArray,
+            VelocityComponent const*   velocityArray,
+            DensityComponent  const*   densityArray,
+            PressureComponent const*   pressureArray,
+            MassComponent     const*   massArray,
+            size_t            const*   positionLocations,
+            size_t            const*   densityLocations,
+            size_t            const*   pressureLocations,
+            size_t            const*   velocityLocations,
+            size_t            const*   massLocations
         );
 };
