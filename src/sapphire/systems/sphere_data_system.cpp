@@ -174,7 +174,6 @@ glm::vec3 SphereDataSystem::ComputeForces(
     auto& currentPointDensity = densityPool.GetComponent(currentPointID).d;
     auto& currentPointVelocity = velocityPool.GetComponent(currentPointID).v;
 
-    currentPointDensity = std::max(currentPointDensity, 1e-5f);
     float softeningSquared = softening*softening;
     
     for(const auto& neighborID : neighbors) {
@@ -184,14 +183,13 @@ glm::vec3 SphereDataSystem::ComputeForces(
 
         if(radius > 0.0f && radius < smoothingLength) {
             // Get neighbor components
-            auto& neighborDensity = densityPool.GetComponent(neighborID).d;
-            auto& neighborPressure = pressurePool.GetComponent(neighborID).p;
-            auto& neighborVelocity = velocityPool.GetComponent(neighborID).v;
-            auto& neighborMass = massPool.GetComponent(neighborID).m;
+            const auto& neighborDensity  = densityPool.GetComponent(neighborID).d;
+            const auto& neighborPressure = pressurePool.GetComponent(neighborID).p;
+            const auto& neighborVelocity = velocityPool.GetComponent(neighborID).v;
+            const auto& neighborMass     = massPool.GetComponent(neighborID).m;
 
             // Pressure
             glm::vec3 gradient = sapphire::CubicSplineGradient(deltaPoint, radius, smoothingLength);
-            neighborDensity = std::max(neighborDensity, 1e-5f);
 
             float pressureTerm = (currentPointPressure / (currentPointDensity * currentPointDensity)) +
                 (neighborPressure / (neighborDensity * neighborDensity));
