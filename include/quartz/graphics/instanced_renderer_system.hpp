@@ -23,6 +23,9 @@ class InstancedRendererSystem {
         GLuint mShaderProgram;
 
         size_t mDataSize;
+
+        GLint mUniformProjectionMatrix;
+        GLint mUniformCameraPosition;
 };
 
 }

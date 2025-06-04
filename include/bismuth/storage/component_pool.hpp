@@ -22,13 +22,10 @@ class ComponentPool : public ISparseSet{
         using EntityID = size_t;
         static constexpr size_t INVALID_INDEX = std::numeric_limits<size_t>::max();
 
-        ComponentType& GetComponent(const EntityID& entity) {
+        inline ComponentType& GetComponent(const EntityID& entity) {
             assert(HasComponent(entity) && "No entity with such component");
 
             return mDenseComponents[mComponentLocation[entity]];
-        }
-        const std::vector<size_t>& GetDenseEntities() const noexcept{
-            return mDenseEntities;
         }
 
         inline bool HasComponent(const EntityID& entity) const noexcept {
@@ -67,6 +64,10 @@ class ComponentPool : public ISparseSet{
         }
 
         void RemoveComponent(const EntityID& entity) override {
+            if(!HasComponent(entity)) {
+                return;
+            }
+
             const size_t& index = mComponentLocation[entity];
             const size_t& lastEntity = mDenseEntities.back();
 
@@ -89,6 +90,12 @@ class ComponentPool : public ISparseSet{
         // For efficient reading/sending data to gpu
         const std::vector<ComponentType>& GetDenseComponents() const {
             return mDenseComponents;
+        }
+        const std::vector<size_t>& GetDenseEntities() const noexcept{
+            return mDenseEntities;
+        }
+        const std::vector<size_t>& GetComponentLocations() const noexcept {
+            return mComponentLocation;
         }
 
         std::vector<ComponentType>::iterator ComponentBegin() {

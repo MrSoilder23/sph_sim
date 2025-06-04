@@ -1,8 +1,10 @@
 #pragma once
 // C++ standard libraries
+#include <bit>
 #include <cstddef>
 #include <memory>
 #include <vector>
+#include <array>
 
 // Own libraries
 #include "./bismuth/storage/component_pool.hpp"
@@ -28,10 +30,9 @@ class Registry {
             return componentID;
         }
 
-        
         template<typename ComponentName>
         ComponentPool<ComponentName>& GetComponentPool() {
-            static uint32_t type_id = GetPoolID<ComponentName>();
+            static const size_t type_id = GetPoolID<ComponentName>();
 
             if (type_id >= mComponentPool.size()) {
                 mComponentPool.resize(type_id + 1);
@@ -44,50 +45,62 @@ class Registry {
             return *static_cast<ComponentPool<ComponentName>*>(mComponentPool[type_id].get());
         }
 
-
         size_t CreateEntity() {
-            mEntities.push_back(false);
-            const size_t& currentEntityAmount = mEntities.size()-1;
-
-            return currentEntityAmount;
+            const size_t id = mEntities.size();
+            mEntities.emplace_back();
+            return id;
         }
 
         template<typename ComponentName>
-        void EmplaceComponent(const size_t& entityID, ComponentName& component) {
-            static ComponentPool<ComponentName>& pool = GetComponentPool<ComponentName>();
+        void EmplaceComponent(size_t entityID, ComponentName&& component) {
+            assert(entityID < mEntities.size() && "Invalid entity ID");
             
-            pool.AddComponent(entityID, component);
-            mEntities[entityID] = true;
+            auto& pool = GetComponentPool<ComponentName>();
+            const size_t compID = GetPoolID<ComponentName>();
+            
+            pool.AddComponent(entityID, std::forward<ComponentName>(component));
+            mEntities[entityID] |= (1ULL << compID);
         }
+
         template<typename ComponentName, typename... Args>
-        void EmplaceComponent(const size_t& entityID, Args&&... args) {
-            static ComponentPool<ComponentName>& pool = GetComponentPool<ComponentName>();
+        void EmplaceComponent(size_t entityID, Args&&... args) {
+            assert(entityID < mEntities.size() && "Invalid entity ID");
             
-            pool.AddComponent(entityID, args...);
-            mEntities[entityID] = true;
+            auto& pool = GetComponentPool<ComponentName>();
+            const size_t compID = GetPoolID<ComponentName>();
+            
+            pool.AddComponent(entityID, std::forward<Args>(args)...);
+            mEntities[entityID] |= (1ULL << compID);
         }
 
         template<typename ComponentName>
-        bool HasComponent(const size_t& entityID) {
-            return GetComponentPool<ComponentName>().HasComponent(entityID);
+        bool HasComponent(size_t entityID) const {
+            if (entityID >= mEntities.size()) return false;
+            const size_t compID = GetPoolID<ComponentName>();
+            return (mEntities[entityID] >> compID) & 1;
         }
 
         template<typename ComponentName>
-        void RemoveComponent(const size_t& entityID) {
-            static ComponentPool<ComponentName>& pool = GetComponentPool<ComponentName>();
-
+        void RemoveComponent(size_t entityID) {
+            if (entityID >= mEntities.size()) return;
+            
+            auto& pool = GetComponentPool<ComponentName>();
+            const size_t compID = GetPoolID<ComponentName>();
+            
             pool.RemoveComponent(entityID);
+            mEntities[entityID] &= ~(1ULL << compID);
         }
 
-        void RemoveEntity(const size_t& entityID) {
-            if(entityID >= mEntities.size()) {
-                return;
+        void RemoveEntity(size_t entityID) {
+            if (entityID >= mEntities.size()) return;
+            
+            uint64_t mask = mEntities[entityID];
+            while (mask) {
+                const size_t idx = std::countr_zero(mask);
+                mComponentPool[idx]->RemoveComponent(entityID);
+                mask &= ~(1ULL << idx);
             }
-
-            for(auto& pool : mComponentPool) {
-                pool->RemoveComponent(entityID);
-            }
-            mEntities[entityID] = false;
+            mEntities[entityID] = 0;
         }
 
         template<typename... ComponentName>
@@ -96,7 +109,7 @@ class Registry {
         }
 
     private:
-        std::vector<bool> mEntities;
+        std::vector<size_t> mEntities; // Component bitmask per entity
         std::vector<std::unique_ptr<ISparseSet>> mComponentPool;
 };
 
