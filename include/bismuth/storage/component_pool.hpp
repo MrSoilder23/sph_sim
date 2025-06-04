@@ -27,9 +27,6 @@ class ComponentPool : public ISparseSet{
 
             return mDenseComponents[mComponentLocation[entity]];
         }
-        const std::vector<size_t>& GetDenseEntities() const noexcept{
-            return mDenseEntities;
-        }
 
         inline bool HasComponent(const EntityID& entity) const noexcept {
             return entity < mComponentLocation.size() && 
@@ -93,6 +90,12 @@ class ComponentPool : public ISparseSet{
         // For efficient reading/sending data to gpu
         const std::vector<ComponentType>& GetDenseComponents() const {
             return mDenseComponents;
+        }
+        const std::vector<size_t>& GetDenseEntities() const noexcept{
+            return mDenseEntities;
+        }
+        const std::vector<size_t>& GetComponentLocations() const noexcept {
+            return mComponentLocation;
         }
 
         std::vector<ComponentType>::iterator ComponentBegin() {

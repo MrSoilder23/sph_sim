@@ -24,10 +24,10 @@ void PosToSpatialSystem::Update(bismuth::Registry& registry) {
     auto& spatialPool = registry.GetComponentPool<SpatialHashComponent>();
 
     const auto& particleIDs = particlePool.GetDenseEntities();
-    const auto IDsToRemove = spatialPool.GetDenseEntities();
+    const auto spatialIDs = spatialPool.GetDenseEntities();
 
     std::unordered_map<glm::ivec3, size_t> chunkMap;
-    chunkMap.reserve(IDsToRemove.size() * 2);
+    chunkMap.reserve(spatialIDs.size() * 2);
 
     for (const auto& entityID : spatialPool.GetDenseEntities()) {
         auto& spatial = spatialPool.GetComponent(entityID);
@@ -42,7 +42,6 @@ void PosToSpatialSystem::Update(bismuth::Registry& registry) {
 
         chunkMap[chunkKey] = entityID;
     }
-
 
     for(const auto& particleID : particleIDs) {
         auto particlePos = glm::vec3(particlePool.GetComponent(particleID).positionAndRadius);
@@ -79,8 +78,7 @@ void PosToSpatialSystem::Update(bismuth::Registry& registry) {
         }
     }
 
-    auto& spatialEntities = spatialPool.GetDenseEntities();
-    for (auto it = spatialEntities.begin(); it != spatialEntities.end(); ) {
+    for (auto it = spatialIDs.begin(); it != spatialIDs.end(); ) {
         auto& spatial = spatialPool.GetComponent(*it);
         bool isEmpty = true;
         for (const auto& bin : spatial.flatArrayIDs) {
