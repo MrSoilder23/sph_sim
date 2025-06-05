@@ -140,7 +140,8 @@ void SphereDataSystem::GetNeighbors(
     using sapphire_config::SPATIAL_LENGTH_MAX;
 
     size_t count = 0;
-    neighbors.resize(maxParticles);
+    // neighbors.resize(maxParticles);
+    size_t* tmp = (size_t*)alloca(maxParticles * sizeof(size_t));  
 
     float radiusSquaredMax = radius * radius;
     glm::vec3 currentPos = glm::vec3(positionArray[positionLocations[currentPointID]].positionAndRadius);
@@ -183,7 +184,6 @@ void SphereDataSystem::GetNeighbors(
                         continue;
                     }
                     
-                    
                     const auto& spatial = spatialHashArray[spatialHashLocations[spatialID]];
                     const auto& entityArray = spatial.flatArrayIDs[flatIndex];
                     
@@ -192,7 +192,7 @@ void SphereDataSystem::GetNeighbors(
                         const float radiusSquared = sapphire::Dot(point, point);
                         
                         if(radiusSquared <= radiusSquaredMax) {
-                            neighbors[count] = ID;
+                            tmp[count] = ID;
                             count++;
                         }
                     } 
@@ -201,6 +201,11 @@ void SphereDataSystem::GetNeighbors(
         }
     }
     neighbors.resize(count);
+    if (count > 0) {
+        std::memcpy(neighbors.data(),
+                    tmp,
+                    count * sizeof(size_t));
+    }
 }
 float SphereDataSystem::ComputePressure(float& density) {
     return sapphire_config::STIFFNESS * (density - sapphire_config::REST_DENSITY);

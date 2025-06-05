@@ -61,7 +61,7 @@ void InitEntities() {
     gRegistry.EmplaceComponent<CameraComponent>(entity, camera);
     gRegistry.EmplaceComponent<TransformComponent>(entity, transform);
 
-    int amountX = 10;
+    int amountX = 100;
     int amountY = 10;
     int amountZ = 10;
 
