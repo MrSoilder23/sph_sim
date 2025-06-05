@@ -200,6 +200,7 @@ void SphereDataSystem::GetNeighbors(
             }   
         }
     }
+
     neighbors.resize(count);
     if (count > 0) {
         std::memcpy(neighbors.data(),
