@@ -6,7 +6,7 @@
 #include <glm/glm.hpp>
 
 namespace sapphire {
-    constexpr float PI = 3.14159265358979323846;
+    static constexpr float PI = 3.14159265358979323846;
 
     float CubicSplineKernel(const float& radius, const float& smoothingLength);
     float CubicSplineDerivative(const float& radius, const float& smoothingLength);
