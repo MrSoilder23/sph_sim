@@ -16,42 +16,47 @@ namespace {
 
         return result;
     }
-
-    GLuint CompileShader(GLuint type, const std::string& source) {
-        GLuint shaderObject;
-
-        shaderObject = glCreateShader(type);
-
-        const char* src = source.c_str();
-        glShaderSource(shaderObject, 1, &src, nullptr);
-        glCompileShader(shaderObject);
-
-        return shaderObject;
-        
-    }
-
-    GLuint CreateShaderProgram(const std::string& vertexShaderSource, const std::string& fragmentShaderSource) {
-        GLuint programObject = glCreateProgram();
-
-        GLuint myVertexShader = CompileShader(GL_VERTEX_SHADER, vertexShaderSource);
-        GLuint myFragmentShader = CompileShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
-
-        glAttachShader(programObject ,myVertexShader);
-        glAttachShader(programObject ,myFragmentShader);
-        glLinkProgram(programObject);
-
-        glValidateProgram(programObject);
-
-        return programObject;
-    }
-
 }
 
-GLuint shader::CreateGraphicsPipeline(const std::string& _vertexShaderSource, const std::string& _fragmentShaderSource) {
-    std::string vertexShaderSource = LoadShaderAsString(_vertexShaderSource);
-    std::string fragmentShaderSource = LoadShaderAsString(_fragmentShaderSource);
+GLuint shader::CompileShader(GLuint type, const std::string& shaderPath) {
+    GLuint shaderObject;
 
-    return CreateShaderProgram(vertexShaderSource, fragmentShaderSource);
+    shaderObject = glCreateShader(type);
+
+    std::string shaderCode = LoadShaderAsString(shaderPath);
+    
+    const char* src = shaderCode.c_str();
+    glShaderSource(shaderObject, 1, &src, nullptr);
+    glCompileShader(shaderObject);
+
+    return shaderObject;
+    
+}
+
+GLuint shader::LinkProgram(GLuint& shader) {
+    GLuint programObject = glCreateProgram();
+
+    glAttachShader(programObject, shader);
+    glLinkProgram(programObject);
+
+    glValidateProgram(programObject);
+    
+    return programObject;
+}
+
+GLuint shader::CreateGraphicsPipeline(const std::string& vertexShaderPath, const std::string& fragmentShaderPath) {
+    GLuint programObject = glCreateProgram();
+
+    GLuint myVertexShader =   shader::CompileShader(GL_VERTEX_SHADER, vertexShaderPath);
+    GLuint myFragmentShader = shader::CompileShader(GL_FRAGMENT_SHADER, fragmentShaderPath);
+
+    glAttachShader(programObject, myVertexShader);
+    glAttachShader(programObject, myFragmentShader);
+    glLinkProgram(programObject);
+
+    glValidateProgram(programObject);
+
+    return programObject;
 }
 
 int shader::FindUniformLocation(GLuint pipeline, const GLchar* name) {
