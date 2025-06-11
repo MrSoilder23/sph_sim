@@ -1,23 +1,27 @@
 #version 450 core
+layout(local_size_x = 64) in;
 
 // Dense components array
 layout(std430, binding = 0) buffer sphereComponent      { vec4  positionAndRadius[]; };
-layout(std430, binding = 1) buffer pressureComponent    { float pressure[]; };
-layout(std430, binding = 2) buffer densityComponent     { float density[];  };
-layout(std430, binding = 3) buffer massComponent        { float mass[];     };
+layout(std430, binding = 1) buffer pressureComponent    { float pressure[];          };
+layout(std430, binding = 2) buffer densityComponent     { float densities[];         };
+layout(std430, binding = 3) buffer massComponent        { float mass[];              };
 
-// Component locations in dense array
-layout(std430, binding = 4) buffer sphereComponentLoc   { uint IDs[]; };
-layout(std430, binding = 5) buffer massComponentLoc     { uint IDs[]; };
-layout(std430, binding = 6) buffer pressureComponentLoc { uint IDs[]; };
-layout(std430, binding = 7) buffer densityComponentLoc  { uint IDs[]; };
+// Component locations
+layout(std430, binding = 4) buffer sphereComponentLoc   { uint sphereIDs[];          };
+layout(std430, binding = 5) buffer pressureComponentLoc { uint pressureIDs[];        };
+layout(std430, binding = 6) buffer densityComponentLoc  { uint densityIDs[];         };
+layout(std430, binding = 7) buffer massComponentLoc     { uint massIDs[];            };
 
-layout(std430, binding = 8) buffer neighborIDs          { uint IDs[]; };
+layout(std430, binding = 8) buffer denseSphereIDs       { uint denseIDs[];           };
 
+// Uniforms
 uniform float uStiffness;
 uniform float uRestDensity;
 uniform float uSmoothingLength;
 
+
+// Helper functions
 float CubicSplineKernel(float radius) {
     const float PI = 3.14159265358979323846f;
 
@@ -37,14 +41,18 @@ float CubicSplineKernel(float radius) {
 float ComputeDensity(uint currentSphereID) {
     float density = 0.0f;
 
-    vec3 point = positionAndRadius[sphereComponentLoc.IDs[currentSphereID]].xyz;
+    vec3 point = positionAndRadius[sphereIDs[currentSphereID]].xyz;
+    float radiusSquared = uSmoothingLength*uSmoothingLength;
 
-    for(int i = 0; i < neighborIDs.IDs.length(); i++) {
-        uint neighborID = neighborIDs.IDs[i];
-        vec3 diff = point - positionAndRadius[sphereComponentLoc.IDs[neighborID]].xyz;
+    for(uint i = 0; i < sphereIDs.length(); i++) {
+        uint diffSphereID = denseIDs[i];
+
+        vec3 diff = point - positionAndRadius[sphereIDs[diffSphereID]].xyz;
         float radius = length(diff);
 
-        density += mass[massComponentLoc.IDs[neighborID]] * CubicSplineKernel(radius);
+        if(radius <= radiusSquared) {
+            density += mass[massIDs[diffSphereID]] * CubicSplineKernel(radius);
+        }
     }
 
     return max(density, 1e-5f);
@@ -56,12 +64,14 @@ float ComputePressure(float density) {
 
 void main() {
     uint currentID = gl_GlobalInvocationID.x;
-    if(currentID >= sphereComponentLoc.IDs.length()) {
+    if(currentID >= denseIDs.length()) {
         return;
     }
 
-    float density = ComputeDensity(currentID);
+    uint currentPointID = denseIDs[currentID];
 
-    density[densityComponentLoc.IDs[currentID]] = density;
-    pressure[pressureComponentLoc.IDs[currentID]] = ComputePressure(density);
+    float density = ComputeDensity(currentPointID);
+
+    densities[densityIDs[currentPointID]] = density;
+    pressure[pressureIDs[currentPointID]] = ComputePressure(density);
 }

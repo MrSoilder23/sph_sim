@@ -29,6 +29,8 @@
 #include "sapphire/systems/force_to_pos_system.hpp"
 #include "sapphire/systems/pos_to_spatial_system.hpp"
 
+#include "sapphire/systems/gpu_sphere_data_system.hpp"
+
 quartz::Engine gEngine;
 bismuth::Registry gRegistry;
 
@@ -130,14 +132,16 @@ void System(float deltaTime) {
     static SphereDataSystem sphereDataSystem;
     static ForceToPosSystem forceToPosSystem;
     static PosToSpatialSystem posToSpatialSystem;
+    static GPUSphereDataSystem gpuToSphereDataSystem(gRegistry);
 
     cameraSystem.Update(gRegistry);
 
-    posToSpatialSystem.Update(gRegistry);
-    sphereDataSystem.Update(gRegistry);
-    forceToPosSystem.Update(gRegistry, deltaTime);
+    // posToSpatialSystem.Update(gRegistry);
+    // sphereDataSystem.Update(gRegistry);
+    gpuToSphereDataSystem.Update(gRegistry);
+    // forceToPosSystem.Update(gRegistry, deltaTime);
 
-    gInstanceRenderer.Update(gRegistry);
+    // gInstanceRenderer.Update(gRegistry);
 }
 
 void FpsCounter(float deltaTime) {

@@ -1,5 +1,5 @@
 #include "./quartz/graphics/shader.hpp"
-
+#include <vector>
 namespace {
     std::string LoadShaderAsString(const std::string& src) {
         std::string result = "";
@@ -29,8 +29,21 @@ GLuint shader::CompileShader(GLuint type, const std::string& shaderPath) {
     glShaderSource(shaderObject, 1, &src, nullptr);
     glCompileShader(shaderObject);
 
+    GLint success;
+    glGetShaderiv(shaderObject, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        GLint length;
+        glGetShaderiv(shaderObject, GL_INFO_LOG_LENGTH, &length);
+        std::vector<GLchar> log(length);
+        glGetShaderInfoLog(shaderObject, length, &length, log.data());
+        
+        std::cerr << "SHADER COMPILE ERROR (" << shaderPath << "):\n"
+                  << log.data() << std::endl;
+        return 0; // Return 0 to indicate failure
+    }
+
     return shaderObject;
-    
+
 }
 
 GLuint shader::LinkProgram(GLuint& shader) {
@@ -39,8 +52,21 @@ GLuint shader::LinkProgram(GLuint& shader) {
     glAttachShader(programObject, shader);
     glLinkProgram(programObject);
 
-    glValidateProgram(programObject);
     
+    GLint success;
+    glGetProgramiv(programObject, GL_LINK_STATUS, &success);
+    if (!success) {
+        GLint length;
+        glGetProgramiv(programObject, GL_INFO_LOG_LENGTH, &length);
+        std::vector<GLchar> log(length);
+        glGetProgramInfoLog(programObject, length, &length, log.data());
+        
+        std::cerr << "PROGRAM LINK ERROR:\n"
+                  << log.data() << std::endl;
+        return 0; // Return 0 to indicate failure
+    }
+
+
     return programObject;
 }
 

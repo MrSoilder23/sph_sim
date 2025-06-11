@@ -16,28 +16,42 @@
 
 class GPUSphereDataSystem {
     public:
-        GPUSphereDataSystem();
+        GPUSphereDataSystem(bismuth::Registry& registry);
 
         void Update(bismuth::Registry& registry);
     private:
-        void CheckNeighbor(int currentChunk, int& chunkNeighbor, int& neighbor);
+        void BindDensity();
+        void BindForce();
+        void BindPosToForce();
 
-        void GetNeighbors(
-            size_t               const& currentPointID,
-            float                       radius,
-            std::vector<size_t>&        neighbors, 
-            size_t               const& maxParticles,
+        void ComputeDensity(const std::vector<size_t>& denseEntities);
+        void ComputeForces(const std::vector<size_t>& denseEntities);
+        void ComputePos(const std::vector<size_t>& denseEntities);
 
-            SphereComponent      const* positionArray,
-            PositionComponent    const* spatialPosArray,
-            SpatialHashComponent const* spatialHashArray,
-            size_t               const* positionLocations,
-            size_t               const* spatialPositionLoc,
-            size_t               const* spatialHashLocations,
-
-            std::vector<size_t>  const& spatialDenseEntities
-        );
+        void Render(const std::vector<size_t>& denseEntities, bismuth::Registry& registry);
 
     private:
         GLuint mDensityProgram;
+        GLuint mForcesProgram;
+        GLuint mPosProgram;
+
+        GLuint mRender;
+
+        GLuint mSphereData;
+        GLuint mMassData;
+        GLuint mDensityData;
+        GLuint mPressureData;
+        GLuint mForceData;
+        GLuint mVelocityData;
+
+        GLuint mSphereLocData;
+        GLuint mMassLocData;
+        GLuint mDensityLocData;
+        GLuint mPressureLocData;
+        GLuint mForceLocData;
+        GLuint mVelocityLocData;
+
+        GLuint mDenseIDs;
+
+        GLuint mDummyVAO;
 };
