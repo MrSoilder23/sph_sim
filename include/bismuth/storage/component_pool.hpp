@@ -5,12 +5,13 @@
 #include <utility>
 #include <vector>
 #include <limits>
+#include <cstdint>
 
 namespace bismuth {
 
 class ISparseSet {
     public:
-        using EntityID = size_t;
+        using EntityID = uint32_t;
 
         virtual ~ISparseSet() = default;
         virtual void RemoveComponent(const EntityID& entity) = 0;
@@ -19,8 +20,8 @@ class ISparseSet {
 template<typename ComponentType>
 class ComponentPool : public ISparseSet{
     public:
-        using EntityID = size_t;
-        static constexpr size_t INVALID_INDEX = std::numeric_limits<size_t>::max();
+        using EntityID = uint32_t;
+        static constexpr uint32_t INVALID_INDEX = std::numeric_limits<uint32_t>::max();
 
         inline ComponentType& GetComponent(const EntityID& entity) {
             assert(HasComponent(entity) && "No entity with such component");
@@ -91,10 +92,10 @@ class ComponentPool : public ISparseSet{
         const std::vector<ComponentType>& GetDenseComponents() const {
             return mDenseComponents;
         }
-        const std::vector<size_t>& GetDenseEntities() const noexcept{
+        const std::vector<uint32_t>& GetDenseEntities() const noexcept{
             return mDenseEntities;
         }
-        const std::vector<size_t>& GetComponentLocations() const noexcept {
+        const std::vector<uint32_t>& GetComponentLocations() const noexcept {
             return mComponentLocation;
         }
 
@@ -106,9 +107,9 @@ class ComponentPool : public ISparseSet{
         }
 
     private:
-        std::vector<size_t> mComponentLocation;
+        std::vector<uint32_t> mComponentLocation;
         std::vector<ComponentType> mDenseComponents;
-        std::vector<size_t> mDenseEntities;
+        std::vector<uint32_t> mDenseEntities;
 };
 
 }

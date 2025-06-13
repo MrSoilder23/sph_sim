@@ -24,11 +24,11 @@ class GPUSphereDataSystem {
         void BindForce();
         void BindPosToForce();
 
-        void ComputeDensity(const std::vector<size_t>& denseEntities);
-        void ComputeForces(const std::vector<size_t>& denseEntities);
-        void ComputePos(const std::vector<size_t>& denseEntities);
+        void ComputeDensity(const std::vector<uint32_t>& denseEntities);
+        void ComputeForces(const std::vector<uint32_t>& denseEntities);
+        void ComputePos(const std::vector<uint32_t>& denseEntities);
 
-        void Render(const std::vector<size_t>& denseEntities, bismuth::Registry& registry);
+        void Render(const std::vector<uint32_t>& denseEntities, bismuth::Registry& registry);
 
     private:
         GLuint mDensityProgram;

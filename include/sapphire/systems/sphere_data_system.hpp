@@ -31,11 +31,11 @@ class SphereDataSystem {
             SphereComponent      const* positionArray,
             PositionComponent    const* spatialPosArray,
             SpatialHashComponent const* spatialHashArray,
-            size_t               const* positionLocations,
-            size_t               const* spatialPositionLoc,
-            size_t               const* spatialHashLocations,
+            uint32_t             const* positionLocations,
+            uint32_t             const* spatialPositionLoc,
+            uint32_t             const* spatialHashLocations,
 
-            std::vector<size_t>  const& spatialDenseEntities
+            std::vector<uint32_t>  const& spatialDenseEntities
         );
 
         float ComputePressure(float& density);
@@ -46,7 +46,7 @@ class SphereDataSystem {
             float                      mass,
             
             SphereComponent     const* positionArray,
-            size_t              const* positionLocations    
+            uint32_t            const* positionLocations    
         );
 
         glm::vec3 ComputeForces(
@@ -60,10 +60,10 @@ class SphereDataSystem {
             DensityComponent  const*   densityArray,
             PressureComponent const*   pressureArray,
             MassComponent     const*   massArray,
-            size_t            const*   positionLocations,
-            size_t            const*   densityLocations,
-            size_t            const*   pressureLocations,
-            size_t            const*   velocityLocations,
-            size_t            const*   massLocations
+            uint32_t          const*   positionLocations,
+            uint32_t          const*   densityLocations,
+            uint32_t          const*   pressureLocations,
+            uint32_t          const*   velocityLocations,
+            uint32_t          const*   massLocations
         );
 };

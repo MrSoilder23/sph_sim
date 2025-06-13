@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 #include <array>
+#include <cstdint>
 
 // Own libraries
 #include "./bismuth/storage/component_pool.hpp"
@@ -45,8 +46,8 @@ class Registry {
             return *static_cast<ComponentPool<ComponentName>*>(mComponentPool[type_id].get());
         }
 
-        size_t CreateEntity() {
-            const size_t id = mEntities.size();
+        uint32_t CreateEntity() {
+            const uint32_t id = mEntities.size();
             mEntities.emplace_back();
             return id;
         }
@@ -109,7 +110,7 @@ class Registry {
         }
 
     private:
-        std::vector<size_t> mEntities; // Component bitmask per entity
+        std::vector<uint64_t> mEntities; // Component bitmask per entity
         std::vector<std::unique_ptr<ISparseSet>> mComponentPool;
 };
 

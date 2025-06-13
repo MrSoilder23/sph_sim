@@ -76,9 +76,9 @@ void GPUSphereDataSystem::Update(bismuth::Registry& registry) {
     auto& spherePool = registry.GetComponentPool<SphereComponent>();
     auto& denseEntities = spherePool.GetDenseEntities();
     
-    // ComputeDensity(denseEntities);
-    // ComputeForces(denseEntities);
-    // ComputePos(denseEntities);
+    ComputeDensity(denseEntities);
+    ComputeForces(denseEntities);
+    ComputePos(denseEntities);
 
     Render(denseEntities, registry);
 }
@@ -128,7 +128,7 @@ void GPUSphereDataSystem::BindPosToForce() {
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 8, mDenseIDs);
 }
 
-void GPUSphereDataSystem::ComputeDensity(const std::vector<size_t>& denseEntities) {
+void GPUSphereDataSystem::ComputeDensity(const std::vector<uint32_t>& denseEntities) {
     glUseProgram(mDensityProgram);
 
     BindDensity();
@@ -144,7 +144,7 @@ void GPUSphereDataSystem::ComputeDensity(const std::vector<size_t>& denseEntitie
     glDispatchCompute((denseEntities.size() + 63) / 64, 1, 1);
     glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 }
-void GPUSphereDataSystem::ComputeForces(const std::vector<size_t>& denseEntities) {
+void GPUSphereDataSystem::ComputeForces(const std::vector<uint32_t>& denseEntities) {
     glUseProgram(mForcesProgram);
 
     BindForce();
@@ -158,7 +158,7 @@ void GPUSphereDataSystem::ComputeForces(const std::vector<size_t>& denseEntities
     glDispatchCompute((denseEntities.size() + 63) / 64, 1, 1);
     glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 }
-void GPUSphereDataSystem::ComputePos(const std::vector<size_t>& denseEntities) {
+void GPUSphereDataSystem::ComputePos(const std::vector<uint32_t>& denseEntities) {
     glUseProgram(mPosProgram);
 
     BindPosToForce();
@@ -170,7 +170,7 @@ void GPUSphereDataSystem::ComputePos(const std::vector<size_t>& denseEntities) {
     glDispatchCompute((denseEntities.size() + 63) / 64, 1, 1);
     glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 }
-void GPUSphereDataSystem::Render(const std::vector<size_t>& denseEntities, bismuth::Registry& registry) {
+void GPUSphereDataSystem::Render(const std::vector<uint32_t>& denseEntities, bismuth::Registry& registry) {
     auto& cameraPool          = registry.GetComponentPool<CameraComponent>();
     auto& cameraTransformPool = registry.GetComponentPool<TransformComponent>();
 

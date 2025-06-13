@@ -6,6 +6,7 @@
 #include <iterator>
 #include <tuple>
 #include <vector>
+#include <cstdint>
 
 // Own libraries
 #include "./bismuth/storage/component_pool.hpp"
@@ -19,7 +20,7 @@ class ComponentView {
     public:
 
         ComponentView(ComponentPool<ComponentName>&... componentPool) : mComponentPools(componentPool...) {
-            std::array<const std::vector<size_t>*, sizeof...(ComponentName)> pools = {
+            std::array<const std::vector<uint32_t>*, sizeof...(ComponentName)> pools = {
                 &componentPool.GetDenseEntities()...
             };
 
@@ -32,7 +33,7 @@ class ComponentView {
         struct Iterator {
             
             using Category = std::forward_iterator_tag;
-            using ValueType = std::tuple<size_t, ComponentName&...>;
+            using ValueType = std::tuple<uint32_t, ComponentName&...>;
             using Reference = ValueType;
             using Pointer = void;
 
@@ -49,7 +50,7 @@ class ComponentView {
                 auto& entities = *componentView->mDenseEntities;
 
                 while(index < entities.size()) {
-                    size_t entityID = entities[index];
+                    uint32_t entityID = entities[index];
                     // Checks if entity has every component listed
                     bool rightEntity = std::apply
                         ([&](auto&... componentPool){
@@ -85,7 +86,7 @@ class ComponentView {
             }
 
             Reference operator*() const {
-                size_t entity = (*componentView->mDenseEntities)[index];
+                uint32_t entity = (*componentView->mDenseEntities)[index];
 
                 return std::apply(
                     [&](auto&... componentPool){
@@ -114,13 +115,13 @@ class ComponentView {
             return mDenseEntities->size();
         }
 
-        const std::vector<size_t>* GetSmallestDense() {
+        const std::vector<uint32_t>* GetSmallestDense() {
             return mDenseEntities;
         }
 
     private:
         std::tuple<ComponentPool<ComponentName>&...> mComponentPools;
-        const std::vector<size_t>* mDenseEntities; // Smallest array of entities
+        const std::vector<uint32_t>* mDenseEntities; // Smallest array of entities
 };
 
 }
