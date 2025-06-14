@@ -3,5 +3,5 @@
 #include <glm/glm.hpp>
 
 struct VelocityComponent {
-    glm::vec3 v;    
+    glm::vec4 v; // Vec4 for padding in gpu
 };

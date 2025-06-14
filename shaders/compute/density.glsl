@@ -42,15 +42,14 @@ float ComputeDensity(uint currentSphereID) {
     float density = 0.0f;
 
     vec3 point = positionAndRadius[sphereIDs[currentSphereID]].xyz;
-    float radiusSquared = uSmoothingLength*uSmoothingLength;
 
-    for(uint i = 0; i < sphereIDs.length(); i++) {
+    for(uint i = 0; i < denseIDs.length(); i++) {
         uint diffSphereID = denseIDs[i];
 
         vec3 diff = point - positionAndRadius[sphereIDs[diffSphereID]].xyz;
         float radius = length(diff);
 
-        if(radius <= radiusSquared) {
+        if(radius <= uSmoothingLength) {
             density += mass[massIDs[diffSphereID]] * CubicSplineKernel(radius);
         }
     }

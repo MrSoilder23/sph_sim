@@ -3,11 +3,11 @@ layout(local_size_x = 64) in;
 
 // Dense components array
 layout(std430, binding = 0) buffer sphereComponent      { vec4 positionAndRadius[]; };
-layout(std430, binding = 1) buffer velocityComponent    { vec3 velocity[];          };
+layout(std430, binding = 1) buffer velocityComponent    { vec4 velocity[];          };
 layout(std430, binding = 2) buffer pressureComponent    { float pressure[];         };
 layout(std430, binding = 3) buffer densityComponent     { float densities[];        };
 layout(std430, binding = 4) buffer massComponent        { float mass[];             };
-layout(std430, binding = 5) buffer forceComponent       { vec3  force[];            };
+layout(std430, binding = 5) buffer forceComponent       { vec4  force[];            };
 
 // Component locations
 layout(std430, binding = 6) buffer sphereComponentLoc   { uint sphereIDs[];         };
@@ -76,13 +76,13 @@ vec3 ComputeForce(uint currentID) {
     float softening = uSmoothingLength * 0.01f;
     float softeningSquared = softening*softening;
 
-    vec3 pressureForce;
-    vec3 viscosityForce;
-    vec3 gravityForce;
+    vec3 pressureForce  = vec3(0.0f);
+    vec3 viscosityForce = vec3(0.0f);
+    vec3 gravityForce   = vec3(0.0f);
 
     // Current point data
     vec3 currentPoint          = positionAndRadius[sphereIDs[currentID]].xyz;
-    vec3 currentPointVelocity  = velocity[velocityIDs[currentID]];
+    vec3 currentPointVelocity  = velocity[velocityIDs[currentID]].xyz;
     float currentPointPressure = pressure[pressureIDs[currentID]];
     float currentPointDensity  = densities[densityIDs[currentID]];
 
@@ -97,7 +97,7 @@ vec3 ComputeForce(uint currentID) {
             float neighborDensity  = densities[densityIDs[diffSphereID]];
             float neighborPressure = pressure[pressureIDs[diffSphereID]];
             float neighborMass     = mass[massIDs[diffSphereID]];
-            vec3 neighborVelocity  = velocity[velocityIDs[diffSphereID]];
+            vec3 neighborVelocity  = velocity[velocityIDs[diffSphereID]].xyz;
 
             // Pressure
             float pressureTerm = (currentPointPressure / (currentPointDensity*currentPointDensity)) +
@@ -123,7 +123,12 @@ void main() {
         return;
     }
 
-    uint currentPointID = denseIDs[currentID];
+    if(currentID >= 7500 && force.length() == 7500) {
+        positionAndRadius[sphereIDs[currentID]] = vec4(0.0f, 10.0f, -40.0f, 1.0f);
+    }
 
-    force[forceIDs[currentPointID]] = ComputeForce(currentPointID);
+
+    uint currentPointID = denseIDs[currentID];
+    vec3 particleForce = ComputeForce(currentPointID);
+    force[forceIDs[currentPointID]].xyz = particleForce;
 }

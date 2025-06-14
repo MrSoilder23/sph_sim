@@ -49,7 +49,7 @@ class SphereDataSystem {
             uint32_t            const* positionLocations    
         );
 
-        glm::vec3 ComputeForces(
+        glm::vec4 ComputeForces(
             size_t            const&   currentPointID,
             float                      smoothingLength,
             float                      softening,

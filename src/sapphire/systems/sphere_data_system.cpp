@@ -88,7 +88,7 @@ void SphereDataSystem::Update(bismuth::Registry& registry) {
     for(int i = 0; i < sphereIDs.size(); i++) {
         size_t entityID = sphereIDs[i];
 
-        glm::vec3& force = forcePool.GetComponent(entityID).f;
+        glm::vec4& force = forcePool.GetComponent(entityID).f;
         force = ComputeForces(
             entityID,
             SMOOTHING_LENGTH,
@@ -235,7 +235,7 @@ float SphereDataSystem::ComputeDensity(
     return std::max(density, 1e-5f);
 }
 
-glm::vec3 SphereDataSystem::ComputeForces(
+glm::vec4 SphereDataSystem::ComputeForces(
     size_t            const&   currentPointID,
     float                      smoothingLength,
     float                      softening,
@@ -262,7 +262,7 @@ glm::vec3 SphereDataSystem::ComputeForces(
 
     const float& currentPointPressure     = pressureArray[pressureLocations[currentPointID]].p;
     const float& currentPointDensity      = densityArray[densityLocations[currentPointID]].d;
-    const glm::vec3& currentPointVelocity = velocityArray[velocityLocations[currentPointID]].v;
+    const glm::vec3 currentPointVelocity  = glm::vec3(velocityArray[velocityLocations[currentPointID]].v);
     
     for(const auto& neighborID : neighbors) {
         glm::vec3 deltaPoint = point - glm::vec3(positionArray[positionLocations[neighborID]].positionAndRadius);
@@ -274,7 +274,7 @@ glm::vec3 SphereDataSystem::ComputeForces(
             const float& neighborDensity      = densityArray[densityLocations[neighborID]].d;
             const float& neighborPressure     = pressureArray[pressureLocations[neighborID]].p;
             const float& neighborMass         = massArray[massLocations[neighborID]].m;
-            const glm::vec3& neighborVelocity = velocityArray[velocityLocations[neighborID]].v;
+            const glm::vec3 neighborVelocity  = glm::vec3(velocityArray[velocityLocations[neighborID]].v);
 
             // Pressure
             float pressureTerm = (currentPointPressure / (currentPointDensity * currentPointDensity)) +
@@ -290,5 +290,5 @@ glm::vec3 SphereDataSystem::ComputeForces(
             gravityForce += sapphire_config::G * neighborMass * deltaPoint / denominator;
         }
     }
-    return pressureForce + viscosityForce + gravityForce;
+    return glm::vec4(pressureForce + viscosityForce + gravityForce, 0.0f);
 }

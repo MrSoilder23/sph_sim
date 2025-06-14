@@ -12,13 +12,13 @@ void ForceToPosSystem::Update(bismuth::Registry& registry, float deltaTime) {
     for(int i = 0; i < sphereIDs.size(); i++) {
         size_t entityID = sphereIDs[i];
         
-        glm::vec3& velocity = velocityPool.GetComponent(entityID).v;
+        glm::vec4& velocity = velocityPool.GetComponent(entityID).v;
         auto& mass = massPool.GetComponent(entityID).m;
         auto& force = forcePool.GetComponent(entityID).f;
 
-        glm::vec3 acceleration = force / mass;
+        glm::vec4 acceleration = force / mass;
         velocity += acceleration * 0.01f;
 
-        spherePool.GetComponent(entityID).positionAndRadius += glm::vec4(velocity, 0.0f) * 0.01f;
+        spherePool.GetComponent(entityID).positionAndRadius += velocity * 0.01f;
     }
 }

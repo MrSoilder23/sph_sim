@@ -2,8 +2,8 @@
 layout(local_size_x = 64) in;
 
 layout(std430, binding = 0) buffer sphereComponent      { vec4 positionAndRadius[]; };
-layout(std430, binding = 1) buffer velocityComponent    { vec3 velocity[];          };
-layout(std430, binding = 2) buffer forceComponent       { vec3 force[];             };
+layout(std430, binding = 1) buffer velocityComponent    { vec4 velocity[];          };
+layout(std430, binding = 2) buffer forceComponent       { vec4 force[];             };
 layout(std430, binding = 3) buffer massComponent        { float mass[];             };
 
 layout(std430, binding = 4) buffer sphereComponentLoc   { uint sphereIDs[];         };
@@ -23,6 +23,6 @@ void main() {
 
     uint currentPointID = denseIDs[currentID];
 
-    velocity[velocityIDs[currentPointID]] += (force[forceIDs[currentPointID]] / mass[massIDs[currentPointID]]) * uTimeStep;
-    positionAndRadius[sphereIDs[currentPointID]] += vec4(velocity[velocityIDs[currentPointID]], 0.0f) * uTimeStep;
+    velocity[velocityIDs[currentPointID]].xyz += (force[forceIDs[currentPointID]].xyz / mass[massIDs[currentPointID]]) * uTimeStep;
+    positionAndRadius[sphereIDs[currentPointID]] += velocity[velocityIDs[currentPointID]] * uTimeStep;
 }
