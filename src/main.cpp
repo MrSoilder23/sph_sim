@@ -150,7 +150,7 @@ void FpsCounter(float deltaTime) {
 
     float fps = 1.0f/deltaTime;
     smoothedFPS = alpha * fps + (1.0f - alpha) * smoothedFPS;
-    std::cout << "\rFPS: " << static_cast<int>(smoothedFPS) << std::flush;
+    std::cout << "\33[2K\rFPS: " << static_cast<int>(smoothedFPS) << std::flush;
 }
 
 void Loop(float deltaTime) {
