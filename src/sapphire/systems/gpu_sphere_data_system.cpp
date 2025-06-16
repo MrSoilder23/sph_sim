@@ -13,9 +13,10 @@ void GenerateBuffers(GLuint& buffer, const std::vector<T>& data) {
 }
 
 GPUSphereDataSystem::GPUSphereDataSystem(bismuth::Registry& registry) {
-    GLuint densityShader    = shader::CompileShader(GL_COMPUTE_SHADER, "./shaders/compute/density.glsl");
-    GLuint forceShader      = shader::CompileShader(GL_COMPUTE_SHADER, "./shaders/compute/forces.glsl");
-    GLuint forceToPosShader = shader::CompileShader(GL_COMPUTE_SHADER, "./shaders/compute/force_to_pos.glsl");
+    GLuint densityShader     = shader::CompileShader(GL_COMPUTE_SHADER, "./shaders/compute/density.glsl");
+    GLuint forceShader       = shader::CompileShader(GL_COMPUTE_SHADER, "./shaders/compute/forces.glsl");
+    GLuint forceToPosShader  = shader::CompileShader(GL_COMPUTE_SHADER, "./shaders/compute/force_to_pos.glsl");
+    GLuint spatialHashShader = shader::CompileShader(GL_COMPUTE_SHADER, "./shaders/compute/spatial_hash.glsl");
 
     mRender = shader::CreateGraphicsPipeline("./shaders/ssbo_sphere_vert.glsl", "./shaders/instancedFrag.glsl");
 
@@ -46,9 +47,10 @@ GPUSphereDataSystem::GPUSphereDataSystem(bismuth::Registry& registry) {
     auto& denseEntities     = spherePool.GetDenseEntities();
 
 
-    mDensityProgram = shader::LinkProgram(densityShader);
-    mForcesProgram  = shader::LinkProgram(forceShader);
-    mPosProgram     = shader::LinkProgram(forceToPosShader);
+    mSpatialHashProgram = shader::LinkProgram(spatialHashShader);
+    mDensityProgram     = shader::LinkProgram(densityShader);
+    mForcesProgram      = shader::LinkProgram(forceShader);
+    mPosProgram         = shader::LinkProgram(forceToPosShader);
 
     // Data Buffers
     GenerateBuffers(mSphereData,      positionArray);
@@ -68,14 +70,36 @@ GPUSphereDataSystem::GPUSphereDataSystem(bismuth::Registry& registry) {
 
     GenerateBuffers(mDenseIDs,        denseEntities);
 
+    constexpr uint32_t HASH_SIZE = 8192;
+
+    // SpatialHash
+    glGenBuffers(1, &mHashTable);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, mHashTable);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, HASH_SIZE * sizeof(uint32_t), nullptr, GL_DYNAMIC_COPY);
+
+    glGenBuffers(1, &mNextPointers);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, mNextPointers);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, denseEntities.size() * sizeof(uint32_t), nullptr, GL_DYNAMIC_COPY);
+
+    glGenBuffers(1, &mBucketKeys);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, mBucketKeys);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, denseEntities.size() * sizeof(uint32_t), nullptr, GL_DYNAMIC_COPY);
+
     // Doesnt render without any vao
     glGenVertexArrays(1, &mDummyVAO);
 }
 
 void GPUSphereDataSystem::Update(bismuth::Registry& registry) {
+    constexpr uint32_t RESET_VALUE = 0xFFFFFFFF;
+
     auto& spherePool = registry.GetComponentPool<SphereComponent>();
     auto& denseEntities = spherePool.GetDenseEntities();
+
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, mHashTable);
+    glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_R32UI, GL_RED_INTEGER, GL_UNSIGNED_INT, &RESET_VALUE);
     
+    ComputeSpatialHash(denseEntities);
+
     ComputeDensity(denseEntities);
     ComputeForces(denseEntities);
     ComputePos(denseEntities);
@@ -84,6 +108,16 @@ void GPUSphereDataSystem::Update(bismuth::Registry& registry) {
 }
 
 // Private functions
+void GPUSphereDataSystem::BindSpatial() {
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, mSphereData);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, mHashTable);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, mNextPointers);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, mBucketKeys);
+    
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, mSphereLocData);
+
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, mDenseIDs);
+}
 void GPUSphereDataSystem::BindDensity() {
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, mSphereData);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, mPressureData);
@@ -128,6 +162,20 @@ void GPUSphereDataSystem::BindPosToForce() {
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 8, mDenseIDs);
 }
 
+void GPUSphereDataSystem::ComputeSpatialHash(const std::vector<uint32_t>& denseEntities) {
+    glUseProgram(mSpatialHashProgram);
+
+    BindSpatial();
+
+    int uCellSize = shader::FindUniformLocation(mSpatialHashProgram, "uCellSize");
+    int uHashSize = shader::FindUniformLocation(mSpatialHashProgram, "uHashSize");
+
+    glUniform1f(uCellSize, sapphire_config::SPATIAL_LENGTH);
+    glUniform1ui(uHashSize, 8192);
+
+    glDispatchCompute((denseEntities.size() + 63) / 64, 1, 1);
+    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+}
 void GPUSphereDataSystem::ComputeDensity(const std::vector<uint32_t>& denseEntities) {
     glUseProgram(mDensityProgram);
 

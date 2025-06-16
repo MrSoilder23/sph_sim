@@ -123,11 +123,6 @@ void main() {
         return;
     }
 
-    if(currentID >= 7500 && force.length() == 7500) {
-        positionAndRadius[sphereIDs[currentID]] = vec4(0.0f, 10.0f, -40.0f, 1.0f);
-    }
-
-
     uint currentPointID = denseIDs[currentID];
     vec3 particleForce = ComputeForce(currentPointID);
     force[forceIDs[currentPointID]].xyz = particleForce;

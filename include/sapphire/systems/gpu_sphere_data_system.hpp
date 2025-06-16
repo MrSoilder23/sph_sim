@@ -20,10 +20,12 @@ class GPUSphereDataSystem {
 
         void Update(bismuth::Registry& registry);
     private:
+        void BindSpatial();
         void BindDensity();
         void BindForce();
         void BindPosToForce();
 
+        void ComputeSpatialHash(const std::vector<uint32_t>& denseEntities);
         void ComputeDensity(const std::vector<uint32_t>& denseEntities);
         void ComputeForces(const std::vector<uint32_t>& denseEntities);
         void ComputePos(const std::vector<uint32_t>& denseEntities);
@@ -31,12 +33,15 @@ class GPUSphereDataSystem {
         void Render(const std::vector<uint32_t>& denseEntities, bismuth::Registry& registry);
 
     private:
+        // Programs
         GLuint mDensityProgram;
         GLuint mForcesProgram;
         GLuint mPosProgram;
+        GLuint mSpatialHashProgram;
 
         GLuint mRender;
 
+        // Data SSBO
         GLuint mSphereData;
         GLuint mMassData;
         GLuint mDensityData;
@@ -44,6 +49,7 @@ class GPUSphereDataSystem {
         GLuint mForceData;
         GLuint mVelocityData;
 
+        // Locations SSBO
         GLuint mSphereLocData;
         GLuint mMassLocData;
         GLuint mDensityLocData;
@@ -52,6 +58,11 @@ class GPUSphereDataSystem {
         GLuint mVelocityLocData;
 
         GLuint mDenseIDs;
+
+        // SparseHash SSBO
+        GLuint mHashTable;
+        GLuint mNextPointers;
+        GLuint mBucketKeys;
 
         GLuint mDummyVAO;
 };

@@ -63,9 +63,9 @@ void InitEntities() {
     gRegistry.EmplaceComponent<CameraComponent>(entity, camera);
     gRegistry.EmplaceComponent<TransformComponent>(entity, transform);
 
-    int amountX = 100;
-    int amountY = 10;
-    int amountZ = 10;
+    int amountX = 50;
+    int amountY = 50;
+    int amountZ = 50;
 
     float coordOffsetX = (amountX/2)*sapphire_config::INITIAL_SPACING;
     float coordOffsetY = (amountY/2)*sapphire_config::INITIAL_SPACING;
