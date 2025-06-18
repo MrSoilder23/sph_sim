@@ -19,9 +19,17 @@ layout(std430, binding = 11) buffer forceComponentLoc   { uint forceIDs[];      
 
 layout(std430, binding = 12) buffer denseSphereIDs      { uint denseIDs[];          };
 
+// SpatialHash
+layout(std430, binding = 13) buffer hashTable           { uint bucketHeads[];       };
+layout(std430, binding = 14) buffer nextPointers        { uint next[];              };
+layout(std430, binding = 15) buffer bucketKeys          { uint keys[];              };
+
 // Uniforms
 uniform float uSmoothingLength;
 uniform float uG;
+
+uniform float uCellSize;
+uniform uint uHashSize;
 
 
 // Helper functions
@@ -71,6 +79,11 @@ float CubicSplineLaplacian(float radius) {
     }
 }
 
+uint HashFunction(ivec3 gridCell) {
+    const uint p1 = 73856093, p2 = 19349663, p3 = 83492791;
+    return (gridCell.x * p1 ^ gridCell.y * p2 ^ gridCell.z * p3) & (uHashSize - 1);
+}
+
 // Main Calculations
 vec3 ComputeForce(uint currentID) {
     float softening = uSmoothingLength * 0.01f;
@@ -81,37 +94,56 @@ vec3 ComputeForce(uint currentID) {
     vec3 gravityForce   = vec3(0.0f);
 
     // Current point data
-    vec3 currentPoint          = positionAndRadius[sphereIDs[currentID]].xyz;
+    vec3 currentPointPosition  = positionAndRadius[sphereIDs[currentID]].xyz;
     vec3 currentPointVelocity  = velocity[velocityIDs[currentID]].xyz;
     float currentPointPressure = pressure[pressureIDs[currentID]];
     float currentPointDensity  = densities[densityIDs[currentID]];
 
-    for(int i = 0; i < denseIDs.length(); i++) {
-        uint diffSphereID = denseIDs[i];
+    ivec3 centerCell = ivec3(floor(currentPointPosition / uCellSize));
 
-        vec3 deltaPoint = currentPoint - positionAndRadius[sphereIDs[diffSphereID]].xyz;
-        float radiusSquared = dot(deltaPoint, deltaPoint);
-        float radius = sqrt(radiusSquared);
+    // Find neighbors directly because I don't have enough memory on the gpu
+    for(int x = -1; x <= 1; x++) {
+    for(int y = -1; y <= 1; y++) {
+    for(int z = -1; z <= 1; z++) {
+        ivec3 neighborCell = centerCell + ivec3(x, y, z);
+        uint targetBucketKey = HashFunction(neighborCell);
 
-        if(radius > 0.0f && radius < uSmoothingLength) {
-            float neighborDensity  = densities[densityIDs[diffSphereID]];
-            float neighborPressure = pressure[pressureIDs[diffSphereID]];
-            float neighborMass     = mass[massIDs[diffSphereID]];
-            vec3 neighborVelocity  = velocity[velocityIDs[diffSphereID]].xyz;
-
-            // Pressure
-            float pressureTerm = (currentPointPressure / (currentPointDensity*currentPointDensity)) +
-                (neighborPressure / (neighborDensity*neighborDensity));
-            pressureForce += -pressureTerm * CubicSplineGradient(deltaPoint, radius);
-
-            // Viscosity
-            viscosityForce += (neighborDensity * (neighborVelocity - currentPointVelocity)) * CubicSplineLaplacian(radius);
-
-            // Gravity
-            float distSoft = radiusSquared + softeningSquared;
-            float denominator = sqrt(distSoft*distSoft*distSoft);
-            gravityForce += uG * neighborMass * deltaPoint / denominator;
+        if(targetBucketKey >= bucketHeads.length()) {
+            continue;
         }
+
+        uint neighborID = bucketHeads[targetBucketKey];
+
+        while(neighborID != 0xFFFFFFFF) {
+            if(keys[neighborID] == targetBucketKey) {
+                vec3 dist = currentPointPosition - positionAndRadius[sphereIDs[neighborID]].xyz;
+                float radiusSquared = dot(dist, dist);
+                float radius = sqrt(radiusSquared);
+
+                if(radius > 0.0f && radius < uSmoothingLength) {
+                    float neighborDensity  = densities[densityIDs[neighborID]];
+                    float neighborPressure = pressure[pressureIDs[neighborID]];
+                    float neighborMass     = mass[massIDs[neighborID]];
+                    vec3 neighborVelocity  = velocity[velocityIDs[neighborID]].xyz;
+
+                    // Pressure
+                    float pressureTerm = (currentPointPressure / (currentPointDensity*currentPointDensity)) +
+                        (neighborPressure / (neighborDensity*neighborDensity));
+                    pressureForce += -pressureTerm * CubicSplineGradient(dist, radius);
+
+                    // Viscosity
+                    viscosityForce += (neighborDensity * (neighborVelocity - currentPointVelocity)) * CubicSplineLaplacian(radius);
+
+                    // Gravity
+                    float distSoft = radiusSquared + softeningSquared;
+                    float denominator = sqrt(distSoft*distSoft*distSoft);
+                    gravityForce += uG * neighborMass * dist / denominator;
+                }
+            }
+            neighborID = next[neighborID];
+        }
+    }
+    }
     }
 
     return pressureForce + viscosityForce + gravityForce;

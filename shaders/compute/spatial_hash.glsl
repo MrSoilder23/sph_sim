@@ -35,5 +35,5 @@ void main() {
     uint previousHead = atomicExchange(bucketHeads[bucketKey], currentPointID);
 
     next[currentPointID] = previousHead;
-    keys[currentPointID]   = bucketKey;
+    keys[currentPointID] = bucketKey;
 }

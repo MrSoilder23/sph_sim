@@ -70,20 +70,22 @@ GPUSphereDataSystem::GPUSphereDataSystem(bismuth::Registry& registry) {
 
     GenerateBuffers(mDenseIDs,        denseEntities);
 
-    constexpr uint32_t HASH_SIZE = 8192;
-
+    constexpr uint32_t RESET_VALUE = 0xFFFFFFFF;
     // SpatialHash
     glGenBuffers(1, &mHashTable);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, mHashTable);
-    glBufferData(GL_SHADER_STORAGE_BUFFER, HASH_SIZE * sizeof(uint32_t), nullptr, GL_DYNAMIC_COPY);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, sapphire_config::HASH_SIZE * sizeof(uint32_t), nullptr, GL_DYNAMIC_COPY);
+    glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_R32UI, GL_RED_INTEGER, GL_UNSIGNED_INT, &RESET_VALUE);
 
     glGenBuffers(1, &mNextPointers);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, mNextPointers);
     glBufferData(GL_SHADER_STORAGE_BUFFER, denseEntities.size() * sizeof(uint32_t), nullptr, GL_DYNAMIC_COPY);
+    glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_R32UI, GL_RED_INTEGER, GL_UNSIGNED_INT, &RESET_VALUE);
 
     glGenBuffers(1, &mBucketKeys);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, mBucketKeys);
     glBufferData(GL_SHADER_STORAGE_BUFFER, denseEntities.size() * sizeof(uint32_t), nullptr, GL_DYNAMIC_COPY);
+    glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_R32UI, GL_RED_INTEGER, GL_UNSIGNED_INT, &RESET_VALUE);
 
     // Doesnt render without any vao
     glGenVertexArrays(1, &mDummyVAO);
@@ -130,6 +132,10 @@ void GPUSphereDataSystem::BindDensity() {
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 7, mMassLocData);
 
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 8, mDenseIDs);
+
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 9, mHashTable);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 10, mNextPointers);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 11, mBucketKeys);
 }
 void GPUSphereDataSystem::BindForce() {
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, mSphereData);
@@ -147,6 +153,10 @@ void GPUSphereDataSystem::BindForce() {
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 11,mForceLocData);
     
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 12, mDenseIDs);
+
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 13, mHashTable);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 14, mNextPointers);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 15, mBucketKeys);
 }
 void GPUSphereDataSystem::BindPosToForce() {
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, mSphereData);
@@ -170,8 +180,8 @@ void GPUSphereDataSystem::ComputeSpatialHash(const std::vector<uint32_t>& denseE
     int uCellSize = shader::FindUniformLocation(mSpatialHashProgram, "uCellSize");
     int uHashSize = shader::FindUniformLocation(mSpatialHashProgram, "uHashSize");
 
-    glUniform1f(uCellSize, sapphire_config::SPATIAL_LENGTH);
-    glUniform1ui(uHashSize, 8192);
+    glUniform1f(uCellSize, sapphire_config::SMOOTHING_LENGTH);
+    glUniform1ui(uHashSize, sapphire_config::HASH_SIZE);
 
     glDispatchCompute((denseEntities.size() + 63) / 64, 1, 1);
     glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
@@ -181,13 +191,20 @@ void GPUSphereDataSystem::ComputeDensity(const std::vector<uint32_t>& denseEntit
 
     BindDensity();
     
+    // Uniforms
     int uStiffness   = shader::FindUniformLocation(mDensityProgram, "uStiffness");
     int uRestDensity = shader::FindUniformLocation(mDensityProgram, "uRestDensity");
     int uSmoothing   = shader::FindUniformLocation(mDensityProgram, "uSmoothingLength");
 
+    int uCellSize = shader::FindUniformLocation(mDensityProgram, "uCellSize");
+    int uHashSize = shader::FindUniformLocation(mDensityProgram, "uHashSize");
+
     glUniform1f(uStiffness,   sapphire_config::STIFFNESS);
     glUniform1f(uRestDensity, sapphire_config::REST_DENSITY);
     glUniform1f(uSmoothing,   sapphire_config::SMOOTHING_LENGTH);
+    
+    glUniform1f(uCellSize, sapphire_config::SMOOTHING_LENGTH);
+    glUniform1ui(uHashSize, sapphire_config::HASH_SIZE);
 
     glDispatchCompute((denseEntities.size() + 63) / 64, 1, 1);
     glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
@@ -197,11 +214,18 @@ void GPUSphereDataSystem::ComputeForces(const std::vector<uint32_t>& denseEntiti
 
     BindForce();
     
+    // Uniforms
     int uSmoothing = shader::FindUniformLocation(mForcesProgram, "uSmoothingLength");
     int uG         = shader::FindUniformLocation(mForcesProgram, "uG");
 
+    int uCellSize = shader::FindUniformLocation(mForcesProgram, "uCellSize");
+    int uHashSize = shader::FindUniformLocation(mForcesProgram, "uHashSize");
+
     glUniform1f(uSmoothing, sapphire_config::SMOOTHING_LENGTH);
     glUniform1f(uG,         sapphire_config::G);
+
+    glUniform1f(uCellSize, sapphire_config::SMOOTHING_LENGTH);
+    glUniform1ui(uHashSize, sapphire_config::HASH_SIZE);
 
     glDispatchCompute((denseEntities.size() + 63) / 64, 1, 1);
     glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
