@@ -129,10 +129,10 @@ vec3 ComputeForce(uint currentID) {
                     // Pressure
                     float pressureTerm = (currentPointPressure / (currentPointDensity*currentPointDensity)) +
                         (neighborPressure / (neighborDensity*neighborDensity));
-                    pressureForce += -pressureTerm * CubicSplineGradient(dist, radius);
+                    pressureForce += -neighborMass * pressureTerm * CubicSplineGradient(dist, radius);
 
                     // Viscosity
-                    viscosityForce += (neighborDensity * (neighborVelocity - currentPointVelocity)) * CubicSplineLaplacian(radius);
+                    viscosityForce += neighborMass * (neighborDensity * (neighborVelocity - currentPointVelocity)) * CubicSplineLaplacian(radius);
 
                     // Gravity
                     float distSoft = radiusSquared + softeningSquared;

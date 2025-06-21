@@ -49,7 +49,7 @@ void CreateParticle(float x, float y, float z, glm::vec4 velocity) {
 
     gRegistry.EmplaceComponent<DensityComponent>(sphereEntity,  0.0f);
     gRegistry.EmplaceComponent<PressureComponent>(sphereEntity, 0.0f);
-    gRegistry.EmplaceComponent<MassComponent>(sphereEntity,     0.5f);
+    gRegistry.EmplaceComponent<MassComponent>(sphereEntity,     0.3f);
     gRegistry.EmplaceComponent<ForceComponent>(sphereEntity,    glm::vec4(0.0f));
     gRegistry.EmplaceComponent<VelocityComponent>(sphereEntity, velocity);
 }
