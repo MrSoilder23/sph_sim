@@ -7,8 +7,8 @@ Simulation is built on Bismuth, custom ECS library. Depending on choice of itera
 Currently it renders a basic simulation with 15625 particles in no gravity environment. Computes on gpu.
 
 <p float="left">
-  <img alt="Image of Bob from different perspective" src="https://github.com/MrSoilder23/sph_sim/blob/development/assets/screenshots/screenshot1.png" width="49.5%" /> 
-  <img alt="Image of Bob" src="https://github.com/MrSoilder23/sph_sim/blob/development/assets/screenshots/screenshot2.png" width="49.5%" />
+  <img alt="Image of Bob from different perspective" src="https://github.com/MrSoilder23/sph_sim/blob/main/assets/screenshots/screenshot1.png" width="49.5%" /> 
+  <img alt="Image of Bob" src="https://github.com/MrSoilder23/sph_sim/blob/main/assets/screenshots/screenshot2.png" width="49.5%" />
 </p>
 
 &nbsp;
