@@ -48,7 +48,7 @@ void CreateParticle(float x, float y, float z, glm::vec4 velocity) {
     gRegistry.EmplaceComponent<DensityComponent>(sphereEntity,  0.0f);
     gRegistry.EmplaceComponent<PressureComponent>(sphereEntity, 0.0f);
     gRegistry.EmplaceComponent<EnergyComponent>(sphereEntity,   0.0f);
-    gRegistry.EmplaceComponent<MassComponent>(sphereEntity,     1.0f);
+    gRegistry.EmplaceComponent<MassComponent>(sphereEntity,     0.5f);
     gRegistry.EmplaceComponent<ForceComponent>(sphereEntity,    glm::vec4(0.0f));
     gRegistry.EmplaceComponent<VelocityComponent>(sphereEntity, velocity);
 }
@@ -63,9 +63,9 @@ void InitEntities() {
     gRegistry.EmplaceComponent<CameraComponent>(entity, camera);
     gRegistry.EmplaceComponent<TransformComponent>(entity, transform);
 
-    int amountX = 50;
-    int amountY = 50;
-    int amountZ = 50;
+    int amountX = 47;
+    int amountY = 47;
+    int amountZ = 47;
 
     float coordOffsetX = (amountX/2)*sapphire_config::INITIAL_SPACING;
     float coordOffsetY = (amountY/2)*sapphire_config::INITIAL_SPACING;

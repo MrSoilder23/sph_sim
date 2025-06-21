@@ -183,7 +183,7 @@ void GPUSphereDataSystem::ComputeSpatialHash(const std::vector<uint32_t>& denseE
     glUniform1f(uCellSize, sapphire_config::SMOOTHING_LENGTH);
     glUniform1ui(uHashSize, sapphire_config::HASH_SIZE);
 
-    glDispatchCompute((denseEntities.size() + 63) / 64, 1, 1);
+    glDispatchCompute((denseEntities.size() + sapphire_config::WORKGROUP_SIZE-1) / sapphire_config::WORKGROUP_SIZE, 1, 1);
     glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 }
 void GPUSphereDataSystem::ComputeDensity(const std::vector<uint32_t>& denseEntities) {
@@ -206,7 +206,7 @@ void GPUSphereDataSystem::ComputeDensity(const std::vector<uint32_t>& denseEntit
     glUniform1f(uCellSize, sapphire_config::SMOOTHING_LENGTH);
     glUniform1ui(uHashSize, sapphire_config::HASH_SIZE);
 
-    glDispatchCompute((denseEntities.size() + 63) / 64, 1, 1);
+    glDispatchCompute((denseEntities.size() + sapphire_config::WORKGROUP_SIZE-1) / sapphire_config::WORKGROUP_SIZE, 1, 1);
     glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 }
 void GPUSphereDataSystem::ComputeForces(const std::vector<uint32_t>& denseEntities) {
@@ -227,7 +227,7 @@ void GPUSphereDataSystem::ComputeForces(const std::vector<uint32_t>& denseEntiti
     glUniform1f(uCellSize, sapphire_config::SMOOTHING_LENGTH);
     glUniform1ui(uHashSize, sapphire_config::HASH_SIZE);
 
-    glDispatchCompute((denseEntities.size() + 63) / 64, 1, 1);
+    glDispatchCompute((denseEntities.size() + sapphire_config::WORKGROUP_SIZE-1) / sapphire_config::WORKGROUP_SIZE, 1, 1);
     glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 }
 void GPUSphereDataSystem::ComputePos(const std::vector<uint32_t>& denseEntities) {
@@ -239,7 +239,7 @@ void GPUSphereDataSystem::ComputePos(const std::vector<uint32_t>& denseEntities)
 
     glUniform1f(uTimeStep, 0.01f);
 
-    glDispatchCompute((denseEntities.size() + 63) / 64, 1, 1);
+    glDispatchCompute((denseEntities.size() + sapphire_config::WORKGROUP_SIZE-1) / sapphire_config::WORKGROUP_SIZE, 1, 1);
     glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 }
 void GPUSphereDataSystem::Render(const std::vector<uint32_t>& denseEntities, bismuth::Registry& registry) {
