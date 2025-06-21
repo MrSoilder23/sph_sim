@@ -6,8 +6,8 @@ namespace sapphire_config {
     constexpr static float SMOOTHING_LENGTH = 4.0f;
 
     // Pressure
-    constexpr float REST_DENSITY = 0.2f;
-    constexpr float STIFFNESS = 10.0f;
+    constexpr float REST_DENSITY = 0.6f;
+    constexpr float STIFFNESS = 100.0f;
 
     // SpatialHash
     constexpr int SPATIAL_LENGTH = 32;
