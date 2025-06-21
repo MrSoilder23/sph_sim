@@ -13,24 +13,25 @@
 
 #include "sapphire/components/position_component.hpp"
 #include "sapphire/components/spatial_hash_component.hpp"
+#include "sapphire/utility/data_buffers.hpp"
 
 class GPUSphereDataSystem {
     public:
         GPUSphereDataSystem(bismuth::Registry& registry);
 
-        void Update(bismuth::Registry& registry);
+        void Update(bismuth::Registry& registry, DataBuffers& dataBuffer);
     private:
-        void BindSpatial();
-        void BindDensity();
-        void BindForce();
-        void BindPosToForce();
+        void BindSpatial(DataBuffers& dataBuffer);
+        void BindDensity(DataBuffers& dataBuffer);
+        void BindForce(DataBuffers& dataBuffer);
+        void BindPosToForce(DataBuffers& dataBuffer);
 
-        void ComputeSpatialHash(const std::vector<uint32_t>& denseEntities);
-        void ComputeDensity(const std::vector<uint32_t>& denseEntities);
-        void ComputeForces(const std::vector<uint32_t>& denseEntities);
-        void ComputePos(const std::vector<uint32_t>& denseEntities);
+        void ComputeSpatialHash(const std::vector<uint32_t>& denseEntities, DataBuffers& dataBuffer);
+        void ComputeDensity(const std::vector<uint32_t>& denseEntities, DataBuffers& dataBuffer);
+        void ComputeForces(const std::vector<uint32_t>& denseEntities, DataBuffers& dataBuffer);
+        void ComputePos(const std::vector<uint32_t>& denseEntities, DataBuffers& dataBuffer);
 
-        void Render(const std::vector<uint32_t>& denseEntities, bismuth::Registry& registry);
+        void Render(const std::vector<uint32_t>& denseEntities, bismuth::Registry& registry, DataBuffers& dataBuffer);
 
     private:
         // Programs
@@ -40,29 +41,6 @@ class GPUSphereDataSystem {
         GLuint mSpatialHashProgram;
 
         GLuint mRender;
-
-        // Data SSBO
-        GLuint mSphereData;
-        GLuint mMassData;
-        GLuint mDensityData;
-        GLuint mPressureData;
-        GLuint mForceData;
-        GLuint mVelocityData;
-
-        // Locations SSBO
-        GLuint mSphereLocData;
-        GLuint mMassLocData;
-        GLuint mDensityLocData;
-        GLuint mPressureLocData;
-        GLuint mForceLocData;
-        GLuint mVelocityLocData;
-
-        GLuint mDenseIDs;
-
-        // SparseHash SSBO
-        GLuint mHashTable;
-        GLuint mNextPointers;
-        GLuint mBucketKeys;
 
         GLuint mDummyVAO;
 };
