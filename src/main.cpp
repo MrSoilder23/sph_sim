@@ -227,6 +227,16 @@ void UpdateBuffers() {
     FillBuffer(gParticleSSBO.mMassLocData, massLocations);
 
     FillBuffer(gParticleSSBO.mDenseIDs, denseEntities);
+
+    constexpr uint32_t RESET_VALUE = 0xFFFFFFFF;
+
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, gParticleSSBO.mNextPointers);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, denseEntities.size() * sizeof(uint32_t), nullptr, GL_DYNAMIC_COPY);
+    glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_R32UI, GL_RED_INTEGER, GL_UNSIGNED_INT, &RESET_VALUE);
+
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, gParticleSSBO.mBucketKeys);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, denseEntities.size() * sizeof(uint32_t), nullptr, GL_DYNAMIC_COPY);
+    glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_R32UI, GL_RED_INTEGER, GL_UNSIGNED_INT, &RESET_VALUE);
     
     glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_BUFFER_UPDATE_BARRIER_BIT);
 }
