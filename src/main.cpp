@@ -237,8 +237,6 @@ void UpdateBuffers() {
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, gParticleSSBO.mBucketKeys);
     glBufferData(GL_SHADER_STORAGE_BUFFER, denseEntities.size() * sizeof(uint32_t), nullptr, GL_DYNAMIC_COPY);
     glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_R32UI, GL_RED_INTEGER, GL_UNSIGNED_INT, &RESET_VALUE);
-    
-    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_BUFFER_UPDATE_BARRIER_BIT);
 }
 
 void Event(float deltaTime) {
