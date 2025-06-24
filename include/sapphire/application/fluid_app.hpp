@@ -52,12 +52,4 @@ class FluidApp {
         WindowData mWindowData;
 
         DataBuffers mDataBuffers;
-
-        // Systems
-        quartz::CameraSystem mCameraSystem;
-        GPUSphereDataSystem mGpuToSphereDataSystem;
-        // quartz::InstancedRendererSystem mInstanceRenderer;
-        // SphereDataSystem sphereDataSystem;
-        // ForceToPosSystem forceToPosSystem;
-        // PosToSpatialSystem posToSpatialSystem;
 };

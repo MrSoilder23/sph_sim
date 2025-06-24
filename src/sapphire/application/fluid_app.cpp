@@ -1,6 +1,6 @@
 #include "sapphire/application/fluid_app.hpp"
 
-FluidApp::FluidApp(std::string configFilePath) : mWindowData(configFilePath), mGpuToSphereDataSystem(mRegistry) {
+FluidApp::FluidApp(std::string configFilePath) : mWindowData(configFilePath) {
     mEngine.Initialize(configFilePath);
 
     // GLuint shaderProgram = shader::CreateGraphicsPipeline("./shaders/sphereVert.glsl", "./shaders/instancedFrag.glsl");
