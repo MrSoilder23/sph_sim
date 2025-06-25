@@ -103,47 +103,47 @@ vec3 ComputeForce(uint currentID) {
 
     // Find neighbors directly because I don't have enough memory on the gpu
     for(int x = -1; x <= 1; x++) {
-    for(int y = -1; y <= 1; y++) {
-    for(int z = -1; z <= 1; z++) {
-        ivec3 neighborCell = centerCell + ivec3(x, y, z);
-        uint targetBucketKey = HashFunction(neighborCell);
+        for(int y = -1; y <= 1; y++) {
+            for(int z = -1; z <= 1; z++) {
+                ivec3 neighborCell = centerCell + ivec3(x, y, z);
+                uint targetBucketKey = HashFunction(neighborCell);
 
-        if(targetBucketKey >= bucketHeads.length()) {
-            continue;
-        }
+                if(targetBucketKey >= bucketHeads.length()) {
+                    continue;
+                }
 
-        uint neighborID = bucketHeads[targetBucketKey];
+                uint neighborID = bucketHeads[targetBucketKey];
 
-        while(neighborID != 0xFFFFFFFF) {
-            if(keys[neighborID] == targetBucketKey) {
-                vec3 dist = currentPointPosition - positionAndRadius[sphereIDs[neighborID]].xyz;
-                float radiusSquared = dot(dist, dist);
-                float radius = sqrt(radiusSquared);
+                while(neighborID != 0xFFFFFFFF) {
+                    if(keys[neighborID] == targetBucketKey) {
+                        vec3 dist = currentPointPosition - positionAndRadius[sphereIDs[neighborID]].xyz;
+                        float radiusSquared = dot(dist, dist);
+                        float radius = sqrt(radiusSquared);
 
-                if(radius > 0.0f && radius < uSmoothingLength) {
-                    float neighborDensity  = densities[densityIDs[neighborID]];
-                    float neighborPressure = pressure[pressureIDs[neighborID]];
-                    float neighborMass     = mass[massIDs[neighborID]];
-                    vec3 neighborVelocity  = velocity[velocityIDs[neighborID]].xyz;
+                        if(radius > 0.0f && radius < uSmoothingLength) {
+                            float neighborDensity  = densities[densityIDs[neighborID]];
+                            float neighborPressure = pressure[pressureIDs[neighborID]];
+                            float neighborMass     = mass[massIDs[neighborID]];
+                            vec3 neighborVelocity  = velocity[velocityIDs[neighborID]].xyz;
 
-                    // Pressure
-                    float pressureTerm = (currentPointPressure / (currentPointDensity*currentPointDensity)) +
-                        (neighborPressure / (neighborDensity*neighborDensity));
-                    pressureForce += -neighborMass * pressureTerm * CubicSplineGradient(dist, radius);
+                            // Pressure
+                            float pressureTerm = (currentPointPressure / (currentPointDensity*currentPointDensity)) +
+                                (neighborPressure / (neighborDensity*neighborDensity));
+                            pressureForce += -neighborMass * pressureTerm * CubicSplineGradient(dist, radius);
 
-                    // Viscosity
-                    viscosityForce += neighborMass * (neighborDensity * (neighborVelocity - currentPointVelocity)) * CubicSplineLaplacian(radius);
+                            // Viscosity
+                            viscosityForce += neighborMass * (neighborDensity * (neighborVelocity - currentPointVelocity)) * CubicSplineLaplacian(radius);
 
-                    // Gravity
-                    float distSoft = radiusSquared + softeningSquared;
-                    float denominator = sqrt(distSoft*distSoft*distSoft);
-                    gravityForce += uG * neighborMass * dist / denominator;
+                            // Gravity
+                            float distSoft = radiusSquared + softeningSquared;
+                            float denominator = sqrt(distSoft*distSoft*distSoft);
+                            gravityForce += uG * neighborMass * dist / denominator;
+                        }
+                    }
+                    neighborID = next[neighborID];
                 }
             }
-            neighborID = next[neighborID];
         }
-    }
-    }
     }
 
     return pressureForce + viscosityForce + gravityForce;

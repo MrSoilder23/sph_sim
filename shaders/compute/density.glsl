@@ -59,30 +59,30 @@ float ComputeDensity(uint currentSphereID) {
 
     // Find neighbors directly because I don't have enough memory on the gpu
     for(int x = -1; x <= 1; x++) {
-    for(int y = -1; y <= 1; y++) {
-    for(int z = -1; z <= 1; z++) {
-        ivec3 neighborCell = centerCell + ivec3(x, y, z);
-        uint targetBucketKey = HashFunction(neighborCell);
+        for(int y = -1; y <= 1; y++) {
+            for(int z = -1; z <= 1; z++) {
+                ivec3 neighborCell = centerCell + ivec3(x, y, z);
+                uint targetBucketKey = HashFunction(neighborCell);
 
-        if(targetBucketKey >= bucketHeads.length()) {
-            continue;
-        }
+                if(targetBucketKey >= bucketHeads.length()) {
+                    continue;
+                }
 
-        uint neighborID = bucketHeads[targetBucketKey];
+                uint neighborID = bucketHeads[targetBucketKey];
 
-        while(neighborID != 0xFFFFFFFF) {
-            if(keys[neighborID] == targetBucketKey) {
-                vec3 dist = pointPos - positionAndRadius[sphereIDs[neighborID]].xyz;
-                float radius = length(dist);
+                while(neighborID != 0xFFFFFFFF) {
+                    if(keys[neighborID] == targetBucketKey) {
+                        vec3 dist = pointPos - positionAndRadius[sphereIDs[neighborID]].xyz;
+                        float radius = length(dist);
 
-                if(radius <= uSmoothingLength) {
-                    density += mass[massIDs[neighborID]] * CubicSplineKernel(radius);
+                        if(radius <= uSmoothingLength) {
+                            density += mass[massIDs[neighborID]] * CubicSplineKernel(radius);
+                        }
+                    }
+                    neighborID = next[neighborID];
                 }
             }
-            neighborID = next[neighborID];
         }
-    }
-    }    
     }
 
     return max(density, 1e-5f);
