@@ -1,6 +1,3 @@
-// C++ standard libraries
-#include <string>
-
 // Own libraries
 #include "sapphire/application/fluid_app.hpp"
 
