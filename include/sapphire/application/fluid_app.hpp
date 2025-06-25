@@ -14,6 +14,7 @@
 #include "quartz/core/systems/camera_system.hpp"
 // #include "quartz/graphics/instanced_renderer_system.hpp"
 #include "sapphire/systems/gpu_sphere_data_system.hpp"
+#include "sapphire/systems/particle_system.hpp"
 
 #include "quartz/core/components/instance_component.hpp"
 #include "quartz/core/components/sphere_component.hpp"
@@ -36,7 +37,6 @@ class FluidApp {
         void System(float deltaTime);
         void Event(float deltaTime);
 
-        void CreateParticle(float x, float y, float z, glm::vec4 velocity);
         void SpawnParticles(int mouseX, int mouseY);
 
         // Main helpers
@@ -52,4 +52,6 @@ class FluidApp {
         WindowData mWindowData;
 
         DataBuffers mDataBuffers;
+        ParticleSystem mParticleSystem;
+
 };

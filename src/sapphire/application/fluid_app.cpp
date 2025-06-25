@@ -1,6 +1,6 @@
 #include "sapphire/application/fluid_app.hpp"
 
-FluidApp::FluidApp(std::string configFilePath) : mWindowData(configFilePath) {
+FluidApp::FluidApp(std::string configFilePath) : mWindowData(configFilePath), mParticleSystem(mRegistry) {
     mEngine.Initialize(configFilePath);
 
     // GLuint shaderProgram = shader::CreateGraphicsPipeline("./shaders/sphereVert.glsl", "./shaders/instancedFrag.glsl");
@@ -66,20 +66,8 @@ void FluidApp::Event(float deltaTime) {
     }
 }
 
+
 // Helper functions
-void FluidApp::CreateParticle(float x, float y, float z, glm::vec4 velocity) {
-    size_t sphereEntity = mRegistry.CreateEntity();
-            
-    mRegistry.EmplaceComponent<InstanceComponent>(sphereEntity);
-    mRegistry.EmplaceComponent<SphereComponent>(sphereEntity, glm::vec4(x, y, z, 1));
-
-    mRegistry.EmplaceComponent<DensityComponent>(sphereEntity,  0.0f);
-    mRegistry.EmplaceComponent<PressureComponent>(sphereEntity, 0.0f);
-    mRegistry.EmplaceComponent<MassComponent>(sphereEntity,     0.3f);
-    mRegistry.EmplaceComponent<ForceComponent>(sphereEntity,    glm::vec4(0.0f));
-    mRegistry.EmplaceComponent<VelocityComponent>(sphereEntity, velocity);
-}
-
 void FluidApp::SpawnParticles(int mouseX, int mouseY) {
     float x = (2.0f * mouseX / mWindowData.mScreenWidth) - 1.0f;
     float y =-(2.0f * mouseY / mWindowData.mScreenHeight) + 1.0f;
@@ -98,17 +86,22 @@ void FluidApp::SpawnParticles(int mouseX, int mouseY) {
     float t = -40.0f / rayWorld.z;
     glm::vec3 worldPoint = glm::vec3(0.0f) + t * rayWorld;
 
+    
     for(int x = 0; x < 3; x++) {
         for(int y = 0; y < 3; y++) {
             for(int z = 0; z < 3; z++) {
-                CreateParticle(x+worldPoint.x-1, y+worldPoint.y-1, z+worldPoint.z-1, glm::vec4(-8.0f,0.0f,0.0f, 0.0f));
+                mParticleSystem.CreateParticle(
+                    x+worldPoint.x-1, 
+                    y+worldPoint.y-1, 
+                    z+worldPoint.z-1, 
+                    0.3f, 
+                    glm::vec4(-8.0f,0.0f,0.0f, 0.0f)
+                );
             }
         }
     }
 }
 
-
-// Main helpers
 void FluidApp::FpsCounter(float deltaTime) {
     static float smoothedFPS = 0.0f;
     static float alpha = 0.1f;  
@@ -119,6 +112,7 @@ void FluidApp::FpsCounter(float deltaTime) {
 }
 
 void FluidApp::InitEntities() {
+    // Camera
     size_t entity = mRegistry.CreateEntity();
     CameraComponent camera;
     TransformComponent transform;
@@ -128,6 +122,7 @@ void FluidApp::InitEntities() {
     mRegistry.EmplaceComponent<CameraComponent>(entity, camera);
     mRegistry.EmplaceComponent<TransformComponent>(entity, transform);
 
+    // Initial cube
     int amountX = 25;
     int amountY = 25;
     int amountZ = 25;
@@ -139,10 +134,11 @@ void FluidApp::InitEntities() {
     for(int x = 0; x < amountX; x++) {
         for(int y = 0; y < amountY; y++) {
             for(int z = 0; z < amountZ; z++) {
-                CreateParticle(
+                mParticleSystem.CreateParticle(
                     x*sapphire_config::INITIAL_SPACING - coordOffsetX, 
                     y*sapphire_config::INITIAL_SPACING - coordOffsetY, 
                     z*sapphire_config::INITIAL_SPACING - coordOffsetZ - 40,
+                    0.3f,
                     glm::vec4(0.0f)
                 );
             }
