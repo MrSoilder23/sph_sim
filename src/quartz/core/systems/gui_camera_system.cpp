@@ -6,8 +6,11 @@ void quartz::GuiCameraSystem::Update(bismuth::Registry& registry) {
     auto& cameraIDs = guiCameraPool.GetDenseEntities();
     for(int i = 0; i < cameraIDs.size(); i++) {
         size_t entityID = cameraIDs[i];
-
         auto& guiCamera = guiCameraPool.GetComponent(entityID);
-        guiCamera.projectionMatrix = glm::ortho(0.0f, (float)guiCamera.width, (float)guiCamera.height, 0.0f, -1.0f, 1.0f);
+
+        if(guiCamera.isDirty) {
+            guiCamera.projectionMatrix = glm::ortho(0.0f, (float)guiCamera.width, (float)guiCamera.height, 0.0f, -1.0f, 1.0f);
+            guiCamera.isDirty = false;
+        }
     }
 }
