@@ -8,9 +8,9 @@
 #include "quartz/ui/properties.hpp"
 
 class Style {
-    using StyleValue = std::variant<std::monostate, int>;
-
     public:
+        using StyleValue = std::variant<std::monostate, int>;
+    
         void Set(Properties property, StyleValue value) {
             mData[property] = value;
         }
