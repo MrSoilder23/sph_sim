@@ -1,4 +1,4 @@
-#include "quartz/core/systems/gui_camera_system.hpp"
+#include "quartz/ui/systems/gui_camera_system.hpp"
 
 void quartz::GuiCameraSystem::Update(bismuth::Registry& registry) {
     auto& guiCameraPool = registry.GetComponentPool<GuiCameraComponent>();

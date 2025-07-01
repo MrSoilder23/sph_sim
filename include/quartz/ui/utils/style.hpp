@@ -4,12 +4,17 @@
 #include <unordered_map>
 #include <stdexcept>
 
+// Third_party libraries
+#include <glm/glm.hpp>
+
 // Own libraries
-#include "quartz/ui/properties.hpp"
+#include "quartz/ui/utils/properties.hpp"
+
+namespace quartz {
 
 class Style {
     public:
-        using StyleValue = std::variant<std::monostate, int>;
+        using StyleValue = std::variant<std::monostate, glm::vec2, unsigned int, int>;
     
         void Set(Properties property, StyleValue value) {
             mData[property] = value;
@@ -37,3 +42,5 @@ class Style {
     private:
         std::unordered_map<Properties, StyleValue> mData;
 };
+
+}

@@ -1,5 +1,7 @@
 #pragma once
 
+namespace quartz {
+
 enum class Properties {
     width,
     height,
@@ -28,3 +30,5 @@ enum class Properties {
 
     text_overflow
 };
+
+}
