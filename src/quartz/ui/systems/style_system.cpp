@@ -1,7 +1,7 @@
 #include "quartz/ui/systems/style_system.hpp"
 
 void quartz::StyleSystem::Update(bismuth::Registry& registry) {
-    auto styleView = registry.GetView<GuiObjectComponent, MeshComponent2>();
+    auto styleView = registry.GetView<GuiObjectComponent, GuiMeshComponent>();
 
     for(auto [entity, object, mesh] : styleView) {
         glm::vec2 pos       = object.style.Get<glm::vec2>(Properties::position);
