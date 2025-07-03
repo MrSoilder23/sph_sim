@@ -11,8 +11,8 @@ void quartz::StyleSystem::Update(bismuth::Registry& registry) {
         mesh.vertices = {
             glm::vec3(pos.x,         pos.y,          object.zLayer),
             glm::vec3(pos.x + width, pos.y,          object.zLayer),
-            glm::vec3(pos.x,         pos.y - height, object.zLayer),
-            glm::vec3(pos.x + width, pos.y - height, object.zLayer),
+            glm::vec3(pos.x,         pos.y + height, object.zLayer),
+            glm::vec3(pos.x + width, pos.y + height, object.zLayer),
         };
     }
 }
