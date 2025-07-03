@@ -8,9 +8,9 @@
 #include <glm/gtc/type_ptr.hpp>
 
 struct GuiMeshComponent {
-    GLuint VAO;
-    GLuint VBO;
-    GLuint EBO;
+    GLuint VAO = 0;
+    GLuint VBO = 0;
+    GLuint EBO = 0;
 
     std::vector<glm::vec3> vertices;
 };

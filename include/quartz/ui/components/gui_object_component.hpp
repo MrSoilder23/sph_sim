@@ -4,5 +4,5 @@
 
 struct GuiObjectComponent {
     quartz::Style style;
-    int zLayer;
+    float zLayer = -1.0f;
 };

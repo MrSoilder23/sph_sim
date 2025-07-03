@@ -6,8 +6,8 @@ quartz::UiRendererSystem::UiRendererSystem() {
 }
 
 void quartz::UiRendererSystem::Update(bismuth::Registry& registry) {
-    auto guiCameraPool = registry.GetComponentPool<GuiCameraComponent>();
-    auto guiMeshPool   = registry.GetComponentPool<GuiMeshComponent>();
+    auto& guiCameraPool = registry.GetComponentPool<GuiCameraComponent>();
+    auto& guiMeshPool   = registry.GetComponentPool<GuiMeshComponent>();
     
     auto& camera = guiCameraPool.GetDenseComponents()[0];
 

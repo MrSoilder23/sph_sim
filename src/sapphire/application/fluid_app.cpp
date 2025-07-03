@@ -29,18 +29,24 @@ void FluidApp::Loop(float deltaTime) {
     FpsCounter(deltaTime);
 }
 void FluidApp::System(float deltaTime) {
+    static quartz::UiRendererSystem uiRenderer;
     static quartz::CameraSystem cameraSystem;
+    static quartz::GuiCameraSystem guiCameraSystem;
     static GPUSphereDataSystem gpuToSphereDataSystem(mRegistry);
     // static SphereDataSystem sphereDataSystem;
     // static ForceToPosSystem forceToPosSystem;
     // static PosToSpatialSystem posToSpatialSystem;
 
     cameraSystem.Update(mRegistry);
+    guiCameraSystem.Update(mRegistry);
 
     // posToSpatialSystem.Update(mRegistry);
     // sphereDataSystem.Update(mRegistry);
-    gpuToSphereDataSystem.Update(mRegistry, mDataBuffers);
     // forceToPosSystem.Update(mRegistry, deltaTime);
+    
+    gpuToSphereDataSystem.Update(mRegistry, mDataBuffers);
+    
+    uiRenderer.Update(mRegistry);
 
     // gInstanceRenderer.Update(mRegistry);
 }
@@ -113,14 +119,40 @@ void FluidApp::FpsCounter(float deltaTime) {
 
 void FluidApp::InitEntities() {
     // Camera
-    size_t entity = mRegistry.CreateEntity();
+    size_t cameraEntity = mRegistry.CreateEntity();
     CameraComponent camera;
     TransformComponent transform;
 
     camera.aspectRatio = mWindowData.mScreenWidth/mWindowData.mScreenHeight;
 
-    mRegistry.EmplaceComponent<CameraComponent>(entity, camera);
-    mRegistry.EmplaceComponent<TransformComponent>(entity, transform);
+    mRegistry.EmplaceComponent<CameraComponent>(cameraEntity, camera);
+    mRegistry.EmplaceComponent<TransformComponent>(cameraEntity, transform);
+
+    // Gui Camera
+    size_t guiCameraEntity = mRegistry.CreateEntity();
+
+    GuiCameraComponent guiCamera;
+    guiCamera.height = mWindowData.mScreenHeight;
+    guiCamera.width  = mWindowData.mScreenWidth;
+
+    mRegistry.EmplaceComponent<GuiCameraComponent>(guiCameraEntity, guiCamera);
+
+    // Gui Object
+    size_t guiObjectEntity = mRegistry.CreateEntity();
+    
+    GuiObjectComponent guiObject;
+    guiObject.style.Set(quartz::Properties::position, glm::vec2(50.0f, mWindowData.mScreenHeight));
+    guiObject.style.Set(quartz::Properties::width,    static_cast<unsigned int>(100));
+    guiObject.style.Set(quartz::Properties::height,   static_cast<unsigned int>(1000));
+    guiObject.zLayer = -0.5f;
+
+    mRegistry.EmplaceComponent<GuiObjectComponent>(guiObjectEntity, guiObject);
+    mRegistry.EmplaceComponent<GuiMeshComponent>(guiObjectEntity);
+
+    quartz::StyleSystem styleSystem;
+    quartz::GuiVertexSetupSystem guiVertexSystem;
+    styleSystem.Update(mRegistry);
+    guiVertexSystem.Update(mRegistry);
 
     // Initial cube
     int amountX = 25;
