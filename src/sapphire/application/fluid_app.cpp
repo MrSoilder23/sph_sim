@@ -141,9 +141,10 @@ void FluidApp::InitEntities() {
     size_t guiObjectEntity = mRegistry.CreateEntity();
     
     GuiObjectComponent guiObject;
-    guiObject.style.Set(quartz::Properties::position, glm::vec2(50.0f, 0.0f));
-    guiObject.style.Set(quartz::Properties::width,    static_cast<unsigned int>(100));
-    guiObject.style.Set(quartz::Properties::height,   static_cast<unsigned int>(1000));
+    guiObject.style.Set(quartz::Properties::position, glm::vec2(mWindowData.mScreenWidth-200, 0.0f));
+    guiObject.style.Set(quartz::Properties::width,    static_cast<unsigned int>(200));
+    guiObject.style.Set(quartz::Properties::height,   static_cast<unsigned int>(mWindowData.mScreenHeight));
+    guiObject.style.Set(quartz::Properties::color,    glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
     guiObject.zLayer = -0.5f;
 
     mRegistry.EmplaceComponent<GuiObjectComponent>(guiObjectEntity, guiObject);

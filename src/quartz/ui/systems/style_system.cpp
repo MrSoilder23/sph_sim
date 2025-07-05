@@ -4,6 +4,8 @@ void quartz::StyleSystem::Update(bismuth::Registry& registry) {
     auto styleView = registry.GetView<GuiObjectComponent, GuiMeshComponent>();
 
     for(auto [entity, object, mesh] : styleView) {
+        glm::vec4 color     = (object.style.Has(Properties::color)) ? object.style.Get<glm::vec4>(Properties::color) : glm::vec4(1.0f);
+        
         glm::vec2 pos       = object.style.Get<glm::vec2>(Properties::position);
         unsigned int width  = object.style.Get<unsigned int>(Properties::width);
         unsigned int height = object.style.Get<unsigned int>(Properties::height);
@@ -13,6 +15,10 @@ void quartz::StyleSystem::Update(bismuth::Registry& registry) {
             glm::vec3(pos.x + width, pos.y,          object.zLayer),
             glm::vec3(pos.x,         pos.y + height, object.zLayer),
             glm::vec3(pos.x + width, pos.y + height, object.zLayer),
+        };
+
+        mesh.colors = {
+            color, color, color, color, color, color
         };
     }
 }
