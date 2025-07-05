@@ -14,7 +14,7 @@ namespace quartz {
 
 class Style {
     public:
-        using StyleValue = std::variant<std::monostate, glm::vec2, unsigned int, int>;
+        using StyleValue = std::variant<std::monostate, glm::vec4, glm::vec2, unsigned int, int, float>;
     
         void Set(Properties property, StyleValue value) {
             mData[property] = value;
@@ -35,6 +35,8 @@ class Style {
             if(it == mData.end()) {
                 throw std::out_of_range("Property not found");
             }
+
+            assert(std::holds_alternative<Type>(it->second) && "Wrong property variable type");
 
             return std::get<Type>(it->second);
         }
