@@ -144,20 +144,21 @@ void FluidApp::InitEntities() {
     
     GuiObjectComponent guiObject;
     guiObject.style.Set(quartz::Properties::position, glm::vec2(mWindowData.mScreenWidth-200, 0.0f));
-    guiObject.style.Set(quartz::Properties::width,    static_cast<unsigned int>(200));
+    guiObject.style.Set(quartz::Properties::width,    200u);
     guiObject.style.Set(quartz::Properties::height,   static_cast<unsigned int>(mWindowData.mScreenHeight));
     guiObject.style.Set(quartz::Properties::color,    glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
     guiObject.zLayer = -0.5f;
 
     GuiObjectComponent guiObject1;
-    guiObject1.style.Set(quartz::Properties::width,    static_cast<unsigned int>(200));
-    guiObject1.style.Set(quartz::Properties::height,   static_cast<unsigned int>(50));
+    guiObject1.style.Set(quartz::Properties::width,    200u);
+    guiObject1.style.Set(quartz::Properties::height,   50u);
     guiObject1.style.Set(quartz::Properties::color,    glm::vec4(1.0f, 1.0f, 0.0f, 1.0f));
     guiObject1.zLayer = -0.4f;
 
     GuiObjectComponent guiObject2;
-    guiObject2.style.Set(quartz::Properties::width,    static_cast<unsigned int>(200));
-    guiObject2.style.Set(quartz::Properties::height,   static_cast<unsigned int>(50));
+    guiObject2.style.Set(quartz::Properties::width,    200u);
+    guiObject2.style.Set(quartz::Properties::height,   50u);
+    guiObject2.style.Set(quartz::Properties::margin_bottom,   30u);
     guiObject2.style.Set(quartz::Properties::color,    glm::vec4(1.0f, 0.0f, 1.0f, 1.0f));
     guiObject2.zLayer = -0.4f;
 

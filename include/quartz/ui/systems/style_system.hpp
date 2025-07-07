@@ -13,7 +13,7 @@ class StyleSystem {
 
     private:
         template<typename Type>
-        inline Type GetStyleValue(const Style& style, Properties property, Type defaultValue) {
+        inline Type GetStyleValue(Style& style, Properties property, Type defaultValue) {
             return style.Has(property) ? style.Get<Type>(property) : defaultValue;
         }
 };

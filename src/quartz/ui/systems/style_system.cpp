@@ -10,7 +10,7 @@ void quartz::StyleSystem::Update(bismuth::Registry& registry) {
 
         if(layoutType == Layouts::vertical) {
             auto& children = object.childrenIDs;
-            auto position  = (object.style.Has(Properties::position)) ? object.style.Get<glm::vec2>(Properties::position) : glm::vec2(0.0f);
+            auto position  = GetStyleValue<glm::vec2>(object.style, Properties::position, glm::vec2(0.0f));
 
             unsigned int spacing = 0;
 
@@ -23,12 +23,12 @@ void quartz::StyleSystem::Update(bismuth::Registry& registry) {
                 auto marginTop     = GetStyleValue<unsigned int>(childrenObject.style, Properties::margin_top, 0);
                 auto marginBottom  = GetStyleValue<unsigned int>(childrenObject.style, Properties::margin_bottom, 0);
 
-                childrenObject.style.Set(Properties::position, glm::vec2(position.x, position.y + spacing));
+                childrenObject.style.Set(Properties::position, glm::vec2(position.x, position.y + spacing + paddingBottom + marginBottom));
                 spacing += height + paddingTop + paddingBottom + marginTop + marginBottom;
             }
         } else if(layoutType == Layouts::horizontal) {
             auto& children = object.childrenIDs;
-            auto position  = (object.style.Has(Properties::position)) ? object.style.Get<glm::vec2>(Properties::position) : glm::vec2(0.0f);
+            auto position  = GetStyleValue<glm::vec2>(object.style, Properties::position, glm::vec2(0.0f));
 
             unsigned int spacing = 0;
 
@@ -41,7 +41,7 @@ void quartz::StyleSystem::Update(bismuth::Registry& registry) {
                 auto marginLeft   = GetStyleValue<unsigned int>(childrenObject.style, Properties::margin_left, 0);
                 auto marginRight  = GetStyleValue<unsigned int>(childrenObject.style, Properties::margin_right, 0);
 
-                childrenObject.style.Set(Properties::position, glm::vec2(position.x + spacing, position.y));
+                childrenObject.style.Set(Properties::position, glm::vec2(position.x + spacing + paddingLeft + marginLeft, position.y));
                 spacing += width + paddingLeft + paddingRight + marginLeft + marginRight;
             }
         }
