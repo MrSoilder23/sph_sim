@@ -129,7 +129,7 @@ void FluidApp::InitEntities() {
     mRegistry.EmplaceComponent<TransformComponent>(cameraEntity, transform);
 
     // Gui Camera
-    size_t guiCameraEntity = mRegistry.CreateEntity();
+    uint32_t guiCameraEntity = mRegistry.CreateEntity();
 
     GuiCameraComponent guiCamera;
     guiCamera.height = mWindowData.mScreenHeight;
@@ -138,7 +138,9 @@ void FluidApp::InitEntities() {
     mRegistry.EmplaceComponent<GuiCameraComponent>(guiCameraEntity, guiCamera);
 
     // Gui Object
-    size_t guiObjectEntity = mRegistry.CreateEntity();
+    uint32_t guiObjectEntity  = mRegistry.CreateEntity();
+    uint32_t guiObjectEntity1 = mRegistry.CreateEntity();
+    uint32_t guiObjectEntity2 = mRegistry.CreateEntity();
     
     GuiObjectComponent guiObject;
     guiObject.style.Set(quartz::Properties::position, glm::vec2(mWindowData.mScreenWidth-200, 0.0f));
@@ -147,8 +149,29 @@ void FluidApp::InitEntities() {
     guiObject.style.Set(quartz::Properties::color,    glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
     guiObject.zLayer = -0.5f;
 
+    GuiObjectComponent guiObject1;
+    guiObject1.style.Set(quartz::Properties::width,    static_cast<unsigned int>(200));
+    guiObject1.style.Set(quartz::Properties::height,   static_cast<unsigned int>(50));
+    guiObject1.style.Set(quartz::Properties::color,    glm::vec4(1.0f, 1.0f, 0.0f, 1.0f));
+    guiObject1.zLayer = -0.4f;
+
+    GuiObjectComponent guiObject2;
+    guiObject2.style.Set(quartz::Properties::width,    static_cast<unsigned int>(200));
+    guiObject2.style.Set(quartz::Properties::height,   static_cast<unsigned int>(50));
+    guiObject2.style.Set(quartz::Properties::color,    glm::vec4(1.0f, 0.0f, 1.0f, 1.0f));
+    guiObject2.zLayer = -0.4f;
+
+    guiObject.childrenIDs.push_back(guiObjectEntity1);
+    guiObject.childrenIDs.push_back(guiObjectEntity2);
+
     mRegistry.EmplaceComponent<GuiObjectComponent>(guiObjectEntity, guiObject);
     mRegistry.EmplaceComponent<GuiMeshComponent>(guiObjectEntity);
+
+    mRegistry.EmplaceComponent<GuiObjectComponent>(guiObjectEntity1, guiObject1);
+    mRegistry.EmplaceComponent<GuiMeshComponent>(guiObjectEntity1);
+
+    mRegistry.EmplaceComponent<GuiObjectComponent>(guiObjectEntity2, guiObject2);
+    mRegistry.EmplaceComponent<GuiMeshComponent>(guiObjectEntity2);
 
     quartz::StyleSystem styleSystem;
     quartz::GuiVertexSetupSystem guiVertexSystem;

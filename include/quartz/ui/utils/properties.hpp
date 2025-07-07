@@ -7,6 +7,7 @@ enum class Properties {
     height,
 
     position,
+    layout,
 
     background_color,
     color,

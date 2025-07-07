@@ -9,12 +9,13 @@
 
 // Own libraries
 #include "quartz/ui/utils/properties.hpp"
+#include "quartz/ui/utils/layouts.hpp"
 
 namespace quartz {
 
 class Style {
     public:
-        using StyleValue = std::variant<std::monostate, glm::vec4, glm::vec2, unsigned int, int, float>;
+        using StyleValue = std::variant<std::monostate, Layouts, glm::vec4, glm::vec2, unsigned int, int, float>;
     
         void Set(Properties property, StyleValue value) {
             mData[property] = value;
