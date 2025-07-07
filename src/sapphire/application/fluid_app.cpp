@@ -141,11 +141,15 @@ void FluidApp::InitEntities() {
     uint32_t guiObjectEntity  = mRegistry.CreateEntity();
     uint32_t guiObjectEntity1 = mRegistry.CreateEntity();
     uint32_t guiObjectEntity2 = mRegistry.CreateEntity();
+    uint32_t guiObjectEntity3 = mRegistry.CreateEntity();
     
     GuiObjectComponent guiObject;
     guiObject.style.Set(quartz::Properties::position, glm::vec2(mWindowData.mScreenWidth-200, 0.0f));
     guiObject.style.Set(quartz::Properties::width,    200u);
     guiObject.style.Set(quartz::Properties::height,   static_cast<unsigned int>(mWindowData.mScreenHeight));
+    
+    guiObject.style.Set(quartz::Properties::padding_left, 30u);
+
     guiObject.style.Set(quartz::Properties::color,    glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
     guiObject.zLayer = -0.5f;
 
@@ -158,12 +162,23 @@ void FluidApp::InitEntities() {
     GuiObjectComponent guiObject2;
     guiObject2.style.Set(quartz::Properties::width,    200u);
     guiObject2.style.Set(quartz::Properties::height,   50u);
-    guiObject2.style.Set(quartz::Properties::margin_bottom,   30u);
+
+    guiObject2.style.Set(quartz::Properties::margin_bottom,  30u);
+    guiObject2.style.Set(quartz::Properties::padding_top,    30u);
+    guiObject2.style.Set(quartz::Properties::padding_bottom, 30u);
+    
     guiObject2.style.Set(quartz::Properties::color,    glm::vec4(1.0f, 0.0f, 1.0f, 1.0f));
     guiObject2.zLayer = -0.4f;
 
+    GuiObjectComponent guiObject3;
+    guiObject3.style.Set(quartz::Properties::width,    200u);
+    guiObject3.style.Set(quartz::Properties::height,   50u);
+    guiObject3.style.Set(quartz::Properties::color,    glm::vec4(1.0f, 0.5f, 1.0f, 1.0f));
+    guiObject3.zLayer = -0.4f;
+
     guiObject.childrenIDs.push_back(guiObjectEntity1);
     guiObject.childrenIDs.push_back(guiObjectEntity2);
+    guiObject.childrenIDs.push_back(guiObjectEntity3);
 
     mRegistry.EmplaceComponent<GuiObjectComponent>(guiObjectEntity, guiObject);
     mRegistry.EmplaceComponent<GuiMeshComponent>(guiObjectEntity);
@@ -173,6 +188,9 @@ void FluidApp::InitEntities() {
 
     mRegistry.EmplaceComponent<GuiObjectComponent>(guiObjectEntity2, guiObject2);
     mRegistry.EmplaceComponent<GuiMeshComponent>(guiObjectEntity2);
+
+    mRegistry.EmplaceComponent<GuiObjectComponent>(guiObjectEntity3, guiObject3);
+    mRegistry.EmplaceComponent<GuiMeshComponent>(guiObjectEntity3);
 
     quartz::StyleSystem styleSystem;
     quartz::GuiVertexSetupSystem guiVertexSystem;

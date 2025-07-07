@@ -54,11 +54,16 @@ void quartz::StyleSystem::Update(bismuth::Registry& registry) {
         unsigned int width  = object.style.Get<unsigned int>(Properties::width);
         unsigned int height = object.style.Get<unsigned int>(Properties::height);
 
+        auto paddingLeft   = GetStyleValue<unsigned int>(object.style, Properties::padding_left, 0);
+        auto paddingRight  = GetStyleValue<unsigned int>(object.style, Properties::padding_right, 0);
+        auto paddingTop    = GetStyleValue<unsigned int>(object.style, Properties::padding_top, 0);
+        auto paddingBottom = GetStyleValue<unsigned int>(object.style, Properties::padding_bottom, 0);
+
         mesh.vertices = {
-            glm::vec3(pos.x,         pos.y,          object.zLayer),
-            glm::vec3(pos.x + width, pos.y,          object.zLayer),
-            glm::vec3(pos.x,         pos.y + height, object.zLayer),
-            glm::vec3(pos.x + width, pos.y + height, object.zLayer),
+            glm::vec3(pos.x - paddingLeft,          pos.y - paddingBottom,       object.zLayer),
+            glm::vec3(pos.x + width + paddingRight, pos.y - paddingBottom,       object.zLayer),
+            glm::vec3(pos.x - paddingLeft,          pos.y + height + paddingTop, object.zLayer),
+            glm::vec3(pos.x + width + paddingRight, pos.y + height + paddingTop, object.zLayer),
         };
 
         mesh.colors = {
