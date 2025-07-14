@@ -15,6 +15,7 @@ file(GLOB_RECURSE CONFIG_FILES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/config/*")
 
 add_library(glad STATIC third_party/glad/glad.c)
 find_package(SDL3 CONFIG REQUIRED)
+find_package(Freetype REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(OpenMP REQUIRED)
 
@@ -45,6 +46,7 @@ target_link_libraries(${PROG_NAME} PRIVATE
     SDL3::SDL3
     OpenMP::OpenMP_C
     OpenMP::OpenMP_CXX
+    Freetype::Freetype
 )
 
 enable_testing()
