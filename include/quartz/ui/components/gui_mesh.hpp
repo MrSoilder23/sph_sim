@@ -11,7 +11,7 @@ struct GuiMeshComponent {
     GLuint VAO = 0;
     GLuint VBO = 0;
     GLuint EBO = 0;
-    GLuint colorVBO = 0;
+    GLuint VBOcolor = 0;
 
     std::vector<glm::vec3> vertices;
     std::vector<glm::vec4> colors;

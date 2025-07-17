@@ -27,7 +27,12 @@ enum class Properties {
     border_type,
     border_color,
 
-    text_overflow
+    text_overflow,
+    
+    font_size,
+    font_family,
+    text_color,
+    text_align
 };
 
 }

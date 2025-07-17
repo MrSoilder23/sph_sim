@@ -3,12 +3,16 @@
 #include "./bismuth/registry.hpp"
 #include "quartz/ui/components/gui_mesh.hpp"
 #include "quartz/ui/components/gui_object_component.hpp"
+#include "quartz/ui/components/text_mesh.hpp"
 #include "quartz/ui/utils/layouts.hpp"
+#include "quartz/ui/utils/font_manager.hpp"
 
 namespace quartz {
 
-class StyleSystem {
+class StyleSetupSystem {
     public:
+        StyleSetupSystem(FontManager& fontManager) : mFontManager(fontManager) {}
+
         void Update(bismuth::Registry& registry);
 
     private:
@@ -16,6 +20,11 @@ class StyleSystem {
         inline Type GetStyleValue(Style& style, Properties property, Type defaultValue) {
             return style.Has(property) ? style.Get<Type>(property) : defaultValue;
         }
+
+        void UpdateLayout(GuiObjectComponent& guiObject, bismuth::ComponentPool<GuiObjectComponent>& guiPool);
+
+    private:
+        FontManager& mFontManager;
 };
 
 }

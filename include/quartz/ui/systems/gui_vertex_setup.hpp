@@ -2,6 +2,7 @@
 // Own libraries
 #include "./bismuth/registry.hpp"
 #include "quartz/ui/components/gui_mesh.hpp"
+#include "quartz/ui/components/text_mesh.hpp"
 
 namespace quartz {
 

@@ -1,7 +1,8 @@
 #include "quartz/ui/systems/gui_vertex_setup.hpp"
 
 void quartz::GuiVertexSetupSystem::Update(bismuth::Registry& registry) {
-    auto& guiMeshPool = registry.GetComponentPool<GuiMeshComponent>();
+    auto& guiMeshPool  = registry.GetComponentPool<GuiMeshComponent>();
+    auto& textMeshPool = registry.GetComponentPool<TextMeshComponent>();
 
     const std::vector<GLuint> index = {
         2,0,1, 2,1,3
@@ -29,12 +30,50 @@ void quartz::GuiVertexSetupSystem::Update(bismuth::Registry& registry) {
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void*)0);
 
-        glGenBuffers(1, &mesh->colorVBO);
-        glBindBuffer(GL_ARRAY_BUFFER, mesh->colorVBO);
+        glGenBuffers(1, &mesh->VBOcolor);
+        glBindBuffer(GL_ARRAY_BUFFER, mesh->VBOcolor);
         glBufferData(GL_ARRAY_BUFFER, mesh->colors.size() * sizeof(glm::vec4), mesh->colors.data(), GL_STATIC_DRAW);
 
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+        glBindVertexArray(0);
+    }
+
+    auto textBegin = textMeshPool.ComponentBegin();
+    auto textEnd   = textMeshPool.ComponentEnd();
+
+    for(auto mesh = textBegin; mesh != textEnd; ++mesh) {
+        if(mesh->VAO != 0) {
+            continue;
+        }
+
+        std::vector<GLuint> textIndex;
+        for(int i = 0; i < mesh->vertices.size()/4; i++) {
+            textIndex.insert(textIndex.end(), index.begin(), index.end());
+        }
+        size_t vertexSize = mesh->vertices.size() * sizeof(glm::vec3);
+        size_t uvSize = textIndex.size() * sizeof(GLuint);
+
+        glGenVertexArrays(1, &mesh->VAO);
+        glBindVertexArray(mesh->VAO);
+
+        glGenBuffers(1, &mesh->VBO);
+        glBindBuffer(GL_ARRAY_BUFFER, mesh->VBO);
+        glBufferData(GL_ARRAY_BUFFER, vertexSize + uvSize, nullptr, GL_DYNAMIC_DRAW);
+
+        glBufferSubData(GL_ARRAY_BUFFER, 0, vertexSize, mesh->vertices.data());
+        glBufferSubData(GL_ARRAY_BUFFER, vertexSize, uvSize, mesh->uv.data());
+
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void*)0);
+
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)vertexSize);
+
+        glGenBuffers(1, &mesh->EBO);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->EBO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, textIndex.size() * sizeof(GLuint), textIndex.data(), GL_STATIC_DRAW);
 
         glBindVertexArray(0);
     }

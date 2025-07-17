@@ -3,6 +3,7 @@
 #include <variant>
 #include <unordered_map>
 #include <stdexcept>
+#include <string>
 
 // Third_party libraries
 #include <glm/glm.hpp>
@@ -15,7 +16,7 @@ namespace quartz {
 
 class Style {
     public:
-        using StyleValue = std::variant<std::monostate, Layouts, glm::vec4, glm::vec2, unsigned int, int, float>;
+        using StyleValue = std::variant<std::monostate, Layouts, std::string, glm::vec4, glm::vec2, unsigned int, int, float>;
     
         void Set(Properties property, StyleValue value) {
             mData[property] = value;

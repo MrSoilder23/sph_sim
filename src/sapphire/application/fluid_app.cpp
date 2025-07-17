@@ -29,10 +29,10 @@ void FluidApp::Loop(float deltaTime) {
     FpsCounter(deltaTime);
 }
 void FluidApp::System(float deltaTime) {
-    static quartz::UiRendererSystem uiRenderer;
     static quartz::CameraSystem cameraSystem;
     static quartz::GuiCameraSystem guiCameraSystem;
     static GPUSphereDataSystem gpuToSphereDataSystem(mRegistry);
+    static quartz::UiRendererSystem uiRenderer;
     // static SphereDataSystem sphereDataSystem;
     // static ForceToPosSystem forceToPosSystem;
     // static PosToSpatialSystem posToSpatialSystem;
@@ -142,6 +142,7 @@ void FluidApp::InitEntities() {
     uint32_t guiObjectEntity1 = mRegistry.CreateEntity();
     uint32_t guiObjectEntity2 = mRegistry.CreateEntity();
     uint32_t guiObjectEntity3 = mRegistry.CreateEntity();
+    uint32_t guiObjectEntity4 = mRegistry.CreateEntity();
     
     GuiObjectComponent guiObject;
     guiObject.style.Set(quartz::Properties::position, glm::vec2(mWindowData.mScreenWidth-200, 0.0f));
@@ -176,9 +177,18 @@ void FluidApp::InitEntities() {
     guiObject3.style.Set(quartz::Properties::color,    glm::vec4(1.0f, 0.5f, 1.0f, 1.0f));
     guiObject3.zLayer = -0.4f;
 
+    GuiObjectComponent guiObject4;
+    // guiObject4.style.Set(quartz::Properties::,    glm::vec4(1.0f, 0.5f, 1.0f, 1.0f));
+    guiObject4.zLayer = -0.3f;
+
+    TextMeshComponent textMesh;
+    textMesh.content = "asda";
+
     guiObject.childrenIDs.push_back(guiObjectEntity1);
     guiObject.childrenIDs.push_back(guiObjectEntity2);
     guiObject.childrenIDs.push_back(guiObjectEntity3);
+
+    guiObject.childrenIDs.push_back(guiObjectEntity4);
 
     mRegistry.EmplaceComponent<GuiObjectComponent>(guiObjectEntity, guiObject);
     mRegistry.EmplaceComponent<GuiMeshComponent>(guiObjectEntity);
@@ -192,7 +202,11 @@ void FluidApp::InitEntities() {
     mRegistry.EmplaceComponent<GuiObjectComponent>(guiObjectEntity3, guiObject3);
     mRegistry.EmplaceComponent<GuiMeshComponent>(guiObjectEntity3);
 
-    quartz::StyleSystem styleSystem;
+    mRegistry.EmplaceComponent<GuiObjectComponent>(guiObjectEntity4, guiObject4);
+    mRegistry.EmplaceComponent<GuiMeshComponent>(guiObjectEntity4);
+    mRegistry.EmplaceComponent<TextMeshComponent>(guiObjectEntity4, textMesh);
+
+    quartz::StyleSetupSystem styleSystem(mFontManager);
     quartz::GuiVertexSetupSystem guiVertexSystem;
     styleSystem.Update(mRegistry);
     guiVertexSystem.Update(mRegistry);
