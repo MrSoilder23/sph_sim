@@ -28,7 +28,7 @@ void quartz::GuiVertexSetupSystem::Update(bismuth::Registry& registry) {
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(GLuint), index.data(), GL_STATIC_DRAW);
 
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
         glGenBuffers(1, &mesh->VBOcolor);
         glBindBuffer(GL_ARRAY_BUFFER, mesh->VBOcolor);
@@ -66,7 +66,7 @@ void quartz::GuiVertexSetupSystem::Update(bismuth::Registry& registry) {
         glBufferSubData(GL_ARRAY_BUFFER, vertexSize, uvSize, mesh->uv.data());
 
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)vertexSize);
