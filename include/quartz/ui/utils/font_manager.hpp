@@ -72,12 +72,16 @@ class FontManager {
         void CreateAtlasTexture(FT_Face face, FontAtlas& atlas) {
             unsigned int totalWidth = 0;
             unsigned int maxHeight  = 0;
-            std::vector<FT_GlyphSlot> glyphs;
+            std::vector<std::pair<char, FT_GlyphSlot>> glyphs;
 
             for(unsigned char c = 0; c < 128; c++) {
                 if(FT_Load_Char(face, c, FT_LOAD_RENDER)) {
                     continue;
                 }
+
+                FT_GlyphSlot glyph = face->glyph;
+
+                glyphs.push_back({c, glyph});
 
                 totalWidth += face->glyph->bitmap.width + 1;
                 maxHeight = std::max(maxHeight, static_cast<unsigned int>(face->glyph->bitmap.rows));
@@ -97,7 +101,7 @@ class FontManager {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
             unsigned int xOffset = 0;
-            for(auto glyph : glyphs) {
+            for(auto [c, glyph] : glyphs) {
                 if(glyph->bitmap.buffer) {
                     glTexSubImage2D(
                         GL_TEXTURE_2D, 0, xOffset, 0, 
@@ -114,7 +118,7 @@ class FontManager {
                         static_cast<unsigned int>(glyph->advance.x)
                     };
 
-                    atlas.characters[glyph->glyph_index] = ch;
+                    atlas.characters[c] = ch;
                     xOffset += glyph->bitmap.width + 1;
                 }
             }

@@ -39,15 +39,8 @@ void quartz::StyleSetupSystem::Update(bismuth::Registry& registry) {
 
     for(auto [entity, object, mesh] : textView) {
         if(!mesh.fontAtlas) {
-            std::string fontPath = "fonts/arial.ttf";
-            unsigned int fontSize = 24;
-
-            if(object.style.Has(quartz::Properties::font_family)) {
-                fontPath = object.style.Get<std::string>(quartz::Properties::font_family);
-            }
-            if(object.style.Has(quartz::Properties::font_size)) {
-                fontSize = object.style.Get<unsigned int>(quartz::Properties::font_size);
-            }
+            std::string fontPath = GetStyleValue<std::string>(object.style, Properties::font_family, "fonts/arial.ttf");
+            unsigned int fontSize = GetStyleValue<unsigned int>(object.style, Properties::font_size, 24);
 
             try {
                 mesh.fontAtlas = &mFontManager.GetFont(fontPath, fontSize);
