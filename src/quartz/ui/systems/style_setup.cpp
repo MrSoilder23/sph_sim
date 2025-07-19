@@ -33,13 +33,15 @@ void quartz::StyleSetupSystem::Update(bismuth::Registry& registry) {
         };
 
         mesh.colors = {
-            color, color, color, color, color, color
+            color, color, color, color
         };
     }
 
     for(auto [entity, object, mesh] : textView) {
         if(!mesh.fontAtlas) {
-            std::string fontPath = GetStyleValue<std::string>(object.style, Properties::font_family, "fonts/arial.ttf");
+            glm::vec4 color = GetStyleValue<glm::vec4>(object.style, Properties::color, glm::vec4(1.0f));
+
+            std::string fontPath  = GetStyleValue<std::string>(object.style, Properties::font_family, "fonts/gothic.ttf");
             unsigned int fontSize = GetStyleValue<unsigned int>(object.style, Properties::font_size, 24);
 
             try {
@@ -57,14 +59,18 @@ void quartz::StyleSetupSystem::Update(bismuth::Registry& registry) {
                 float y = pos.y - ch.bearing.y;
                 
                 mesh.vertices.push_back(glm::vec3(x,             y,             object.zLayer));
-                mesh.vertices.push_back(glm::vec3(x,             y + ch.size.y, object.zLayer));
                 mesh.vertices.push_back(glm::vec3(x + ch.size.x, y,             object.zLayer));
+                mesh.vertices.push_back(glm::vec3(x,             y + ch.size.y, object.zLayer));
                 mesh.vertices.push_back(glm::vec3(x + ch.size.x, y + ch.size.y, object.zLayer));
 
-                mesh.uv.push_back(glm::vec2(ch.uvMin.x, ch.uvMin.y));
-                mesh.uv.push_back(glm::vec2(ch.uvMin.x, ch.uvMax.y));
-                mesh.uv.push_back(glm::vec2(ch.uvMax.x, ch.uvMin.y));
-                mesh.uv.push_back(glm::vec2(ch.uvMax.x, ch.uvMax.y));
+                mesh.uv.push_back(glm::vec2(ch.uvMin.x, ch.uvMin.y)); // 0
+                mesh.uv.push_back(glm::vec2(ch.uvMax.x, ch.uvMin.y)); // 1
+                mesh.uv.push_back(glm::vec2(ch.uvMin.x, ch.uvMax.y)); // 2
+                mesh.uv.push_back(glm::vec2(ch.uvMax.x, ch.uvMax.y)); // 3
+
+                for(int i = 0; i < 4; i++) {
+                    mesh.colors.push_back(color);
+                }
                 
                 x += (ch.advance >> 6);
             }

@@ -47,13 +47,21 @@ void quartz::GuiVertexSetupSystem::Update(bismuth::Registry& registry) {
         if(mesh->VAO != 0) {
             continue;
         }
-
+        
+        std::vector<GLuint> tempIndex = {
+            2,0,1, 2,1,3
+        };
         std::vector<GLuint> textIndex;
         for(int i = 0; i < mesh->vertices.size()/4; i++) {
-            textIndex.insert(textIndex.end(), index.begin(), index.end());
+            textIndex.insert(textIndex.end(), tempIndex.begin(), tempIndex.end());
+            for(int s = 0; s < tempIndex.size(); s++) {
+                tempIndex[s] += 4;
+            }
         }
+        mesh->numIndices = textIndex.size();
+        
         size_t vertexSize = mesh->vertices.size() * sizeof(glm::vec3);
-        size_t uvSize = textIndex.size() * sizeof(GLuint);
+        size_t uvSize = mesh->uv.size() * sizeof(glm::vec2);
 
         glGenVertexArrays(1, &mesh->VAO);
         glBindVertexArray(mesh->VAO);
@@ -74,6 +82,13 @@ void quartz::GuiVertexSetupSystem::Update(bismuth::Registry& registry) {
         glGenBuffers(1, &mesh->EBO);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->EBO);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, textIndex.size() * sizeof(GLuint), textIndex.data(), GL_STATIC_DRAW);
+
+        glGenBuffers(1, &mesh->VBOcolor);
+        glBindBuffer(GL_ARRAY_BUFFER, mesh->VBOcolor);
+        glBufferData(GL_ARRAY_BUFFER, mesh->colors.size() * sizeof(glm::vec4), mesh->colors.data(), GL_STATIC_DRAW);
+
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
         glBindVertexArray(0);
     }

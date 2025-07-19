@@ -18,9 +18,9 @@ struct TextMeshComponent {
 
     std::vector<glm::vec3> vertices;
     std::vector<glm::vec2> uv;
+    std::vector<glm::vec4> colors;
 
     std::string content;
-    glm::vec4 color = glm::vec4(1.0f);
     unsigned int numIndices = 0;
 
     const quartz::FontAtlas* fontAtlas = nullptr;

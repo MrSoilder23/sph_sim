@@ -178,11 +178,11 @@ void FluidApp::InitEntities() {
     guiObject3.zLayer = -0.4f;
 
     GuiObjectComponent guiObject4;
-    // guiObject4.style.Set(quartz::Properties::,    glm::vec4(1.0f, 0.5f, 1.0f, 1.0f));
+    guiObject4.style.Set(quartz::Properties::color,    glm::vec4(0.3f, 0.5f, 1.0f, 1.0f));
     guiObject4.zLayer = -0.3f;
 
     TextMeshComponent textMesh;
-    textMesh.content = "asda";
+    textMesh.content = "abcd123";
 
     guiObject.childrenIDs.push_back(guiObjectEntity1);
     guiObject.childrenIDs.push_back(guiObjectEntity2);

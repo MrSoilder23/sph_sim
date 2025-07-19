@@ -30,9 +30,9 @@ struct FontAtlas {
     std::map<char, Character> characters;
 
     ~FontAtlas() {
-        if(textureID) {
-            glDeleteTextures(1, &textureID);
-        }
+        // if(textureID) {
+        //     glDeleteTextures(1, &textureID);
+        // }
     }
 };
 
@@ -91,6 +91,8 @@ class FontManager {
             atlas.height = maxHeight;
 
             std::vector<unsigned char> emptyData(atlas.width * atlas.height, 0);
+            glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
             glGenTextures(1, &atlas.textureID);
             glBindTexture(GL_TEXTURE_2D, atlas.textureID);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, atlas.width, atlas.height, 0, GL_RED, GL_UNSIGNED_BYTE, emptyData.data());
