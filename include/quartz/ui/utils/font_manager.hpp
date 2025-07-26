@@ -64,7 +64,7 @@ class FontManager {
             FontAtlas newAtlas;
             CreateAtlasTexture(face, newAtlas);
             FT_Done_Face(face);
-
+            
             return mAtlasCache.emplace(key, std::move(newAtlas)).first->second;
         }
 
@@ -74,17 +74,11 @@ class FontManager {
             unsigned int maxHeight  = 0;
             std::vector<std::pair<char, FT_GlyphSlot>> glyphs;
 
-            for(unsigned char c = 0; c < 128; c++) {
-                if(FT_Load_Char(face, c, FT_LOAD_RENDER)) {
-                    continue;
-                }
-
+            for (char c = 0; c < 126; c++) {
+                if (FT_Load_Char(face, c, FT_LOAD_RENDER)) continue;
                 FT_GlyphSlot glyph = face->glyph;
-
-                glyphs.push_back({c, glyph});
-
-                totalWidth += face->glyph->bitmap.width + 1;
-                maxHeight = std::max(maxHeight, static_cast<unsigned int>(face->glyph->bitmap.rows));
+                totalWidth += glyph->bitmap.width + 1;
+                maxHeight = std::max(maxHeight, static_cast<unsigned int>(glyph->bitmap.rows));
             }
 
             atlas.width  = totalWidth;
@@ -103,20 +97,35 @@ class FontManager {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
             unsigned int xOffset = 0;
-            for(auto [c, glyph] : glyphs) {
+            
+            for (char c = 0; c < 126; c++) {
+                if (FT_Load_Char(face, c, FT_LOAD_RENDER)) continue;
+                FT_GlyphSlot glyph = face->glyph;
+
                 if(glyph->bitmap.buffer) {
+                    // Flip letters so they stand the right way
+                    std::vector<unsigned char> flippedBuffer(glyph->bitmap.rows * glyph->bitmap.width);
+                    for (unsigned int row = 0; row < glyph->bitmap.rows; ++row) {
+                        memcpy(
+                            flippedBuffer.data() + row * glyph->bitmap.width,
+                            glyph->bitmap.buffer + (glyph->bitmap.rows - 1 - row) * glyph->bitmap.width,
+                            glyph->bitmap.width
+                        );
+                    }
+
                     glTexSubImage2D(
-                        GL_TEXTURE_2D, 0, xOffset, 0, 
+                        GL_TEXTURE_2D, 0,
+                        xOffset, 0, 
                         glyph->bitmap.width, glyph->bitmap.rows, 
-                        GL_RED, GL_UNSIGNED_BYTE, glyph->bitmap.buffer
+                        GL_RED, GL_UNSIGNED_BYTE, 
+                        flippedBuffer.data()
                     );
 
                     Character ch = {
                         {glyph->bitmap.width, glyph->bitmap.rows},
                         {glyph->bitmap_left, glyph->bitmap_top},
                         {static_cast<float>(xOffset) / atlas.width, 0.0f},
-                        {static_cast<float>(xOffset + glyph->bitmap.width) / atlas.width,
-                        static_cast<float>(glyph->bitmap.rows) / atlas.height},
+                        {static_cast<float>(xOffset + glyph->bitmap.width) / atlas.width, static_cast<float>(glyph->bitmap.rows) / atlas.height},
                         static_cast<unsigned int>(glyph->advance.x)
                     };
 
