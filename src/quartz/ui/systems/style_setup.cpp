@@ -14,7 +14,7 @@ void quartz::StyleSetupSystem::Update(bismuth::Registry& registry) {
     }
 
     for(auto [entity, object, mesh] : objectView) {
-        glm::vec4 color     = (object.style.Has(Properties::color)) ? object.style.Get<glm::vec4>(Properties::color) : glm::vec4(1.0f);
+        glm::vec4 color     = GetStyleValue<glm::vec4>(object.style, Properties::background_color, glm::vec4(1.0f));
         
         glm::vec2 pos       = GetStyleValue<glm::vec2>(object.style, Properties::position, glm::vec2(0.0f));
         unsigned int width  = GetStyleValue<unsigned int>(object.style, Properties::width, 10);
@@ -58,10 +58,10 @@ void quartz::StyleSetupSystem::Update(bismuth::Registry& registry) {
                 const Character& ch = mesh.fontAtlas->characters.at(c);
                 float y = pos.y - (ch.size.y - ch.bearing.y);
                 
-                mesh.vertices.push_back(glm::vec3(x,             y,             object.zLayer));
-                mesh.vertices.push_back(glm::vec3(x + ch.size.x, y,             object.zLayer));
-                mesh.vertices.push_back(glm::vec3(x,             y + ch.size.y, object.zLayer));
-                mesh.vertices.push_back(glm::vec3(x + ch.size.x, y + ch.size.y, object.zLayer));
+                mesh.vertices.push_back(glm::vec3(x,             y,             object.zLayer + 0.001));
+                mesh.vertices.push_back(glm::vec3(x + ch.size.x, y,             object.zLayer + 0.001));
+                mesh.vertices.push_back(glm::vec3(x,             y + ch.size.y, object.zLayer + 0.001));
+                mesh.vertices.push_back(glm::vec3(x + ch.size.x, y + ch.size.y, object.zLayer + 0.001));
 
                 mesh.uv.push_back(glm::vec2(ch.uvMin.x, ch.uvMin.y));
                 mesh.uv.push_back(glm::vec2(ch.uvMax.x, ch.uvMin.y));
