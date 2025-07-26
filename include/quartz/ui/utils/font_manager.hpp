@@ -70,26 +70,18 @@ class FontManager {
 
     private:
         void CreateAtlasTexture(FT_Face face, FontAtlas& atlas) {
-            unsigned int totalWidth = 0;
-            unsigned int maxHeight  = 0;
-            std::vector<std::pair<char, FT_GlyphSlot>> glyphs;
-
             for (char c = 0; c < 126; c++) {
                 if (FT_Load_Char(face, c, FT_LOAD_RENDER)) continue;
                 FT_GlyphSlot glyph = face->glyph;
-                totalWidth += glyph->bitmap.width + 1;
-                maxHeight = std::max(maxHeight, static_cast<unsigned int>(glyph->bitmap.rows));
+                atlas.width += glyph->bitmap.width + 1;
+                atlas.height = std::max(atlas.height, static_cast<unsigned int>(glyph->bitmap.rows));
             }
 
-            atlas.width  = totalWidth;
-            atlas.height = maxHeight;
-
-            std::vector<unsigned char> emptyData(atlas.width * atlas.height, 0);
             glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
             glGenTextures(1, &atlas.textureID);
             glBindTexture(GL_TEXTURE_2D, atlas.textureID);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, atlas.width, atlas.height, 0, GL_RED, GL_UNSIGNED_BYTE, emptyData.data());
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, atlas.width, atlas.height, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr);
 
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
