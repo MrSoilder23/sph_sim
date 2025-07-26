@@ -41,7 +41,7 @@ void quartz::StyleSetupSystem::Update(bismuth::Registry& registry) {
         if(!mesh.fontAtlas) {
             glm::vec4 color = GetStyleValue<glm::vec4>(object.style, Properties::color, glm::vec4(1.0f));
 
-            std::string fontPath  = GetStyleValue<std::string>(object.style, Properties::font_family, "fonts/gothic.ttf");
+            std::string fontPath  = GetStyleValue<std::string>(object.style, Properties::font_family, "fonts/arial.ttf");
             unsigned int fontSize = GetStyleValue<unsigned int>(object.style, Properties::font_size, 24);
 
             try {
@@ -56,17 +56,17 @@ void quartz::StyleSetupSystem::Update(bismuth::Registry& registry) {
 
             for(char c : mesh.content) {
                 const Character& ch = mesh.fontAtlas->characters.at(c);
-                float y = pos.y - ch.bearing.y;
+                float y = pos.y - (ch.size.y - ch.bearing.y);
                 
                 mesh.vertices.push_back(glm::vec3(x,             y,             object.zLayer));
                 mesh.vertices.push_back(glm::vec3(x + ch.size.x, y,             object.zLayer));
                 mesh.vertices.push_back(glm::vec3(x,             y + ch.size.y, object.zLayer));
                 mesh.vertices.push_back(glm::vec3(x + ch.size.x, y + ch.size.y, object.zLayer));
 
-                mesh.uv.push_back(glm::vec2(ch.uvMin.x, ch.uvMin.y)); // 0
-                mesh.uv.push_back(glm::vec2(ch.uvMax.x, ch.uvMin.y)); // 1
-                mesh.uv.push_back(glm::vec2(ch.uvMin.x, ch.uvMax.y)); // 2
-                mesh.uv.push_back(glm::vec2(ch.uvMax.x, ch.uvMax.y)); // 3
+                mesh.uv.push_back(glm::vec2(ch.uvMin.x, ch.uvMin.y));
+                mesh.uv.push_back(glm::vec2(ch.uvMax.x, ch.uvMin.y));
+                mesh.uv.push_back(glm::vec2(ch.uvMin.x, ch.uvMax.y));
+                mesh.uv.push_back(glm::vec2(ch.uvMax.x, ch.uvMax.y));
 
                 for(int i = 0; i < 4; i++) {
                     mesh.colors.push_back(color);
