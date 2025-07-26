@@ -12,6 +12,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "src/*.cpp")
 file(GLOB_RECURSE SHADER_FILES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/shaders/*")
 file(GLOB_RECURSE CONFIG_FILES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/config/*")
+file(GLOB_RECURSE CONFIG_FILES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/assets/*")
 
 add_library(glad STATIC third_party/glad/glad.c)
 find_package(SDL3 CONFIG REQUIRED)
@@ -29,6 +30,9 @@ add_custom_target(
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_SOURCE_DIR}/config
         ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/config
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/assets
+        ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/assets
     DEPENDS ${SHADER_FILES} ${CONFIG_FILES}
     COMMENT "Copying shaders and config..."
 )
