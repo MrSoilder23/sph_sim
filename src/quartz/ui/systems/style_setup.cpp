@@ -56,7 +56,7 @@ void quartz::StyleSetupSystem::Update(bismuth::Registry& registry) {
 
             for(char c : mesh.content) {
                 const Character& ch = mesh.fontAtlas->characters.at(c);
-                float y = pos.y - (ch.size.y - ch.bearing.y);
+                float y = pos.y - (ch.size.y - ch.bearing.y) + (mesh.fontAtlas->height * 0.3);
                 
                 mesh.vertices.push_back(glm::vec3(x,             y,             object.zLayer + 0.001));
                 mesh.vertices.push_back(glm::vec3(x + ch.size.x, y,             object.zLayer + 0.001));
@@ -97,8 +97,10 @@ void quartz::StyleSetupSystem::UpdateLayout(GuiObjectComponent& guiObject, bismu
             auto marginTop     = GetStyleValue<unsigned int>(childrenObject.style, Properties::margin_top, 0);
             auto marginBottom  = GetStyleValue<unsigned int>(childrenObject.style, Properties::margin_bottom, 0);
 
-            childrenObject.style.Set(Properties::position, glm::vec2(position.x, position.y + spacing + paddingBottom + marginBottom));
-            childrenObject.style.Set(Properties::width, guiObject.style.Get<unsigned int>(Properties::width));
+            auto paddingLeft = GetStyleValue<unsigned int>(childrenObject.style, Properties::padding_left, 0);
+
+            childrenObject.style.Set(Properties::position, glm::vec2(position.x + paddingLeft, position.y + spacing + paddingBottom + marginBottom));
+            childrenObject.style.Set(Properties::width, guiObject.style.Get<unsigned int>(Properties::width) - paddingLeft);
 
             spacing += height + paddingTop + paddingBottom + marginTop + marginBottom;
             
@@ -111,8 +113,10 @@ void quartz::StyleSetupSystem::UpdateLayout(GuiObjectComponent& guiObject, bismu
             auto marginLeft   = GetStyleValue<unsigned int>(childrenObject.style, Properties::margin_left, 0);
             auto marginRight  = GetStyleValue<unsigned int>(childrenObject.style, Properties::margin_right, 0);
 
-            childrenObject.style.Set(Properties::position, glm::vec2(position.x + spacing + paddingLeft + marginLeft, position.y));
-            childrenObject.style.Set(Properties::height, guiObject.style.Get<unsigned int>(Properties::height));
+            auto paddingBottom = GetStyleValue<unsigned int>(childrenObject.style, Properties::padding_bottom, 0);
+
+            childrenObject.style.Set(Properties::position, glm::vec2(position.x + spacing + paddingLeft + marginLeft, position.y + paddingBottom));
+            childrenObject.style.Set(Properties::height, guiObject.style.Get<unsigned int>(Properties::height) - paddingBottom);
 
             spacing += width + paddingLeft + paddingRight + marginLeft + marginRight;
         }
