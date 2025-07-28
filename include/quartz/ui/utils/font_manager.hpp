@@ -72,7 +72,10 @@ class FontManager {
 
     private:
         void CreateAtlasTexture(FT_Face face, FontAtlas& atlas) {
-            for (char c = 0; c < 126; c++) {
+            static char charMin = 0;
+            static char charMax = 127;
+
+            for (char c = charMin; c < charMax; c++) {
                 if (FT_Load_Char(face, c, FT_LOAD_RENDER)) continue;
                 FT_GlyphSlot glyph = face->glyph;
                 atlas.width += glyph->bitmap.width + 1;
@@ -92,7 +95,7 @@ class FontManager {
 
             unsigned int xOffset = 0;
             
-            for (char c = 0; c < 126; c++) {
+            for (char c = charMin; c < charMax; c++) {
                 FT_UInt glyphIndex = FT_Get_Char_Index(face, c);
                 if (FT_Load_Glyph(face, glyphIndex, FT_LOAD_RENDER)) continue;
                 FT_GlyphSlot glyph = face->glyph;

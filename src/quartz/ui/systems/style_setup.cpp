@@ -56,6 +56,11 @@ void quartz::StyleSetupSystem::Update(bismuth::Registry& registry) {
             FT_UInt prevGlyphIndex = 0;
 
             for(char c : mesh.content) {
+                if(c == ' ') {
+                    xPos += fontSize * 0.3f;
+                    continue;
+                }
+
                 const Character& ch = mesh.fontAtlas->characters.at(c);
                 if(prevGlyphIndex) {
                     FT_Vector kerning;
