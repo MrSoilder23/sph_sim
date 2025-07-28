@@ -52,11 +52,25 @@ void quartz::StyleSetupSystem::Update(bismuth::Registry& registry) {
             }
 
             glm::vec2 pos = GetStyleValue<glm::vec2>(object.style, Properties::position, glm::vec2(0.0f));
-            float x = pos.x;
+            float xPos = pos.x;
+            FT_UInt prevGlyphIndex = 0;
 
             for(char c : mesh.content) {
                 const Character& ch = mesh.fontAtlas->characters.at(c);
-                float y = pos.y - (ch.size.y - ch.bearing.y) + (mesh.fontAtlas->height * 0.3);
+                if(prevGlyphIndex) {
+                    FT_Vector kerning;
+                    FT_Get_Kerning(
+                        mesh.fontAtlas->ftFace, 
+                        prevGlyphIndex,
+                        ch.glyphIndex,
+                        FT_KERNING_DEFAULT,
+                        &kerning
+                    );
+                    xPos += (kerning.x >> 6);
+                }
+
+                float x = xPos + ch.bearing.x;
+                float y = pos.y - (ch.size.y - ch.bearing.y) + (mesh.fontAtlas->height * 0.3f);
                 
                 mesh.vertices.push_back(glm::vec3(x,             y,             object.zLayer + 0.001));
                 mesh.vertices.push_back(glm::vec3(x + ch.size.x, y,             object.zLayer + 0.001));
@@ -72,7 +86,8 @@ void quartz::StyleSetupSystem::Update(bismuth::Registry& registry) {
                     mesh.colors.push_back(color);
                 }
                 
-                x += (ch.advance >> 6);
+                xPos += (ch.advance >> 6);
+                prevGlyphIndex = ch.glyphIndex;
             }
         }
     }

@@ -21,6 +21,7 @@ struct Character {
     glm::vec2 uvMax;
 
     unsigned int advance;
+    FT_UInt glyphIndex;
 }; 
 
 struct FontAtlas {
@@ -28,6 +29,7 @@ struct FontAtlas {
     unsigned int width  = 0;
     unsigned int height = 0;
     std::map<char, Character> characters;
+    FT_Face ftFace;
 
     ~FontAtlas() {
         // if(textureID) {
@@ -63,7 +65,7 @@ class FontManager {
             FT_Set_Pixel_Sizes(face, 0, size);
             FontAtlas newAtlas;
             CreateAtlasTexture(face, newAtlas);
-            FT_Done_Face(face);
+            newAtlas.ftFace = face;
             
             return mAtlasCache.emplace(key, std::move(newAtlas)).first->second;
         }
@@ -91,7 +93,8 @@ class FontManager {
             unsigned int xOffset = 0;
             
             for (char c = 0; c < 126; c++) {
-                if (FT_Load_Char(face, c, FT_LOAD_RENDER)) continue;
+                FT_UInt glyphIndex = FT_Get_Char_Index(face, c);
+                if (FT_Load_Glyph(face, glyphIndex, FT_LOAD_RENDER)) continue;
                 FT_GlyphSlot glyph = face->glyph;
 
                 if(glyph->bitmap.buffer) {
@@ -118,7 +121,8 @@ class FontManager {
                         {glyph->bitmap_left, glyph->bitmap_top},
                         {static_cast<float>(xOffset) / atlas.width, 0.0f},
                         {static_cast<float>(xOffset + glyph->bitmap.width) / atlas.width, static_cast<float>(glyph->bitmap.rows) / atlas.height},
-                        static_cast<unsigned int>(glyph->advance.x)
+                        static_cast<unsigned int>(glyph->advance.x),
+                        glyphIndex
                     };
 
                     atlas.characters[c] = ch;
