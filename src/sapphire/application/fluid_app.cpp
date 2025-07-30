@@ -185,7 +185,7 @@ void FluidApp::InitEntities() {
     guiObject4.zLayer = -0.3f;
 
     TextMeshComponent textMesh;
-    textMesh.content = "W. abcd123";
+    textMesh.content = "W. abcd123q";
 
     guiObject.childrenIDs.push_back(guiObjectEntity1);
     guiObject.childrenIDs.push_back(guiObjectEntity2);
