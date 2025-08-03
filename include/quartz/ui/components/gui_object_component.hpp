@@ -10,5 +10,4 @@ struct GuiObjectComponent {
     float zLayer = -1.0f;
 
     uint32_t parentID;
-    std::vector<uint32_t> childrenIDs;
 };
