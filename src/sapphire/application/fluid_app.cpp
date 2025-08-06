@@ -119,7 +119,7 @@ void FluidApp::FpsCounter(float deltaTime) {
 
 void FluidApp::InitEntities() {
     // Camera
-    size_t cameraEntity = mRegistry.CreateEntity();
+    bismuth::EntityID cameraEntity = mRegistry.CreateEntity();
     CameraComponent camera;
     TransformComponent transform;
 
@@ -129,7 +129,7 @@ void FluidApp::InitEntities() {
     mRegistry.EmplaceComponent<TransformComponent>(cameraEntity, transform);
 
     // Gui Camera
-    uint32_t guiCameraEntity = mRegistry.CreateEntity();
+    bismuth::EntityID guiCameraEntity = mRegistry.CreateEntity();
 
     GuiCameraComponent guiCamera;
     guiCamera.height = mWindowData.mScreenHeight;
@@ -138,11 +138,11 @@ void FluidApp::InitEntities() {
     mRegistry.EmplaceComponent<GuiCameraComponent>(guiCameraEntity, guiCamera);
 
     // Gui Object
-    uint32_t guiObjectEntity  = mRegistry.CreateEntity();
-    uint32_t guiObjectEntity1 = mRegistry.CreateEntity();
-    uint32_t guiObjectEntity2 = mRegistry.CreateEntity();
-    uint32_t guiObjectEntity3 = mRegistry.CreateEntity();
-    uint32_t guiObjectEntity4 = mRegistry.CreateEntity();
+    bismuth::EntityID guiObjectEntity  = mRegistry.CreateEntity();
+    bismuth::EntityID guiObjectEntity1 = mRegistry.CreateEntity();
+    bismuth::EntityID guiObjectEntity2 = mRegistry.CreateEntity();
+    bismuth::EntityID guiObjectEntity3 = mRegistry.CreateEntity();
+    bismuth::EntityID guiObjectEntity4 = mRegistry.CreateEntity();
     
     GuiObjectComponent guiObject;
     guiObject.style.Set(quartz::Properties::position, glm::vec2(mWindowData.mScreenWidth-200, 0.0f));
