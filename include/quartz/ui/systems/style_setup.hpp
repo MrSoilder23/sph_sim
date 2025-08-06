@@ -1,4 +1,7 @@
 #pragma once
+// C++ standard libraries
+#include <unordered_map>
+
 // Own libraries
 #include "./bismuth/registry.hpp"
 #include "quartz/ui/components/gui_mesh.hpp"
@@ -21,7 +24,11 @@ class StyleSetupSystem {
             return style.Has(property) ? style.Get<Type>(property) : defaultValue;
         }
 
-        void UpdateLayout(GuiObjectComponent& guiObject, bismuth::ComponentPool<GuiObjectComponent>& guiPool);
+        void UpdateLayout(
+            bismuth::ComponentPool<GuiObjectComponent>& guiPool,
+            std::vector<bismuth::EntityID> const&       childrenIDs,
+            bismuth::EntityID              const&       currentID
+        );
 
     private:
         FontManager& mFontManager;

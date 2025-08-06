@@ -187,11 +187,10 @@ void FluidApp::InitEntities() {
     TextMeshComponent textMesh;
     textMesh.content = "W. abcd123q";
 
-    guiObject.childrenIDs.push_back(guiObjectEntity1);
-    guiObject.childrenIDs.push_back(guiObjectEntity2);
-    guiObject.childrenIDs.push_back(guiObjectEntity3);
-
-    guiObject.childrenIDs.push_back(guiObjectEntity4);
+    guiObject1.parentID = guiObjectEntity;
+    guiObject2.parentID = guiObjectEntity;
+    guiObject3.parentID = guiObjectEntity;
+    guiObject4.parentID = guiObjectEntity;
 
     mRegistry.EmplaceComponent<GuiObjectComponent>(guiObjectEntity, guiObject);
     mRegistry.EmplaceComponent<GuiMeshComponent>(guiObjectEntity);

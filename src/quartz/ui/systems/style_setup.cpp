@@ -6,11 +6,19 @@ void quartz::StyleSetupSystem::Update(bismuth::Registry& registry) {
 
     auto& objectPool = registry.GetComponentPool<GuiObjectComponent>();
 
-    auto objectBegin = objectPool.ComponentBegin();
-    auto objectEnd   = objectPool.ComponentEnd();
+    std::unordered_map<bismuth::EntityID, std::vector<bismuth::EntityID>> childrenMap;
+    auto& denseIDs = objectPool.GetDenseEntities();
+    for(int i = 0; i < denseIDs.size(); i++) {
+        auto& currentID = denseIDs[i];
+        auto& currentComponent = objectPool.GetComponent(currentID);
 
-    for(auto it = objectBegin; it != objectEnd; ++it) {
-        UpdateLayout(*it, objectPool);
+        if(currentComponent.parentID != bismuth::INVALID_INDEX) {
+            childrenMap[currentComponent.parentID].push_back(currentID);
+        }
+    }
+
+    for(auto& [parentID, children] : childrenMap) {
+        UpdateLayout(objectPool, children, parentID);
     }
 
     for(auto [entity, object, mesh] : objectView) {
@@ -99,15 +107,19 @@ void quartz::StyleSetupSystem::Update(bismuth::Registry& registry) {
 }
 
 // Private
-void quartz::StyleSetupSystem::UpdateLayout(GuiObjectComponent& guiObject, bismuth::ComponentPool<GuiObjectComponent>& guiPool) {
-    auto layoutType = GetStyleValue<Layouts>(guiObject.style, Properties::layout, Layouts::vertical);
+void quartz::StyleSetupSystem::UpdateLayout(
+    bismuth::ComponentPool<GuiObjectComponent>& guiPool,
+    std::vector<bismuth::EntityID> const&       childrenIDs,
+    bismuth::EntityID              const&       currentID
+) {
+    auto& parentObject = guiPool.GetComponent(currentID);
 
-    auto& children = guiObject.childrenIDs;
-    auto position  = GetStyleValue<glm::vec2>(guiObject.style, Properties::position, glm::vec2(0.0f));
+    auto layoutType = GetStyleValue<Layouts>(parentObject.style, Properties::layout, Layouts::vertical);
+    auto position   = GetStyleValue<glm::vec2>(parentObject.style, Properties::position, glm::vec2(0.0f));
 
     unsigned int spacing = 0;
 
-    for(auto IDs : children) {
+    for(auto IDs : childrenIDs) {
         if(layoutType == Layouts::vertical) {
             auto& childrenObject = guiPool.GetComponent(IDs);
             auto height        = GetStyleValue<unsigned int>(childrenObject.style, Properties::height, 10);
@@ -120,7 +132,7 @@ void quartz::StyleSetupSystem::UpdateLayout(GuiObjectComponent& guiObject, bismu
             auto paddingLeft = GetStyleValue<unsigned int>(childrenObject.style, Properties::padding_left, 0);
 
             childrenObject.style.Set(Properties::position, glm::vec2(position.x + paddingLeft, position.y + spacing + paddingBottom + marginBottom));
-            childrenObject.style.Set(Properties::width, guiObject.style.Get<unsigned int>(Properties::width) - paddingLeft);
+            childrenObject.style.Set(Properties::width, parentObject.style.Get<unsigned int>(Properties::width) - paddingLeft);
 
             spacing += height + paddingTop + paddingBottom + marginTop + marginBottom;
             
@@ -136,7 +148,7 @@ void quartz::StyleSetupSystem::UpdateLayout(GuiObjectComponent& guiObject, bismu
             auto paddingBottom = GetStyleValue<unsigned int>(childrenObject.style, Properties::padding_bottom, 0);
 
             childrenObject.style.Set(Properties::position, glm::vec2(position.x + spacing + paddingLeft + marginLeft, position.y + paddingBottom));
-            childrenObject.style.Set(Properties::height, guiObject.style.Get<unsigned int>(Properties::height) - paddingBottom);
+            childrenObject.style.Set(Properties::height, parentObject.style.Get<unsigned int>(Properties::height) - paddingBottom);
 
             spacing += width + paddingLeft + paddingRight + marginLeft + marginRight;
         }
