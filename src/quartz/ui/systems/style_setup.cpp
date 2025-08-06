@@ -8,12 +8,11 @@ void quartz::StyleSetupSystem::Update(bismuth::Registry& registry) {
 
     std::unordered_map<bismuth::EntityID, std::vector<bismuth::EntityID>> childrenMap;
     auto& denseIDs = objectPool.GetDenseEntities();
-    for(int i = 0; i < denseIDs.size(); i++) {
-        auto& currentID = denseIDs[i];
-        auto& currentComponent = objectPool.GetComponent(currentID);
+    for(bismuth::EntityID id : denseIDs) {
+        auto& currentComponent = objectPool.GetComponent(id);
 
         if(currentComponent.parentID != bismuth::INVALID_INDEX) {
-            childrenMap[currentComponent.parentID].push_back(currentID);
+            childrenMap[currentComponent.parentID].push_back(id);
         }
     }
 
@@ -83,7 +82,7 @@ void quartz::StyleSetupSystem::Update(bismuth::Registry& registry) {
                 }
 
                 float x = xPos + ch.bearing.x;
-                float y = pos.y - (ch.size.y - ch.bearing.y) + (mesh.fontAtlas->height * 0.3f);
+                float y = pos.y - ch.bearing.y + mesh.fontAtlas->height;
                 
                 mesh.vertices.push_back(glm::vec3(x,             y,             object.zLayer + 0.001));
                 mesh.vertices.push_back(glm::vec3(x + ch.size.x, y,             object.zLayer + 0.001));

@@ -101,22 +101,12 @@ class FontManager {
                 FT_GlyphSlot glyph = face->glyph;
 
                 if(glyph->bitmap.buffer) {
-                    // Flip letters so they stand the right way
-                    std::vector<unsigned char> flippedBuffer(glyph->bitmap.rows * glyph->bitmap.width);
-                    for (unsigned int row = 0; row < glyph->bitmap.rows; ++row) {
-                        memcpy(
-                            flippedBuffer.data() + row * glyph->bitmap.width,
-                            glyph->bitmap.buffer + (glyph->bitmap.rows - 1 - row) * glyph->bitmap.width,
-                            glyph->bitmap.width
-                        );
-                    }
-
                     glTexSubImage2D(
                         GL_TEXTURE_2D, 0,
                         xOffset, 0, 
                         glyph->bitmap.width, glyph->bitmap.rows, 
                         GL_RED, GL_UNSIGNED_BYTE, 
-                        flippedBuffer.data()
+                        glyph->bitmap.buffer
                     );
 
                     Character ch = {

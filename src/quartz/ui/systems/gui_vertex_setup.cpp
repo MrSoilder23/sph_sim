@@ -5,7 +5,7 @@ void quartz::GuiVertexSetupSystem::Update(bismuth::Registry& registry) {
     auto& textMeshPool = registry.GetComponentPool<TextMeshComponent>();
 
     const std::vector<GLuint> index = {
-        2,0,1, 2,1,3
+        0,2,3, 0,3,1
     };
     
     auto guiBegin = guiMeshPool.ComponentBegin();
@@ -49,7 +49,7 @@ void quartz::GuiVertexSetupSystem::Update(bismuth::Registry& registry) {
         }
         
         std::vector<GLuint> tempIndex = {
-            2,0,1, 2,1,3
+            0,2,3, 0,3,1
         };
         std::vector<GLuint> textIndex;
         for(int i = 0; i < mesh->vertices.size()/4; i++) {

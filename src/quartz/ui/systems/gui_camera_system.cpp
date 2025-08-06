@@ -11,9 +11,9 @@ void quartz::GuiCameraSystem::Update(bismuth::Registry& registry) {
             guiCamera->projectionMatrix = glm::ortho(
                 0.0f, 
                 static_cast<float>(guiCamera->width), 
-                0.0f, 
                 static_cast<float>(guiCamera->height),
-                -1.0f, 
+                0.0f, 
+                -1.0f,
                 1.0f
             );
             guiCamera->isDirty = false;
