@@ -24,13 +24,13 @@ void quartz::StyleSetupSystem::Update(bismuth::Registry& registry) {
         glm::vec4 color     = GetStyleValue<glm::vec4>(object.style, Properties::background_color, glm::vec4(1.0f));
         
         glm::vec2 pos       = GetStyleValue<glm::vec2>(object.style, Properties::position, glm::vec2(0.0f));
-        unsigned int width  = GetStyleValue<unsigned int>(object.style, Properties::width, 10);
-        unsigned int height = GetStyleValue<unsigned int>(object.style, Properties::height, 10);
+        unsigned int width  = GetStyleValue<Dimension>(object.style, Properties::width, Dimension{10u, Unit::Pixels}).resolve(0);
+        unsigned int height = GetStyleValue<Dimension>(object.style, Properties::height, Dimension{10u, Unit::Pixels}).resolve(0);
 
-        auto paddingLeft   = GetStyleValue<unsigned int>(object.style, Properties::padding_left, 0);
-        auto paddingRight  = GetStyleValue<unsigned int>(object.style, Properties::padding_right, 0);
-        auto paddingTop    = GetStyleValue<unsigned int>(object.style, Properties::padding_top, 0);
-        auto paddingBottom = GetStyleValue<unsigned int>(object.style, Properties::padding_bottom, 0);
+        auto paddingLeft   = GetStyleValue<Dimension>(object.style, Properties::padding_left, Dimension{0u, Unit::Pixels}).resolve(0);
+        auto paddingRight  = GetStyleValue<Dimension>(object.style, Properties::padding_right, Dimension{0u, Unit::Pixels}).resolve(0);
+        auto paddingTop    = GetStyleValue<Dimension>(object.style, Properties::padding_top, Dimension{0u, Unit::Pixels}).resolve(0);
+        auto paddingBottom = GetStyleValue<Dimension>(object.style, Properties::padding_bottom, Dimension{0u, Unit::Pixels}).resolve(0);
 
         mesh.vertices = {
             glm::vec3(pos.x - paddingLeft,          pos.y - paddingBottom,       object.zLayer),
@@ -49,7 +49,7 @@ void quartz::StyleSetupSystem::Update(bismuth::Registry& registry) {
             glm::vec4 color = GetStyleValue<glm::vec4>(object.style, Properties::color, glm::vec4(1.0f));
 
             std::string fontPath  = GetStyleValue<std::string>(object.style, Properties::font_family, "assets/fonts/arial.ttf");
-            unsigned int fontSize = GetStyleValue<unsigned int>(object.style, Properties::font_size, 24);
+            unsigned int fontSize = GetStyleValue<Dimension>(object.style, Properties::font_size, Dimension{24u, Unit::Pixels}).resolve(0);
 
             try {
                 mesh.fontAtlas = &mFontManager.GetFont(fontPath, fontSize);
@@ -121,33 +121,33 @@ void quartz::StyleSetupSystem::UpdateLayout(
     for(auto IDs : childrenIDs) {
         if(layoutType == Layouts::vertical) {
             auto& childrenObject = guiPool.GetComponent(IDs);
-            auto height        = GetStyleValue<unsigned int>(childrenObject.style, Properties::height, 10);
+            auto height        = GetStyleValue<Dimension>(childrenObject.style, Properties::height, Dimension{10u, Unit::Pixels}).resolve(0);
 
-            auto paddingTop    = GetStyleValue<unsigned int>(childrenObject.style, Properties::padding_top, 0);
-            auto paddingBottom = GetStyleValue<unsigned int>(childrenObject.style, Properties::padding_bottom, 0);
-            auto marginTop     = GetStyleValue<unsigned int>(childrenObject.style, Properties::margin_top, 0);
-            auto marginBottom  = GetStyleValue<unsigned int>(childrenObject.style, Properties::margin_bottom, 0);
+            auto paddingTop    = GetStyleValue<Dimension>(childrenObject.style, Properties::padding_top, Dimension{0u, Unit::Pixels}).resolve(0);
+            auto paddingBottom = GetStyleValue<Dimension>(childrenObject.style, Properties::padding_bottom, Dimension{0u, Unit::Pixels}).resolve(0);
+            auto marginTop     = GetStyleValue<Dimension>(childrenObject.style, Properties::margin_top, Dimension{0u, Unit::Pixels}).resolve(0);
+            auto marginBottom  = GetStyleValue<Dimension>(childrenObject.style, Properties::margin_bottom, Dimension{0u, Unit::Pixels}).resolve(0);
 
-            auto paddingLeft = GetStyleValue<unsigned int>(childrenObject.style, Properties::padding_left, 0);
+            auto paddingLeft = GetStyleValue<Dimension>(childrenObject.style, Properties::padding_left, Dimension{0u, Unit::Pixels}).resolve(0);
 
             childrenObject.style.Set(Properties::position, glm::vec2(position.x + paddingLeft, position.y + spacing + paddingBottom + marginBottom));
-            childrenObject.style.Set(Properties::width, parentObject.style.Get<unsigned int>(Properties::width) - paddingLeft);
+            childrenObject.style.Set(Properties::width, Dimension{parentObject.style.Get<Dimension>(Properties::width).resolve(0) - paddingLeft, Unit::Pixels});
 
             spacing += height + paddingTop + paddingBottom + marginTop + marginBottom;
             
         } else if(layoutType == Layouts::horizontal) {
             auto& childrenObject = guiPool.GetComponent(IDs);
-            auto width        = GetStyleValue<unsigned int>(childrenObject.style, Properties::width, 10);
+            auto width        = GetStyleValue<Dimension>(childrenObject.style, Properties::width, Dimension{10u, Unit::Pixels}).resolve(0);
 
-            auto paddingLeft  = GetStyleValue<unsigned int>(childrenObject.style, Properties::padding_left, 0);
-            auto paddingRight = GetStyleValue<unsigned int>(childrenObject.style, Properties::padding_right, 0);
-            auto marginLeft   = GetStyleValue<unsigned int>(childrenObject.style, Properties::margin_left, 0);
-            auto marginRight  = GetStyleValue<unsigned int>(childrenObject.style, Properties::margin_right, 0);
+            auto paddingLeft  = GetStyleValue<Dimension>(childrenObject.style, Properties::padding_left, Dimension{0u, Unit::Pixels}).resolve(0);
+            auto paddingRight = GetStyleValue<Dimension>(childrenObject.style, Properties::padding_right,  Dimension{0u, Unit::Pixels}).resolve(0);
+            auto marginLeft   = GetStyleValue<Dimension>(childrenObject.style, Properties::margin_left,  Dimension{0u, Unit::Pixels}).resolve(0);
+            auto marginRight  = GetStyleValue<Dimension>(childrenObject.style, Properties::margin_right,  Dimension{0u, Unit::Pixels}).resolve(0);
 
-            auto paddingBottom = GetStyleValue<unsigned int>(childrenObject.style, Properties::padding_bottom, 0);
+            auto paddingBottom = GetStyleValue<Dimension>(childrenObject.style, Properties::padding_bottom,  Dimension{0u, Unit::Pixels}).resolve(0);
 
             childrenObject.style.Set(Properties::position, glm::vec2(position.x + spacing + paddingLeft + marginLeft, position.y + paddingBottom));
-            childrenObject.style.Set(Properties::height, parentObject.style.Get<unsigned int>(Properties::height) - paddingBottom);
+            childrenObject.style.Set(Properties::height, Dimension{parentObject.style.Get<Dimension>(Properties::height).resolve(0) - paddingBottom, Unit::Pixels});
 
             spacing += width + paddingLeft + paddingRight + marginLeft + marginRight;
         }

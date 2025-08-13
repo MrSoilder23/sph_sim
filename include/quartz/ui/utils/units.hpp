@@ -10,11 +10,32 @@ enum class Unit {
     Auto
 };
 
-struct Value {
+struct Dimension {
     std::variant<float, unsigned int> value;
     Unit unit = Unit::Pixels;
 
-    Value(unsigned int value = 0, Unit unit = Unit::Pixels) : value(value), unit(unit) {}
-    Value(float value, Unit unit = Unit::Percent) : value(value), unit(unit) {}
+    Dimension(unsigned int val, Unit u = Unit::Pixels) : value(val), unit(u) {}
+    Dimension(float val, Unit u = Unit::Percent) : value(val), unit(u) {}
+
+    unsigned int resolve(unsigned int parent) const {
+        switch (unit) {
+        case Unit::Pixels:
+            return std::holds_alternative<unsigned int>(value)
+                ? std::get<unsigned int>(value)
+                : static_cast<unsigned int>(std::get<float>(value));
+
+        case Unit::Percent:
+            return std::holds_alternative<float>(value)
+                ? (static_cast<unsigned int>(std::get<float>(value) * parent / 100.0f))
+                : (static_cast<unsigned int>(std::get<unsigned int>(value)) * parent / 100.0f);
+
+        case Unit::Auto:
+            return parent;
+            
+        default:
+            return 0u;
+        }
+    }
 };
+
 }
