@@ -156,7 +156,7 @@ void FluidApp::InitEntities() {
 
     GuiObjectComponent guiObject1;
     guiObject1.style.Set(quartz::Properties::width,    quartz::Dimension{200u, quartz::Unit::Pixels});
-    guiObject1.style.Set(quartz::Properties::height,   quartz::Dimension{50u, quartz::Unit::Pixels});
+    guiObject1.style.Set(quartz::Properties::height,   quartz::Dimension{30.0f, quartz::Unit::Percent});
     guiObject1.style.Set(quartz::Properties::background_color, glm::vec4(1.0f, 1.0f, 0.0f, 1.0f));
     guiObject1.zLayer = -0.4f;
 

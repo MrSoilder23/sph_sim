@@ -16,8 +16,14 @@ void quartz::StyleSetupSystem::Update(bismuth::Registry& registry) {
         }
     }
 
+    auto beginIt = objectPool.ComponentBegin();
+    auto endIt   = objectPool.ComponentEnd();
+    for(auto it = beginIt; it != endIt; ++it) {
+        ComputeSizes(objectPool, *it);
+    }
+
     for(auto& [parentID, children] : childrenMap) {
-        UpdateLayout(objectPool, children, parentID);
+        ComputeLayout(objectPool, children, parentID);
     }
 
     for(auto [entity, object, mesh] : objectView) {
@@ -106,7 +112,59 @@ void quartz::StyleSetupSystem::Update(bismuth::Registry& registry) {
 }
 
 // Private
-void quartz::StyleSetupSystem::UpdateLayout(
+void quartz::StyleSetupSystem::ComputeSizes(
+    bismuth::ComponentPool<GuiObjectComponent>& guiPool, 
+    GuiObjectComponent                        & currentObject
+) {
+    unsigned int defaultHeight = 0;
+    unsigned int defaultWidth  = 0;
+
+    Layouts layoutType = Layouts::absolute;
+    
+    if(currentObject.parentID != bismuth::INVALID_INDEX) {
+        auto& parentObject = guiPool.GetComponent(currentObject.parentID);
+
+        layoutType    = GetStyleValue<Layouts>(parentObject.style, Properties::layout, Layouts::vertical);
+        
+        defaultHeight = GetStyleValue<Dimension>(parentObject.style, Properties::height, Dimension{10u}).resolve(0);
+        defaultWidth  = GetStyleValue<Dimension>(parentObject.style, Properties::width,  Dimension{10u}).resolve(0);
+    }
+
+    auto height   = GetStyleValue<Dimension>(currentObject.style, Properties::height,         Dimension{10u}).resolve(defaultHeight);
+    auto width    = GetStyleValue<Dimension>(currentObject.style, Properties::width,          Dimension{10u}).resolve(defaultWidth);
+    
+    auto paddingR = GetStyleValue<Dimension>(currentObject.style, Properties::padding_right,  Dimension{0u}).resolve(defaultWidth);
+    auto paddingL = GetStyleValue<Dimension>(currentObject.style, Properties::padding_left,   Dimension{0u}).resolve(defaultWidth);
+    auto paddingT = GetStyleValue<Dimension>(currentObject.style, Properties::padding_top,    Dimension{0u}).resolve(defaultHeight);
+    auto paddingB = GetStyleValue<Dimension>(currentObject.style, Properties::padding_bottom, Dimension{0u}).resolve(defaultHeight);
+
+    auto marginR  = GetStyleValue<Dimension>(currentObject.style, Properties::margin_right,   Dimension{0u}).resolve(defaultWidth);
+    auto marginL  = GetStyleValue<Dimension>(currentObject.style, Properties::margin_left,    Dimension{0u}).resolve(defaultWidth);
+    auto marginT  = GetStyleValue<Dimension>(currentObject.style, Properties::margin_top,     Dimension{0u}).resolve(defaultHeight);
+    auto marginB  = GetStyleValue<Dimension>(currentObject.style, Properties::margin_bottom,  Dimension{0u}).resolve(defaultHeight);
+
+    if(layoutType == Layouts::vertical) {
+        width = defaultWidth - paddingL;
+    } else if(layoutType == Layouts::horizontal) {
+        height = defaultHeight - paddingB;
+    }
+
+    currentObject.style.Set(Properties::height, Dimension{height});
+    currentObject.style.Set(Properties::width,  Dimension{width});
+
+    // Setting values to pixels, because they might be in different unit which requires parent.
+    currentObject.style.Set(Properties::padding_right,  Dimension{paddingR});
+    currentObject.style.Set(Properties::padding_left,   Dimension{paddingL});
+    currentObject.style.Set(Properties::padding_top,    Dimension{paddingT});
+    currentObject.style.Set(Properties::padding_bottom, Dimension{paddingB});
+
+    currentObject.style.Set(Properties::margin_right,   Dimension{marginR});
+    currentObject.style.Set(Properties::margin_left,    Dimension{marginL});
+    currentObject.style.Set(Properties::margin_top,     Dimension{marginT});
+    currentObject.style.Set(Properties::margin_bottom,  Dimension{marginB});
+}
+
+void quartz::StyleSetupSystem::ComputeLayout(
     bismuth::ComponentPool<GuiObjectComponent>& guiPool,
     std::vector<bismuth::EntityID> const&       childrenIDs,
     bismuth::EntityID              const&       currentID
@@ -131,7 +189,6 @@ void quartz::StyleSetupSystem::UpdateLayout(
             auto paddingLeft = GetStyleValue<Dimension>(childrenObject.style, Properties::padding_left,     Dimension{0u, Unit::Pixels}).resolve(0);
 
             childrenObject.style.Set(Properties::position, glm::vec2(position.x + paddingLeft, position.y + spacing + paddingBottom + marginBottom));
-            childrenObject.style.Set(Properties::width, Dimension{parentObject.style.Get<Dimension>(Properties::width).resolve(0) - paddingLeft, Unit::Pixels});
 
             spacing += height + paddingTop + paddingBottom + marginTop + marginBottom;
             
@@ -147,7 +204,6 @@ void quartz::StyleSetupSystem::UpdateLayout(
             auto paddingBottom = GetStyleValue<Dimension>(childrenObject.style, Properties::padding_bottom, Dimension{0u, Unit::Pixels}).resolve(0);
 
             childrenObject.style.Set(Properties::position, glm::vec2(position.x + spacing + paddingLeft + marginLeft, position.y + paddingBottom));
-            childrenObject.style.Set(Properties::height, Dimension{parentObject.style.Get<Dimension>(Properties::height).resolve(0) - paddingBottom, Unit::Pixels});
 
             spacing += width + paddingLeft + paddingRight + marginLeft + marginRight;
         }

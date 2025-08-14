@@ -24,7 +24,12 @@ class StyleSetupSystem {
             return style.Has(property) ? style.Get<Type>(property) : defaultValue;
         }
 
-        void UpdateLayout(
+        void ComputeSizes(
+            bismuth::ComponentPool<GuiObjectComponent>& guiPool, 
+            GuiObjectComponent                        & currentObject
+        );
+
+        void ComputeLayout(
             bismuth::ComponentPool<GuiObjectComponent>& guiPool,
             std::vector<bismuth::EntityID> const&       childrenIDs,
             bismuth::EntityID              const&       currentID
