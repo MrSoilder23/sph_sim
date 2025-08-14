@@ -208,7 +208,7 @@ void FluidApp::InitEntities() {
     mRegistry.EmplaceComponent<GuiMeshComponent>(guiObjectEntity4);
     mRegistry.EmplaceComponent<TextMeshComponent>(guiObjectEntity4, textMesh);
 
-    quartz::StyleSetupSystem styleSystem(mFontManager);
+    quartz::StyleSetupSystem styleSystem(mFontManager, mWindowData.mScreenWidth, mWindowData.mScreenHeight);
     quartz::GuiVertexSetupSystem guiVertexSystem;
     styleSystem.Update(mRegistry);
     guiVertexSystem.Update(mRegistry);

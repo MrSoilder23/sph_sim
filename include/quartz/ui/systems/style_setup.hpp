@@ -14,7 +14,11 @@ namespace quartz {
 
 class StyleSetupSystem {
     public:
-        StyleSetupSystem(FontManager& fontManager) : mFontManager(fontManager) {}
+        StyleSetupSystem(
+            FontManager& fontManager,
+            unsigned int screenWidth,
+            unsigned int screenHeight
+        ) : mFontManager(fontManager), mScreenWidth(screenWidth), mScreenHeight(screenHeight) {}
 
         void Update(bismuth::Registry& registry);
 
@@ -37,6 +41,9 @@ class StyleSetupSystem {
 
     private:
         FontManager& mFontManager;
+
+        unsigned int mScreenWidth;
+        unsigned int mScreenHeight;
 };
 
 }

@@ -116,8 +116,8 @@ void quartz::StyleSetupSystem::ComputeSizes(
     bismuth::ComponentPool<GuiObjectComponent>& guiPool, 
     GuiObjectComponent                        & currentObject
 ) {
-    unsigned int defaultHeight = 0;
-    unsigned int defaultWidth  = 0;
+    unsigned int defaultHeight = mScreenHeight;
+    unsigned int defaultWidth  = mScreenWidth;
 
     Layouts layoutType = Layouts::absolute;
     
@@ -143,6 +143,8 @@ void quartz::StyleSetupSystem::ComputeSizes(
     auto marginT  = GetStyleValue<Dimension>(currentObject.style, Properties::margin_top,     Dimension{0u}).resolve(defaultHeight);
     auto marginB  = GetStyleValue<Dimension>(currentObject.style, Properties::margin_bottom,  Dimension{0u}).resolve(defaultHeight);
 
+    auto fontSize = GetStyleValue<Dimension>(currentObject.style, Properties::font_size,      Dimension{24u}).resolve(defaultHeight);
+
     if(layoutType == Layouts::vertical) {
         width = defaultWidth - paddingL;
     } else if(layoutType == Layouts::horizontal) {
@@ -162,6 +164,8 @@ void quartz::StyleSetupSystem::ComputeSizes(
     currentObject.style.Set(Properties::margin_left,    Dimension{marginL});
     currentObject.style.Set(Properties::margin_top,     Dimension{marginT});
     currentObject.style.Set(Properties::margin_bottom,  Dimension{marginB});
+    
+    currentObject.style.Set(Properties::font_size,      Dimension{fontSize});
 }
 
 void quartz::StyleSetupSystem::ComputeLayout(
