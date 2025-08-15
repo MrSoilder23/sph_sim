@@ -164,7 +164,7 @@ void FluidApp::InitEntities() {
     guiObject2.style.Set(quartz::Properties::width,    quartz::Dimension{200u, quartz::Unit::Pixels});
     guiObject2.style.Set(quartz::Properties::height,   quartz::Dimension{50u, quartz::Unit::Pixels});
 
-    guiObject2.style.Set(quartz::Properties::margin_bottom,  quartz::Dimension{30u, quartz::Unit::Pixels});
+    guiObject2.style.Set(quartz::Properties::margin_top,  quartz::Dimension{30u, quartz::Unit::Pixels});
     guiObject2.style.Set(quartz::Properties::padding_top,    quartz::Dimension{30u, quartz::Unit::Pixels});
     guiObject2.style.Set(quartz::Properties::padding_bottom, quartz::Dimension{30u, quartz::Unit::Pixels});
     
@@ -182,6 +182,7 @@ void FluidApp::InitEntities() {
     guiObject4.style.Set(quartz::Properties::color,            glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
     guiObject4.style.Set(quartz::Properties::height,           quartz::Dimension{50u, quartz::Unit::Pixels});
     guiObject4.style.Set(quartz::Properties::padding_left,     quartz::Dimension{10u, quartz::Unit::Pixels});
+    guiObject4.style.Set(quartz::Properties::padding_top,      quartz::Dimension{30u, quartz::Unit::Pixels});
     guiObject4.zLayer = -0.3f;
 
     TextMeshComponent textMesh;

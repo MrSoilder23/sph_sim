@@ -42,10 +42,10 @@ void quartz::StyleSetupSystem::Update(bismuth::Registry& registry) {
         auto posY = pos.y.resolve(0);
 
         mesh.vertices = {
-            glm::vec3(posX - paddingLeft,          posY - paddingBottom,       object.zLayer),
-            glm::vec3(posX + width + paddingRight, posY - paddingBottom,       object.zLayer),
-            glm::vec3(posX - paddingLeft,          posY + height + paddingTop, object.zLayer),
-            glm::vec3(posX + width + paddingRight, posY + height + paddingTop, object.zLayer),
+            glm::vec3(posX - paddingLeft,          posY - paddingTop,             object.zLayer),
+            glm::vec3(posX + width + paddingRight, posY - paddingTop,             object.zLayer),
+            glm::vec3(posX - paddingLeft,          posY + height + paddingBottom, object.zLayer),
+            glm::vec3(posX + width + paddingRight, posY + height + paddingBottom, object.zLayer),
         };
 
         mesh.colors = {
@@ -152,7 +152,7 @@ void quartz::StyleSetupSystem::ComputeSizes(
     if(layoutType == Layouts::vertical) {
         width = defaultWidth - paddingL;
     } else if(layoutType == Layouts::horizontal) {
-        height = defaultHeight - paddingB;
+        height = defaultHeight - paddingT;
     }
 
     currentObject.style.Set(Properties::height, Dimension{height});
@@ -214,7 +214,9 @@ void quartz::StyleSetupSystem::ComputeLayout(
 
             auto paddingLeft = GetStyleValue<Dimension>(childrenObject.style, Properties::padding_left,     Dimension{0u, Unit::Pixels}).resolve(0);
 
-            childrenObject.style.Set(Properties::position, DimensionVec2{posX + paddingLeft, posY + spacing + paddingBottom + marginBottom});
+            childrenObject.style.Set(Properties::position, 
+                DimensionVec2{posX + paddingLeft, 
+                              posY + spacing + paddingTop + marginTop});
 
             spacing += height + paddingTop + paddingBottom + marginTop + marginBottom;
             
@@ -227,9 +229,11 @@ void quartz::StyleSetupSystem::ComputeLayout(
             auto marginLeft   = GetStyleValue<Dimension>(childrenObject.style, Properties::margin_left,   Dimension{0u, Unit::Pixels}).resolve(0);
             auto marginRight  = GetStyleValue<Dimension>(childrenObject.style, Properties::margin_right,  Dimension{0u, Unit::Pixels}).resolve(0);
 
-            auto paddingBottom = GetStyleValue<Dimension>(childrenObject.style, Properties::padding_bottom, Dimension{0u, Unit::Pixels}).resolve(0);
+            auto paddingTop = GetStyleValue<Dimension>(childrenObject.style, Properties::padding_top, Dimension{0u, Unit::Pixels}).resolve(0);
 
-            childrenObject.style.Set(Properties::position, DimensionVec2{posX + spacing + paddingLeft + marginLeft, posY + paddingBottom});
+            childrenObject.style.Set(Properties::position, 
+                DimensionVec2{posX + spacing + paddingLeft + marginLeft, 
+                              posY + paddingTop});
 
             spacing += width + paddingLeft + paddingRight + marginLeft + marginRight;
         }
