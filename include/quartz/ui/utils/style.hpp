@@ -9,6 +9,7 @@
 #include <glm/glm.hpp>
 
 // Own libraries
+#include "quartz/ui/utils/dimension_vec2.hpp"
 #include "quartz/ui/utils/properties.hpp"
 #include "quartz/ui/utils/layouts.hpp"
 #include "quartz/ui/utils/units.hpp"
@@ -17,7 +18,7 @@ namespace quartz {
 
 class Style {
     public:
-        using StyleValue = std::variant<std::monostate, Layouts, std::string, glm::vec4, glm::vec2, Dimension>;
+        using StyleValue = std::variant<std::monostate, Layouts, std::string, glm::vec4, Dimension, DimensionVec2>;
     
         void Set(Properties property, StyleValue value) {
             mData[property] = value;

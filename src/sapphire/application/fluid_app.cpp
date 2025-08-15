@@ -145,7 +145,7 @@ void FluidApp::InitEntities() {
     bismuth::EntityID guiObjectEntity4 = mRegistry.CreateEntity();
     
     GuiObjectComponent guiObject;
-    guiObject.style.Set(quartz::Properties::position, glm::vec2(mWindowData.mScreenWidth-200, 0.0f));
+    guiObject.style.Set(quartz::Properties::position, quartz::DimensionVec2{30.0f, 0.0f});
     guiObject.style.Set(quartz::Properties::width,    quartz::Dimension{200u, quartz::Unit::Pixels});
     guiObject.style.Set(quartz::Properties::height,   quartz::Dimension{mWindowData.mScreenHeight, quartz::Unit::Pixels});
     

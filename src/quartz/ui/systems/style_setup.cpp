@@ -29,7 +29,7 @@ void quartz::StyleSetupSystem::Update(bismuth::Registry& registry) {
     for(auto [entity, object, mesh] : objectView) {
         glm::vec4 color     = GetStyleValue<glm::vec4>(object.style, Properties::background_color, glm::vec4(1.0f));
         
-        glm::vec2 pos       = GetStyleValue<glm::vec2>(object.style, Properties::position, glm::vec2(0.0f));
+        auto pos            = GetStyleValue<DimensionVec2>(object.style, Properties::position, DimensionVec2{0u, 0u});
         unsigned int width  = GetStyleValue<Dimension>(object.style, Properties::width,  Dimension{10u, Unit::Pixels}).resolve(0);
         unsigned int height = GetStyleValue<Dimension>(object.style, Properties::height, Dimension{10u, Unit::Pixels}).resolve(0);
 
@@ -38,11 +38,14 @@ void quartz::StyleSetupSystem::Update(bismuth::Registry& registry) {
         auto paddingTop    = GetStyleValue<Dimension>(object.style, Properties::padding_top,    Dimension{0u, Unit::Pixels}).resolve(0);
         auto paddingBottom = GetStyleValue<Dimension>(object.style, Properties::padding_bottom, Dimension{0u, Unit::Pixels}).resolve(0);
 
+        auto posX = pos.x.resolve(0);
+        auto posY = pos.y.resolve(0);
+
         mesh.vertices = {
-            glm::vec3(pos.x - paddingLeft,          pos.y - paddingBottom,       object.zLayer),
-            glm::vec3(pos.x + width + paddingRight, pos.y - paddingBottom,       object.zLayer),
-            glm::vec3(pos.x - paddingLeft,          pos.y + height + paddingTop, object.zLayer),
-            glm::vec3(pos.x + width + paddingRight, pos.y + height + paddingTop, object.zLayer),
+            glm::vec3(posX - paddingLeft,          posY - paddingBottom,       object.zLayer),
+            glm::vec3(posX + width + paddingRight, posY - paddingBottom,       object.zLayer),
+            glm::vec3(posX - paddingLeft,          posY + height + paddingTop, object.zLayer),
+            glm::vec3(posX + width + paddingRight, posY + height + paddingTop, object.zLayer),
         };
 
         mesh.colors = {
@@ -64,8 +67,8 @@ void quartz::StyleSetupSystem::Update(bismuth::Registry& registry) {
                 continue;
             }
 
-            glm::vec2 pos = GetStyleValue<glm::vec2>(object.style, Properties::position, glm::vec2(0.0f));
-            float xPos = pos.x;
+            auto pos = GetStyleValue<DimensionVec2>(object.style, Properties::position, DimensionVec2{0u, 0u});
+            float xPos = pos.x.resolve(0);
             FT_UInt prevGlyphIndex = 0;
 
             for(char c : mesh.content) {
@@ -88,7 +91,7 @@ void quartz::StyleSetupSystem::Update(bismuth::Registry& registry) {
                 }
 
                 float x = xPos + ch.bearing.x;
-                float y = pos.y - ch.bearing.y + mesh.fontAtlas->height;
+                float y = pos.y.resolve(0) - ch.bearing.y + mesh.fontAtlas->height;
                 
                 mesh.vertices.push_back(glm::vec3(x,             y,             object.zLayer + 0.001));
                 mesh.vertices.push_back(glm::vec3(x + ch.size.x, y,             object.zLayer + 0.001));
@@ -130,6 +133,7 @@ void quartz::StyleSetupSystem::ComputeSizes(
         defaultWidth  = GetStyleValue<Dimension>(parentObject.style, Properties::width,  Dimension{10u}).resolve(0);
     }
 
+    //                                                            Properties                  Default values (Pixels)
     auto height   = GetStyleValue<Dimension>(currentObject.style, Properties::height,         Dimension{10u}).resolve(defaultHeight);
     auto width    = GetStyleValue<Dimension>(currentObject.style, Properties::width,          Dimension{10u}).resolve(defaultWidth);
     
@@ -173,10 +177,28 @@ void quartz::StyleSetupSystem::ComputeLayout(
     std::vector<bismuth::EntityID> const&       childrenIDs,
     bismuth::EntityID              const&       currentID
 ) {
+    unsigned int defaultHeight = mScreenHeight;
+    unsigned int defaultWidth  = mScreenWidth;
+
     auto& parentObject = guiPool.GetComponent(currentID);
 
+    if(parentObject.parentID != bismuth::INVALID_INDEX) {
+        auto& parentObject2 = guiPool.GetComponent(currentID);
+
+        auto height = GetStyleValue<Dimension>(parentObject2.style, Properties::height, Dimension{10u, Unit::Pixels}).resolve(0);
+        auto width  = GetStyleValue<Dimension>(parentObject2.style, Properties::width,  Dimension{10u, Unit::Pixels}).resolve(0);
+
+        defaultHeight = height;
+        defaultWidth  = width;
+    }
+
     auto layoutType = GetStyleValue<Layouts>(parentObject.style, Properties::layout, Layouts::vertical);
-    auto position   = GetStyleValue<glm::vec2>(parentObject.style, Properties::position, glm::vec2(0.0f));
+    auto position   = GetStyleValue<DimensionVec2>(parentObject.style, Properties::position, DimensionVec2{0u, 0u});
+
+    unsigned int posX = position.x.resolve(defaultWidth);
+    unsigned int posY = position.y.resolve(defaultHeight);
+
+    parentObject.style.Set(Properties::position, DimensionVec2{posX, posY});
 
     unsigned int spacing = 0;
 
@@ -192,7 +214,7 @@ void quartz::StyleSetupSystem::ComputeLayout(
 
             auto paddingLeft = GetStyleValue<Dimension>(childrenObject.style, Properties::padding_left,     Dimension{0u, Unit::Pixels}).resolve(0);
 
-            childrenObject.style.Set(Properties::position, glm::vec2(position.x + paddingLeft, position.y + spacing + paddingBottom + marginBottom));
+            childrenObject.style.Set(Properties::position, DimensionVec2{posX + paddingLeft, posY + spacing + paddingBottom + marginBottom});
 
             spacing += height + paddingTop + paddingBottom + marginTop + marginBottom;
             
@@ -207,7 +229,7 @@ void quartz::StyleSetupSystem::ComputeLayout(
 
             auto paddingBottom = GetStyleValue<Dimension>(childrenObject.style, Properties::padding_bottom, Dimension{0u, Unit::Pixels}).resolve(0);
 
-            childrenObject.style.Set(Properties::position, glm::vec2(position.x + spacing + paddingLeft + marginLeft, position.y + paddingBottom));
+            childrenObject.style.Set(Properties::position, DimensionVec2{posX + spacing + paddingLeft + marginLeft, posY + paddingBottom});
 
             spacing += width + paddingLeft + paddingRight + marginLeft + marginRight;
         }
