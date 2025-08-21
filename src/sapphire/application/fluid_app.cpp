@@ -33,13 +33,14 @@ void FluidApp::System(float deltaTime) {
     static quartz::GuiCameraSystem guiCameraSystem;
     static GPUSphereDataSystem gpuToSphereDataSystem(mRegistry);
     static quartz::UiRendererSystem uiRenderer;
+    static quartz::ButtonSystem buttonSystem;
     // static SphereDataSystem sphereDataSystem;
     // static ForceToPosSystem forceToPosSystem;
     // static PosToSpatialSystem posToSpatialSystem;
 
     cameraSystem.Update(mRegistry);
     guiCameraSystem.Update(mRegistry);
-
+    buttonSystem.Update(mRegistry);
     // posToSpatialSystem.Update(mRegistry);
     // sphereDataSystem.Update(mRegistry);
     // forceToPosSystem.Update(mRegistry, deltaTime);
@@ -51,6 +52,15 @@ void FluidApp::System(float deltaTime) {
     // gInstanceRenderer.Update(mRegistry);
 }
 void FluidApp::Event(float deltaTime) {
+    auto& mouse = mRegistry.GetSingleton<MouseStateComponent>();
+    // Reset
+    mouse.leftClicked  = false;
+    mouse.leftPressed  = false;
+    mouse.rightClicked = false;
+    mouse.rightPressed = false;
+
+    mouse.scroll = 0.0f;
+
     SDL_Event e;
 
     while (SDL_PollEvent(&e)) {
@@ -67,7 +77,16 @@ void FluidApp::Event(float deltaTime) {
                 SpawnParticles(mouseX, mouseY);
                 mDataBuffers.UpdateBuffers(mRegistry);
 
+                mouse.leftPressed = true;
+
             }
+        }
+        if(e.type == SDL_EVENT_MOUSE_MOTION) {
+            mouse.position.x = e.motion.x;
+            mouse.position.y = e.motion.y;
+            mouse.delta.x    = e.motion.xrel;
+            mouse.delta.y    = e.motion.yrel;
+
         }
     }
 }
@@ -118,6 +137,9 @@ void FluidApp::FpsCounter(float deltaTime) {
 }
 
 void FluidApp::InitEntities() {
+    // Singleton components
+    mRegistry.EmplaceSingleton<MouseStateComponent>();
+
     // Camera
     bismuth::EntityID cameraEntity = mRegistry.CreateEntity();
     CameraComponent camera;
@@ -177,6 +199,11 @@ void FluidApp::InitEntities() {
     guiObject3.style.Set(quartz::Properties::background_color, glm::vec4(1.0f, 0.5f, 1.0f, 1.0f));
     guiObject3.zLayer = -0.4f;
 
+    ButtonComponent button;
+    button.onClick = [](){
+        std::cout << "asda1231" << std::endl;
+    };
+
     GuiObjectComponent guiObject4;
     guiObject4.style.Set(quartz::Properties::background_color, glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
     guiObject4.style.Set(quartz::Properties::color,            glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
@@ -204,6 +231,7 @@ void FluidApp::InitEntities() {
 
     mRegistry.EmplaceComponent<GuiObjectComponent>(guiObjectEntity3, guiObject3);
     mRegistry.EmplaceComponent<GuiMeshComponent>(guiObjectEntity3);
+    mRegistry.EmplaceComponent<ButtonComponent>(guiObjectEntity3, button);
 
     mRegistry.EmplaceComponent<GuiObjectComponent>(guiObjectEntity4, guiObject4);
     mRegistry.EmplaceComponent<GuiMeshComponent>(guiObjectEntity4);
