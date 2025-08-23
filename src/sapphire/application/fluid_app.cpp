@@ -160,82 +160,230 @@ void FluidApp::InitEntities() {
     mRegistry.EmplaceComponent<GuiCameraComponent>(guiCameraEntity, guiCamera);
 
     // Gui Object
-    bismuth::EntityID guiObjectEntity  = mRegistry.CreateEntity();
-    bismuth::EntityID guiObjectEntity1 = mRegistry.CreateEntity();
-    bismuth::EntityID guiObjectEntity2 = mRegistry.CreateEntity();
-    bismuth::EntityID guiObjectEntity3 = mRegistry.CreateEntity();
-    bismuth::EntityID guiObjectEntity4 = mRegistry.CreateEntity();
+    bismuth::EntityID backgroundEntity = mRegistry.CreateEntity();
+    bismuth::EntityID labelEntity      = mRegistry.CreateEntity();
+
+    bismuth::EntityID horizontalGui1Entity = mRegistry.CreateEntity();
+    bismuth::EntityID horizontalGui2Entity = mRegistry.CreateEntity();
+    bismuth::EntityID horizontalGui3Entity = mRegistry.CreateEntity();
+
+    bismuth::EntityID radiusEntity   = mRegistry.CreateEntity();
+    bismuth::EntityID massEntity     = mRegistry.CreateEntity();
+    bismuth::EntityID velocityEntity = mRegistry.CreateEntity();
     
-    GuiObjectComponent guiObject;
-    guiObject.style.Set(quartz::Properties::position, quartz::DimensionVec2{30.0f, 0.0f});
-    guiObject.style.Set(quartz::Properties::width,    quartz::Dimension{200u, quartz::Unit::Pixels});
-    guiObject.style.Set(quartz::Properties::height,   quartz::Dimension{mWindowData.mScreenHeight, quartz::Unit::Pixels});
+    bismuth::EntityID radiusButtonEntity   = mRegistry.CreateEntity();
+    bismuth::EntityID massButtonEntity     = mRegistry.CreateEntity();
+    bismuth::EntityID velocityButtonEntity = mRegistry.CreateEntity();
+
+    glm::vec4 backgroundColor = {0.13f, 0.13f, 0.13f, 1.0f};
+    glm::vec4 fontColor       = {0.9f, 0.9f, 0.9f, 1.0f};
+
+    float width       = 25.0f;
+    float height      = 100.0f;
+    float paddingLeft = 4.0f;
+
+    float fontSize    = 3.0f;
+    float fontSize2   = 2.5f;
+
+    GuiObjectComponent background;
+    background.style.Set(quartz::Properties::position,            quartz::DimensionVec2{100.0f-(width-paddingLeft), 0.0f});
+    background.style.Set(quartz::Properties::width,               quartz::Dimension{width, quartz::Unit::Percent});
+    background.style.Set(quartz::Properties::height,              quartz::Dimension{height, quartz::Unit::Percent});
+
+    background.style.Set(quartz::Properties::padding_left,        quartz::Dimension{paddingLeft, quartz::Unit::Percent});
+    background.style.Set(quartz::Properties::background_color,    backgroundColor);
     
-    guiObject.style.Set(quartz::Properties::padding_left, quartz::Dimension{30u, quartz::Unit::Pixels});
+    background.zLayer = -0.5f;
 
-    guiObject.style.Set(quartz::Properties::background_color, glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
-    guiObject.zLayer = -0.5f;
 
-    GuiObjectComponent guiObject1;
-    guiObject1.style.Set(quartz::Properties::width,    quartz::Dimension{200u, quartz::Unit::Pixels});
-    guiObject1.style.Set(quartz::Properties::height,   quartz::Dimension{30.0f, quartz::Unit::Percent});
-    guiObject1.style.Set(quartz::Properties::background_color, glm::vec4(1.0f, 1.0f, 0.0f, 1.0f));
-    guiObject1.zLayer = -0.4f;
-
-    GuiObjectComponent guiObject2;
-    guiObject2.style.Set(quartz::Properties::width,    quartz::Dimension{200u, quartz::Unit::Pixels});
-    guiObject2.style.Set(quartz::Properties::height,   quartz::Dimension{50u, quartz::Unit::Pixels});
-
-    guiObject2.style.Set(quartz::Properties::margin_top,  quartz::Dimension{30u, quartz::Unit::Pixels});
-    guiObject2.style.Set(quartz::Properties::padding_top,    quartz::Dimension{30u, quartz::Unit::Pixels});
-    guiObject2.style.Set(quartz::Properties::padding_bottom, quartz::Dimension{30u, quartz::Unit::Pixels});
+    GuiObjectComponent labelObject;
+    labelObject.style.Set(quartz::Properties::height,             quartz::Dimension{3.6f, quartz::Unit::Percent});
+    labelObject.style.Set(quartz::Properties::margin_top,         quartz::Dimension{3.0f, quartz::Unit::Percent});
+    labelObject.style.Set(quartz::Properties::margin_bottom,      quartz::Dimension{1.5f, quartz::Unit::Percent});
     
-    guiObject2.style.Set(quartz::Properties::background_color, glm::vec4(1.0f, 0.0f, 1.0f, 1.0f));
-    guiObject2.zLayer = -0.4f;
+    labelObject.style.Set(quartz::Properties::font_size,          quartz::Dimension{fontSize, quartz::Unit::Percent});
+    labelObject.style.Set(quartz::Properties::background_color,   backgroundColor);
+    labelObject.style.Set(quartz::Properties::color,              fontColor);
 
-    GuiObjectComponent guiObject3;
-    guiObject3.style.Set(quartz::Properties::width,    quartz::Dimension{200u, quartz::Unit::Pixels});
-    guiObject3.style.Set(quartz::Properties::height,   quartz::Dimension{50u, quartz::Unit::Pixels});
-    guiObject3.style.Set(quartz::Properties::background_color, glm::vec4(1.0f, 0.5f, 1.0f, 1.0f));
-    guiObject3.zLayer = -0.4f;
+    labelObject.zLayer = -0.4f;
 
-    ButtonComponent button;
-    button.onClick = [](){
-        std::cout << "asda1231" << std::endl;
+    TextMeshComponent label;
+    label.content = "Particle Settings";
+
+    // Horizontal panels
+    GuiObjectComponent horizontalGui1;
+    horizontalGui1.style.Set(quartz::Properties::height,          quartz::Dimension{5.0f, quartz::Unit::Percent});
+    horizontalGui1.style.Set(quartz::Properties::margin_top,      quartz::Dimension{1.5f, quartz::Unit::Percent});
+    horizontalGui1.style.Set(quartz::Properties::margin_bottom,   quartz::Dimension{1.5f, quartz::Unit::Percent});
+    
+    horizontalGui1.style.Set(quartz::Properties::layout,          quartz::Layouts::horizontal);
+    horizontalGui1.style.Set(quartz::Properties::background_color, backgroundColor);
+
+    GuiObjectComponent horizontalGui2;
+    horizontalGui2.style.Set(quartz::Properties::height,          quartz::Dimension{5.0f, quartz::Unit::Percent});
+    horizontalGui2.style.Set(quartz::Properties::padding_top,     quartz::Dimension{1.5f, quartz::Unit::Percent});
+    horizontalGui2.style.Set(quartz::Properties::padding_bottom,  quartz::Dimension{1.5f, quartz::Unit::Percent});
+    
+    horizontalGui2.style.Set(quartz::Properties::layout,          quartz::Layouts::horizontal);
+    horizontalGui2.style.Set(quartz::Properties::background_color, backgroundColor);
+
+    GuiObjectComponent horizontalGui3;
+    horizontalGui3.style.Set(quartz::Properties::height,          quartz::Dimension{5.0f, quartz::Unit::Percent});
+    horizontalGui3.style.Set(quartz::Properties::padding_top,     quartz::Dimension{1.5f, quartz::Unit::Percent});
+    horizontalGui3.style.Set(quartz::Properties::padding_bottom,  quartz::Dimension{1.5f, quartz::Unit::Percent});
+    
+    horizontalGui3.style.Set(quartz::Properties::layout,          quartz::Layouts::horizontal);
+    horizontalGui3.style.Set(quartz::Properties::background_color, backgroundColor);
+
+
+    GuiObjectComponent radiusLabelObject;
+    radiusLabelObject.style.Set(quartz::Properties::width,          quartz::Dimension{50.0f, quartz::Unit::Percent});
+
+    radiusLabelObject.style.Set(quartz::Properties::margin_top,     quartz::Dimension{30u, quartz::Unit::Pixels});
+    radiusLabelObject.style.Set(quartz::Properties::padding_top,    quartz::Dimension{10u, quartz::Unit::Pixels});
+    radiusLabelObject.style.Set(quartz::Properties::padding_bottom, quartz::Dimension{10u, quartz::Unit::Pixels});
+    
+    radiusLabelObject.style.Set(quartz::Properties::font_size,      quartz::Dimension{20.0f*fontSize2, quartz::Unit::Percent});
+    radiusLabelObject.style.Set(quartz::Properties::color,          fontColor);
+    radiusLabelObject.style.Set(quartz::Properties::background_color, backgroundColor);
+    radiusLabelObject.zLayer = -0.4f;
+
+    TextMeshComponent labelRadius;
+    labelRadius.content = "Radius";
+
+
+    GuiObjectComponent radiusButtonObject;
+    radiusButtonObject.style.Set(quartz::Properties::width,          quartz::Dimension{200u, quartz::Unit::Pixels});
+    radiusButtonObject.style.Set(quartz::Properties::height,         quartz::Dimension{50u, quartz::Unit::Pixels});
+
+    radiusButtonObject.style.Set(quartz::Properties::margin_top,     quartz::Dimension{30u, quartz::Unit::Pixels});
+    radiusButtonObject.style.Set(quartz::Properties::padding_top,    quartz::Dimension{30u, quartz::Unit::Pixels});
+    radiusButtonObject.style.Set(quartz::Properties::padding_bottom, quartz::Dimension{30u, quartz::Unit::Pixels});
+    radiusButtonObject.style.Set(quartz::Properties::background_color, glm::vec4(1.0f,1.0f,0.0f,1.0f));
+
+    radiusButtonObject.zLayer = -0.4f;
+
+    ButtonComponent radiusButton;
+    radiusButton.onClick = [](){
+        std::cout << "radiusButton" << std::endl;
     };
 
-    GuiObjectComponent guiObject4;
-    guiObject4.style.Set(quartz::Properties::background_color, glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
-    guiObject4.style.Set(quartz::Properties::color,            glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-    guiObject4.style.Set(quartz::Properties::height,           quartz::Dimension{50u, quartz::Unit::Pixels});
-    guiObject4.style.Set(quartz::Properties::padding_left,     quartz::Dimension{10u, quartz::Unit::Pixels});
-    guiObject4.style.Set(quartz::Properties::padding_top,      quartz::Dimension{30u, quartz::Unit::Pixels});
-    guiObject4.zLayer = -0.3f;
+    GuiObjectComponent massLabelObject;
+    massLabelObject.style.Set(quartz::Properties::width,          quartz::Dimension{50.0f, quartz::Unit::Percent});
 
-    TextMeshComponent textMesh;
-    textMesh.content = "W. abcd123q";
+    massLabelObject.style.Set(quartz::Properties::margin_top,     quartz::Dimension{30u, quartz::Unit::Pixels});
+    massLabelObject.style.Set(quartz::Properties::padding_top,    quartz::Dimension{10u, quartz::Unit::Pixels});
+    massLabelObject.style.Set(quartz::Properties::padding_bottom, quartz::Dimension{10u, quartz::Unit::Pixels});
+    
+    massLabelObject.style.Set(quartz::Properties::font_size,      quartz::Dimension{20.0f*fontSize2, quartz::Unit::Percent});
+    massLabelObject.style.Set(quartz::Properties::color,          fontColor);
+    massLabelObject.style.Set(quartz::Properties::background_color, backgroundColor);
 
-    guiObject1.parentID = guiObjectEntity;
-    guiObject2.parentID = guiObjectEntity;
-    guiObject3.parentID = guiObjectEntity;
-    guiObject4.parentID = guiObjectEntity;
+    massLabelObject.zLayer = -0.4f;
 
-    mRegistry.EmplaceComponent<GuiObjectComponent>(guiObjectEntity, guiObject);
-    mRegistry.EmplaceComponent<GuiMeshComponent>(guiObjectEntity);
+    TextMeshComponent labelMass;
+    labelMass.content = "Mass";
 
-    mRegistry.EmplaceComponent<GuiObjectComponent>(guiObjectEntity1, guiObject1);
-    mRegistry.EmplaceComponent<GuiMeshComponent>(guiObjectEntity1);
+    GuiObjectComponent massButtonObject;
+    massButtonObject.style.Set(quartz::Properties::width,          quartz::Dimension{200u, quartz::Unit::Pixels});
+    massButtonObject.style.Set(quartz::Properties::height,         quartz::Dimension{50u, quartz::Unit::Pixels});
 
-    mRegistry.EmplaceComponent<GuiObjectComponent>(guiObjectEntity2, guiObject2);
-    mRegistry.EmplaceComponent<GuiMeshComponent>(guiObjectEntity2);
+    massButtonObject.style.Set(quartz::Properties::margin_top,     quartz::Dimension{30u, quartz::Unit::Pixels});
+    massButtonObject.style.Set(quartz::Properties::padding_top,    quartz::Dimension{30u, quartz::Unit::Pixels});
+    massButtonObject.style.Set(quartz::Properties::padding_bottom, quartz::Dimension{30u, quartz::Unit::Pixels});
+    massButtonObject.style.Set(quartz::Properties::background_color, glm::vec4(1.0f,1.0f,0.0f,1.0f));
 
-    mRegistry.EmplaceComponent<GuiObjectComponent>(guiObjectEntity3, guiObject3);
-    mRegistry.EmplaceComponent<GuiMeshComponent>(guiObjectEntity3);
-    mRegistry.EmplaceComponent<ButtonComponent>(guiObjectEntity3, button);
+    massButtonObject.zLayer = -0.4f;
 
-    mRegistry.EmplaceComponent<GuiObjectComponent>(guiObjectEntity4, guiObject4);
-    mRegistry.EmplaceComponent<GuiMeshComponent>(guiObjectEntity4);
-    mRegistry.EmplaceComponent<TextMeshComponent>(guiObjectEntity4, textMesh);
+    ButtonComponent massButton;
+    radiusButton.onClick = [](){
+        std::cout << "massButton" << std::endl;
+    };
+    
+
+    GuiObjectComponent velocityLabelObject;
+    velocityLabelObject.style.Set(quartz::Properties::width,          quartz::Dimension{50.0f, quartz::Unit::Percent});
+
+    velocityLabelObject.style.Set(quartz::Properties::margin_top,     quartz::Dimension{30u, quartz::Unit::Pixels});
+    velocityLabelObject.style.Set(quartz::Properties::padding_top,    quartz::Dimension{10u, quartz::Unit::Pixels});
+    velocityLabelObject.style.Set(quartz::Properties::padding_bottom, quartz::Dimension{10u, quartz::Unit::Pixels});
+    
+    velocityLabelObject.style.Set(quartz::Properties::font_size,      quartz::Dimension{20.0f*fontSize2, quartz::Unit::Percent});
+    velocityLabelObject.style.Set(quartz::Properties::color,          fontColor);
+    velocityLabelObject.style.Set(quartz::Properties::background_color, backgroundColor);
+    velocityLabelObject.zLayer = -0.4f;
+
+    TextMeshComponent labelVelocity;
+    labelVelocity.content = "Velocity";
+
+    GuiObjectComponent velocityButtonObject;
+    velocityButtonObject.style.Set(quartz::Properties::width,          quartz::Dimension{200u, quartz::Unit::Pixels});
+    velocityButtonObject.style.Set(quartz::Properties::height,         quartz::Dimension{50u, quartz::Unit::Pixels});
+
+    velocityButtonObject.style.Set(quartz::Properties::margin_top,     quartz::Dimension{30u, quartz::Unit::Pixels});
+    velocityButtonObject.style.Set(quartz::Properties::padding_top,    quartz::Dimension{30u, quartz::Unit::Pixels});
+    velocityButtonObject.style.Set(quartz::Properties::padding_bottom, quartz::Dimension{30u, quartz::Unit::Pixels});
+    velocityButtonObject.style.Set(quartz::Properties::background_color, glm::vec4(1.0f,1.0f,0.0f,1.0f));
+
+    velocityButtonObject.zLayer = -0.4f;
+
+    ButtonComponent velocityButton;
+    radiusButton.onClick = [](){
+        std::cout << "velocityButton" << std::endl;
+    };
+
+
+    labelObject.parentID    = backgroundEntity;
+    horizontalGui1.parentID = backgroundEntity;
+    horizontalGui2.parentID = backgroundEntity;
+    horizontalGui3.parentID = backgroundEntity;
+
+    radiusLabelObject.parentID   = horizontalGui1Entity;
+    radiusButtonObject.parentID  = horizontalGui1Entity;
+    
+    massLabelObject.parentID     = horizontalGui2Entity;
+    massButtonObject.parentID    = horizontalGui2Entity;
+
+    velocityLabelObject.parentID = horizontalGui3Entity;
+    velocityButtonObject.parentID= horizontalGui3Entity;
+
+    mRegistry.EmplaceComponent<GuiObjectComponent>(backgroundEntity, background);
+    mRegistry.EmplaceComponent<GuiMeshComponent>(backgroundEntity);
+
+    mRegistry.EmplaceComponent<GuiObjectComponent>(labelEntity, labelObject);
+    mRegistry.EmplaceComponent<TextMeshComponent>(labelEntity, label);
+    mRegistry.EmplaceComponent<GuiMeshComponent>(labelEntity);
+
+    mRegistry.EmplaceComponent<GuiObjectComponent>(horizontalGui1Entity, horizontalGui1);
+    mRegistry.EmplaceComponent<GuiMeshComponent>(horizontalGui1Entity);
+    mRegistry.EmplaceComponent<GuiObjectComponent>(horizontalGui2Entity, horizontalGui2);
+    mRegistry.EmplaceComponent<GuiMeshComponent>(horizontalGui2Entity);
+    mRegistry.EmplaceComponent<GuiObjectComponent>(horizontalGui3Entity, horizontalGui3);
+    mRegistry.EmplaceComponent<GuiMeshComponent>(horizontalGui3Entity);
+
+    mRegistry.EmplaceComponent<GuiObjectComponent>(radiusEntity, radiusLabelObject);
+    mRegistry.EmplaceComponent<GuiMeshComponent>(radiusEntity);
+    mRegistry.EmplaceComponent<TextMeshComponent>(radiusEntity, labelRadius);
+    
+    mRegistry.EmplaceComponent<GuiObjectComponent>(radiusButtonEntity, radiusButtonObject);
+    mRegistry.EmplaceComponent<GuiMeshComponent>(radiusButtonEntity);
+    mRegistry.EmplaceComponent<ButtonComponent>(radiusButtonEntity, radiusButton);
+    
+    mRegistry.EmplaceComponent<GuiObjectComponent>(massEntity, massLabelObject);
+    mRegistry.EmplaceComponent<GuiMeshComponent>(massEntity);
+    mRegistry.EmplaceComponent<TextMeshComponent>(massEntity, labelMass);
+    
+    mRegistry.EmplaceComponent<GuiObjectComponent>(massButtonEntity, massButtonObject);
+    mRegistry.EmplaceComponent<GuiMeshComponent>(massButtonEntity);
+    mRegistry.EmplaceComponent<ButtonComponent>(massButtonEntity, massButton);
+    
+    mRegistry.EmplaceComponent<GuiObjectComponent>(velocityEntity, velocityLabelObject);
+    mRegistry.EmplaceComponent<GuiMeshComponent>(velocityEntity);
+    mRegistry.EmplaceComponent<TextMeshComponent>(velocityEntity, labelVelocity);
+
+    mRegistry.EmplaceComponent<GuiObjectComponent>(velocityButtonEntity, velocityButtonObject);
+    mRegistry.EmplaceComponent<GuiMeshComponent>(velocityButtonEntity);
+    mRegistry.EmplaceComponent<ButtonComponent>(velocityButtonEntity, velocityButton);
 
     quartz::StyleSetupSystem styleSystem(mFontManager, mWindowData.mScreenWidth, mWindowData.mScreenHeight);
     quartz::GuiVertexSetupSystem guiVertexSystem;
