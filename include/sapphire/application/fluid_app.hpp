@@ -35,6 +35,7 @@
 #include "sapphire/components/pressure_component.hpp"
 #include "sapphire/components/velocity_component.hpp"
 #include "sapphire/components/energy_component.hpp"
+#include "sapphire/components/particle_settings.hpp"
 
 class FluidApp {
     public:
