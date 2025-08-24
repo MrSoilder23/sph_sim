@@ -54,6 +54,8 @@ class FluidApp {
         void FpsCounter(float deltaTime);
         void InitEntities();
         
+        void InitInterface();
+        
     private:
         std::string mConfigFilePath = "./config/config.json";
 

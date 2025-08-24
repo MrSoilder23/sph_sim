@@ -159,7 +159,33 @@ void FluidApp::InitEntities() {
 
     mRegistry.EmplaceComponent<GuiCameraComponent>(guiCameraEntity, guiCamera);
 
-    // Gui Object
+    InitInterface();
+
+    // Initial cube
+    int amountX = 25;
+    int amountY = 25;
+    int amountZ = 25;
+
+    float coordOffsetX = (amountX/2)*sapphire_config::INITIAL_SPACING;
+    float coordOffsetY = (amountY/2)*sapphire_config::INITIAL_SPACING;
+    float coordOffsetZ = (amountZ/2)*sapphire_config::INITIAL_SPACING;
+
+    for(int x = 0; x < amountX; x++) {
+        for(int y = 0; y < amountY; y++) {
+            for(int z = 0; z < amountZ; z++) {
+                mParticleSystem.CreateParticle(
+                    x*sapphire_config::INITIAL_SPACING - coordOffsetX, 
+                    y*sapphire_config::INITIAL_SPACING - coordOffsetY, 
+                    z*sapphire_config::INITIAL_SPACING - coordOffsetZ - 40,
+                    0.3f,
+                    glm::vec4(0.0f)
+                );
+            }
+        }
+    }
+}
+
+void FluidApp::InitInterface() {
     bismuth::EntityID backgroundEntity = mRegistry.CreateEntity();
     bismuth::EntityID labelEntity      = mRegistry.CreateEntity();
 
@@ -251,14 +277,10 @@ void FluidApp::InitEntities() {
     TextMeshComponent labelRadius;
     labelRadius.content = "Radius";
 
-
     GuiObjectComponent radiusButtonObject;
-    radiusButtonObject.style.Set(quartz::Properties::width,          quartz::Dimension{200u, quartz::Unit::Pixels});
-    radiusButtonObject.style.Set(quartz::Properties::height,         quartz::Dimension{50u, quartz::Unit::Pixels});
+    radiusButtonObject.style.Set(quartz::Properties::width,          quartz::Dimension{50.0f, quartz::Unit::Percent});
 
     radiusButtonObject.style.Set(quartz::Properties::margin_top,     quartz::Dimension{30u, quartz::Unit::Pixels});
-    radiusButtonObject.style.Set(quartz::Properties::padding_top,    quartz::Dimension{30u, quartz::Unit::Pixels});
-    radiusButtonObject.style.Set(quartz::Properties::padding_bottom, quartz::Dimension{30u, quartz::Unit::Pixels});
     radiusButtonObject.style.Set(quartz::Properties::background_color, glm::vec4(1.0f,1.0f,0.0f,1.0f));
 
     radiusButtonObject.zLayer = -0.4f;
@@ -267,6 +289,7 @@ void FluidApp::InitEntities() {
     radiusButton.onClick = [](){
         std::cout << "radiusButton" << std::endl;
     };
+
 
     GuiObjectComponent massLabelObject;
     massLabelObject.style.Set(quartz::Properties::width,          quartz::Dimension{50.0f, quartz::Unit::Percent});
@@ -285,18 +308,15 @@ void FluidApp::InitEntities() {
     labelMass.content = "Mass";
 
     GuiObjectComponent massButtonObject;
-    massButtonObject.style.Set(quartz::Properties::width,          quartz::Dimension{200u, quartz::Unit::Pixels});
-    massButtonObject.style.Set(quartz::Properties::height,         quartz::Dimension{50u, quartz::Unit::Pixels});
+    massButtonObject.style.Set(quartz::Properties::width,          quartz::Dimension{50.0f, quartz::Unit::Percent});
 
     massButtonObject.style.Set(quartz::Properties::margin_top,     quartz::Dimension{30u, quartz::Unit::Pixels});
-    massButtonObject.style.Set(quartz::Properties::padding_top,    quartz::Dimension{30u, quartz::Unit::Pixels});
-    massButtonObject.style.Set(quartz::Properties::padding_bottom, quartz::Dimension{30u, quartz::Unit::Pixels});
     massButtonObject.style.Set(quartz::Properties::background_color, glm::vec4(1.0f,1.0f,0.0f,1.0f));
 
     massButtonObject.zLayer = -0.4f;
 
     ButtonComponent massButton;
-    radiusButton.onClick = [](){
+    massButton.onClick = [](){
         std::cout << "massButton" << std::endl;
     };
     
@@ -317,18 +337,15 @@ void FluidApp::InitEntities() {
     labelVelocity.content = "Velocity";
 
     GuiObjectComponent velocityButtonObject;
-    velocityButtonObject.style.Set(quartz::Properties::width,          quartz::Dimension{200u, quartz::Unit::Pixels});
-    velocityButtonObject.style.Set(quartz::Properties::height,         quartz::Dimension{50u, quartz::Unit::Pixels});
+    velocityButtonObject.style.Set(quartz::Properties::width,          quartz::Dimension{50.0f, quartz::Unit::Percent});
 
     velocityButtonObject.style.Set(quartz::Properties::margin_top,     quartz::Dimension{30u, quartz::Unit::Pixels});
-    velocityButtonObject.style.Set(quartz::Properties::padding_top,    quartz::Dimension{30u, quartz::Unit::Pixels});
-    velocityButtonObject.style.Set(quartz::Properties::padding_bottom, quartz::Dimension{30u, quartz::Unit::Pixels});
     velocityButtonObject.style.Set(quartz::Properties::background_color, glm::vec4(1.0f,1.0f,0.0f,1.0f));
 
     velocityButtonObject.zLayer = -0.4f;
 
     ButtonComponent velocityButton;
-    radiusButton.onClick = [](){
+    velocityButton.onClick = [](){
         std::cout << "velocityButton" << std::endl;
     };
 
@@ -389,27 +406,4 @@ void FluidApp::InitEntities() {
     quartz::GuiVertexSetupSystem guiVertexSystem;
     styleSystem.Update(mRegistry);
     guiVertexSystem.Update(mRegistry);
-
-    // Initial cube
-    int amountX = 25;
-    int amountY = 25;
-    int amountZ = 25;
-
-    float coordOffsetX = (amountX/2)*sapphire_config::INITIAL_SPACING;
-    float coordOffsetY = (amountY/2)*sapphire_config::INITIAL_SPACING;
-    float coordOffsetZ = (amountZ/2)*sapphire_config::INITIAL_SPACING;
-
-    for(int x = 0; x < amountX; x++) {
-        for(int y = 0; y < amountY; y++) {
-            for(int z = 0; z < amountZ; z++) {
-                mParticleSystem.CreateParticle(
-                    x*sapphire_config::INITIAL_SPACING - coordOffsetX, 
-                    y*sapphire_config::INITIAL_SPACING - coordOffsetY, 
-                    z*sapphire_config::INITIAL_SPACING - coordOffsetZ - 40,
-                    0.3f,
-                    glm::vec4(0.0f)
-                );
-            }
-        }
-    }
 }
