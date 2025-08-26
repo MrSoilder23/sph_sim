@@ -7,25 +7,56 @@ void quartz::StyleSetupSystem::Update(bismuth::Registry& registry) {
     auto& objectPool = registry.GetComponentPool<GuiObjectComponent>();
 
     std::unordered_map<bismuth::EntityID, std::vector<bismuth::EntityID>> childrenMap;
+    std::vector<bismuth::EntityID> rootEntities;
+
     auto& denseIDs = objectPool.GetDenseEntities();
     for(bismuth::EntityID id : denseIDs) {
         auto& currentComponent = objectPool.GetComponent(id);
 
         if(currentComponent.parentID != bismuth::INVALID_INDEX) {
             childrenMap[currentComponent.parentID].push_back(id);
+        } else {
+            rootEntities.push_back(id);
         }
     }
 
-    auto beginIt = objectPool.ComponentBegin();
-    auto endIt   = objectPool.ComponentEnd();
-    for(auto it = beginIt; it != endIt; ++it) {
-        ComputeSizes(objectPool, *it);
+    std::queue<bismuth::EntityID> processingQueue;
+    for(auto rootID : rootEntities) {
+        processingQueue.push(rootID);
     }
 
-    for(auto& [parentID, children] : childrenMap) {
-        ComputeLayout(objectPool, children, parentID);
+    while(!processingQueue.empty()) {
+        bismuth::EntityID currentID = processingQueue.front();
+        processingQueue.pop();
+
+        auto& currentComponent = objectPool.GetComponent(currentID);
+        ComputeSizes(objectPool, currentComponent);
+
+        // Add children to the queue for processing
+        if (childrenMap.find(currentID) != childrenMap.end()) {
+            for (auto childID : childrenMap[currentID]) {
+                processingQueue.push(childID);
+            }
+        }
     }
 
+    for (auto rootID : rootEntities) {
+        processingQueue.push(rootID);
+    }
+
+    while (!processingQueue.empty()) {
+        bismuth::EntityID currentID = processingQueue.front();
+        processingQueue.pop();
+
+        if (childrenMap.find(currentID) != childrenMap.end()) {
+            ComputeLayout(objectPool, childrenMap[currentID], currentID);
+            
+            // Add children to the queue for processing
+            for (auto childID : childrenMap[currentID]) {
+                processingQueue.push(childID);
+            }
+        }
+    }
     for(auto [entity, object, mesh] : objectView) {
         glm::vec4 color     = GetStyleValue<glm::vec4>(object.style, Properties::background_color, glm::vec4(1.0f));
         
@@ -183,7 +214,7 @@ void quartz::StyleSetupSystem::ComputeLayout(
     auto& parentObject = guiPool.GetComponent(currentID);
 
     if(parentObject.parentID != bismuth::INVALID_INDEX) {
-        auto& parentObject2 = guiPool.GetComponent(currentID);
+        auto& parentObject2 = guiPool.GetComponent(parentObject.parentID);
 
         auto height = GetStyleValue<Dimension>(parentObject2.style, Properties::height, Dimension{10u, Unit::Pixels}).resolve(0);
         auto width  = GetStyleValue<Dimension>(parentObject2.style, Properties::width,  Dimension{10u, Unit::Pixels}).resolve(0);

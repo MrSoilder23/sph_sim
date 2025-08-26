@@ -1,6 +1,8 @@
 #pragma once
 // C++ standard libraries
 #include <unordered_map>
+#include <queue>
+#include <vector>
 
 // Own libraries
 #include "./bismuth/registry.hpp"
