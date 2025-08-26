@@ -391,7 +391,7 @@ void FluidApp::CreateRowGui(
     valueObject.style.Set(quartz::Properties::color,          fontColor);
     valueObject.zLayer = -0.4f;
     
-    valueLabelName.content = std::to_string(valueRef);
+    valueLabelName.content = std::format("{:.2f}", valueRef);
 
     labelObject.parentID    = parentID;
     valueObject.parentID    = parentID;

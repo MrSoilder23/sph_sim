@@ -1,6 +1,7 @@
 #pragma once
 // C++ standard libraries
 #include <string>
+#include <format>
 
 // Third_party libraries
 #include <glm/glm.hpp>
