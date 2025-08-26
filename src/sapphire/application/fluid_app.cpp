@@ -230,16 +230,16 @@ void FluidApp::InitInterface() {
     label.content = "Particle Settings";
 
     // Horizontal panels
-    GuiObjectComponent horizontalGui1;
-    horizontalGui1.style.Set(quartz::Properties::height,          quartz::Dimension{5.0f, quartz::Unit::Percent});
-    horizontalGui1.style.Set(quartz::Properties::margin_top,      quartz::Dimension{1.5f, quartz::Unit::Percent});
-    horizontalGui1.style.Set(quartz::Properties::margin_bottom,   quartz::Dimension{1.5f, quartz::Unit::Percent});
-    horizontalGui1.style.Set(quartz::Properties::layout,          quartz::Layouts::horizontal);
-    horizontalGui1.style.Set(quartz::Properties::background_color, backgroundColor);
-    horizontalGui1.zLayer = -0.4f;
+    GuiObjectComponent horizontalGui;
+    horizontalGui.style.Set(quartz::Properties::height,          quartz::Dimension{5.0f, quartz::Unit::Percent});
+    horizontalGui.style.Set(quartz::Properties::margin_top,      quartz::Dimension{1.5f, quartz::Unit::Percent});
+    horizontalGui.style.Set(quartz::Properties::margin_bottom,   quartz::Dimension{1.5f, quartz::Unit::Percent});
+    horizontalGui.style.Set(quartz::Properties::layout,          quartz::Layouts::horizontal);
+    horizontalGui.style.Set(quartz::Properties::background_color, backgroundColor);
+    horizontalGui.zLayer = -0.4f;
 
     labelObject.parentID    = backgroundEntity;
-    horizontalGui1.parentID = backgroundEntity;
+    horizontalGui.parentID = backgroundEntity;
 
     mRegistry.EmplaceComponent<GuiObjectComponent>(backgroundEntity, background);
     mRegistry.EmplaceComponent<GuiMeshComponent>(backgroundEntity);
@@ -248,15 +248,15 @@ void FluidApp::InitInterface() {
     mRegistry.EmplaceComponent<TextMeshComponent>(labelEntity, label);
     mRegistry.EmplaceComponent<GuiMeshComponent>(labelEntity);
 
-    mRegistry.EmplaceComponent<GuiObjectComponent>(horizontalGui1Entity, GuiObjectComponent(horizontalGui1));
+    mRegistry.EmplaceComponent<GuiObjectComponent>(horizontalGui1Entity, GuiObjectComponent(horizontalGui));
     mRegistry.EmplaceComponent<GuiMeshComponent>(horizontalGui1Entity);
-    mRegistry.EmplaceComponent<GuiObjectComponent>(horizontalGui2Entity, GuiObjectComponent(horizontalGui1));
+    mRegistry.EmplaceComponent<GuiObjectComponent>(horizontalGui2Entity, GuiObjectComponent(horizontalGui));
     mRegistry.EmplaceComponent<GuiMeshComponent>(horizontalGui2Entity);
-    mRegistry.EmplaceComponent<GuiObjectComponent>(horizontalGui3Entity, GuiObjectComponent(horizontalGui1));
+    mRegistry.EmplaceComponent<GuiObjectComponent>(horizontalGui3Entity, GuiObjectComponent(horizontalGui));
     mRegistry.EmplaceComponent<GuiMeshComponent>(horizontalGui3Entity);
-    mRegistry.EmplaceComponent<GuiObjectComponent>(horizontalGui4Entity, GuiObjectComponent(horizontalGui1));
+    mRegistry.EmplaceComponent<GuiObjectComponent>(horizontalGui4Entity, GuiObjectComponent(horizontalGui));
     mRegistry.EmplaceComponent<GuiMeshComponent>(horizontalGui4Entity);
-    mRegistry.EmplaceComponent<GuiObjectComponent>(horizontalGui5Entity, GuiObjectComponent(horizontalGui1));
+    mRegistry.EmplaceComponent<GuiObjectComponent>(horizontalGui5Entity, GuiObjectComponent(horizontalGui));
     mRegistry.EmplaceComponent<GuiMeshComponent>(horizontalGui5Entity);
     
     auto& particleSettings = mRegistry.GetSingleton<ParticleSettingsComponent>();
@@ -384,6 +384,9 @@ void FluidApp::CreateRowGui(
     // Value
     valueObject.style.Set(quartz::Properties::width,          quartz::Dimension{50.0f, quartz::Unit::Percent});
     valueObject.style.Set(quartz::Properties::margin_top,     quartz::Dimension{30u, quartz::Unit::Pixels});
+    valueObject.style.Set(quartz::Properties::padding_top,    quartz::Dimension{10u, quartz::Unit::Pixels});
+    valueObject.style.Set(quartz::Properties::padding_bottom, quartz::Dimension{10u, quartz::Unit::Pixels});
+    valueObject.style.Set(quartz::Properties::font_size,      quartz::Dimension{20.0f*fontSize, quartz::Unit::Percent});
     valueObject.style.Set(quartz::Properties::background_color, bgColor);
     valueObject.style.Set(quartz::Properties::color,          fontColor);
     valueObject.zLayer = -0.4f;
