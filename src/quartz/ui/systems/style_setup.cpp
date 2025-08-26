@@ -130,8 +130,6 @@ void quartz::StyleSetupSystem::Update(bismuth::Registry& registry) {
         mesh.uv.clear();
         mesh.colors.clear();
 
-        std::cout << "CONTENT: " << mesh.content << std::endl;
-
         glm::vec4 color = GetStyleValue<glm::vec4>(object.style, Properties::color, glm::vec4(1.0f));
 
         std::string fontPath  = GetStyleValue<std::string>(object.style, Properties::font_family, "assets/fonts/arial.ttf");
