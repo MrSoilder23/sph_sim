@@ -7,17 +7,26 @@ void quartz::StyleSetupSystem::Update(bismuth::Registry& registry) {
     auto& objectPool = registry.GetComponentPool<GuiObjectComponent>();
 
     std::unordered_map<bismuth::EntityID, std::vector<bismuth::EntityID>> childrenMap;
+    std::vector<bismuth::EntityID> dirtyEntities;
     std::vector<bismuth::EntityID> rootEntities;
 
     auto& denseIDs = objectPool.GetDenseEntities();
     for(bismuth::EntityID id : denseIDs) {
         auto& currentComponent = objectPool.GetComponent(id);
 
-        if(currentComponent.parentID != bismuth::INVALID_INDEX) {
-            childrenMap[currentComponent.parentID].push_back(id);
-        } else {
-            rootEntities.push_back(id);
+        if(currentComponent.isDirty) {
+            dirtyEntities.push_back(id);
+
+            if(currentComponent.parentID != bismuth::INVALID_INDEX) {
+                childrenMap[currentComponent.parentID].push_back(id);
+            } else {
+                rootEntities.push_back(id);
+            }
         }
+    }
+
+    if(dirtyEntities.empty()) {
+        return;
     }
 
     std::queue<bismuth::EntityID> processingQueue;
@@ -58,6 +67,21 @@ void quartz::StyleSetupSystem::Update(bismuth::Registry& registry) {
         }
     }
     for(auto [entity, object, mesh] : objectView) {
+        if(!object.isDirty) {
+            continue;
+        }
+
+        glBindVertexArray(0);
+        glDeleteVertexArrays(1, &mesh.VAO);
+        glDeleteBuffers(1, &mesh.VBO);
+        glDeleteBuffers(1, &mesh.EBO);
+        glDeleteBuffers(1, &mesh.VBOcolor);
+
+        mesh.VAO = 0;
+        mesh.VBO = 0;
+        mesh.EBO = 0;
+        mesh.VBOcolor = 0;
+
         glm::vec4 color     = GetStyleValue<glm::vec4>(object.style, Properties::background_color, glm::vec4(1.0f));
         
         auto pos            = GetStyleValue<DimensionVec2>(object.style, Properties::position, DimensionVec2{0u, 0u});
@@ -85,63 +109,90 @@ void quartz::StyleSetupSystem::Update(bismuth::Registry& registry) {
     }
 
     for(auto [entity, object, mesh] : textView) {
-        if(!mesh.fontAtlas) {
-            glm::vec4 color = GetStyleValue<glm::vec4>(object.style, Properties::color, glm::vec4(1.0f));
+        if(!object.isDirty) {
+            continue;
+        }
 
-            std::string fontPath  = GetStyleValue<std::string>(object.style, Properties::font_family, "assets/fonts/arial.ttf");
-            unsigned int fontSize = GetStyleValue<Dimension>(object.style, Properties::font_size, Dimension{24u, Unit::Pixels}).resolve(0);
+        mesh.fontAtlas = nullptr;
 
-            try {
-                mesh.fontAtlas = &mFontManager.GetFont(fontPath, fontSize);
-            } catch (const std::exception& e) {
-                std::cerr << "Font load error: " << e.what() << std::endl;
+        glBindVertexArray(0);
+        glDeleteVertexArrays(1, &mesh.VAO);
+        glDeleteBuffers(1, &mesh.VBO);
+        glDeleteBuffers(1, &mesh.EBO);
+        glDeleteBuffers(1, &mesh.VBOcolor);
+
+        mesh.VAO = 0;
+        mesh.VBO = 0;
+        mesh.EBO = 0;
+        mesh.VBOcolor = 0;
+
+        mesh.vertices.clear();
+        mesh.uv.clear();
+        mesh.colors.clear();
+
+        std::cout << "CONTENT: " << mesh.content << std::endl;
+
+        glm::vec4 color = GetStyleValue<glm::vec4>(object.style, Properties::color, glm::vec4(1.0f));
+
+        std::string fontPath  = GetStyleValue<std::string>(object.style, Properties::font_family, "assets/fonts/arial.ttf");
+        unsigned int fontSize = GetStyleValue<Dimension>(object.style, Properties::font_size, Dimension{24u, Unit::Pixels}).resolve(0);
+
+        try {
+            mesh.fontAtlas = &mFontManager.GetFont(fontPath, fontSize);
+        } catch (const std::exception& e) {
+            std::cerr << "Font load error: " << e.what() << std::endl;
+            continue;
+        }
+
+        auto pos = GetStyleValue<DimensionVec2>(object.style, Properties::position, DimensionVec2{0u, 0u});
+        float xPos = pos.x.resolve(0);
+        FT_UInt prevGlyphIndex = 0;
+
+        for(char c : mesh.content) {
+            if(c == ' ') {
+                xPos += fontSize * 0.3f;
                 continue;
             }
 
-            auto pos = GetStyleValue<DimensionVec2>(object.style, Properties::position, DimensionVec2{0u, 0u});
-            float xPos = pos.x.resolve(0);
-            FT_UInt prevGlyphIndex = 0;
-
-            for(char c : mesh.content) {
-                if(c == ' ') {
-                    xPos += fontSize * 0.3f;
-                    continue;
-                }
-
-                const Character& ch = mesh.fontAtlas->characters.at(c);
-                if(prevGlyphIndex) {
-                    FT_Vector kerning;
-                    FT_Get_Kerning(
-                        mesh.fontAtlas->ftFace, 
-                        prevGlyphIndex,
-                        ch.glyphIndex,
-                        FT_KERNING_DEFAULT,
-                        &kerning
-                    );
-                    xPos += (kerning.x >> 6);
-                }
-
-                float x = xPos + ch.bearing.x;
-                float y = pos.y.resolve(0) - ch.bearing.y + mesh.fontAtlas->height;
-                
-                mesh.vertices.push_back(glm::vec3(x,             y,             object.zLayer + 0.001));
-                mesh.vertices.push_back(glm::vec3(x + ch.size.x, y,             object.zLayer + 0.001));
-                mesh.vertices.push_back(glm::vec3(x,             y + ch.size.y, object.zLayer + 0.001));
-                mesh.vertices.push_back(glm::vec3(x + ch.size.x, y + ch.size.y, object.zLayer + 0.001));
-
-                mesh.uv.push_back(glm::vec2(ch.uvMin.x, ch.uvMin.y));
-                mesh.uv.push_back(glm::vec2(ch.uvMax.x, ch.uvMin.y));
-                mesh.uv.push_back(glm::vec2(ch.uvMin.x, ch.uvMax.y));
-                mesh.uv.push_back(glm::vec2(ch.uvMax.x, ch.uvMax.y));
-
-                for(int i = 0; i < 4; i++) {
-                    mesh.colors.push_back(color);
-                }
-                
-                xPos += (ch.advance >> 6);
-                prevGlyphIndex = ch.glyphIndex;
+            const Character& ch = mesh.fontAtlas->characters.at(c);
+            if(prevGlyphIndex) {
+                FT_Vector kerning;
+                FT_Get_Kerning(
+                    mesh.fontAtlas->ftFace, 
+                    prevGlyphIndex,
+                    ch.glyphIndex,
+                    FT_KERNING_DEFAULT,
+                    &kerning
+                );
+                xPos += (kerning.x >> 6);
             }
+
+            float x = xPos + ch.bearing.x;
+            float y = pos.y.resolve(0) - ch.bearing.y + mesh.fontAtlas->height;
+            
+            mesh.vertices.push_back(glm::vec3(x,             y,             object.zLayer + 0.001));
+            mesh.vertices.push_back(glm::vec3(x + ch.size.x, y,             object.zLayer + 0.001));
+            mesh.vertices.push_back(glm::vec3(x,             y + ch.size.y, object.zLayer + 0.001));
+            mesh.vertices.push_back(glm::vec3(x + ch.size.x, y + ch.size.y, object.zLayer + 0.001));
+
+            mesh.uv.push_back(glm::vec2(ch.uvMin.x, ch.uvMin.y));
+            mesh.uv.push_back(glm::vec2(ch.uvMax.x, ch.uvMin.y));
+            mesh.uv.push_back(glm::vec2(ch.uvMin.x, ch.uvMax.y));
+            mesh.uv.push_back(glm::vec2(ch.uvMax.x, ch.uvMax.y));
+
+            for(int i = 0; i < 4; i++) {
+                mesh.colors.push_back(color);
+            }
+            
+            xPos += (ch.advance >> 6);
+            prevGlyphIndex = ch.glyphIndex;
         }
+        
+    }
+
+    for(auto ID : dirtyEntities) {
+        auto& object = objectPool.GetComponent(ID);
+        object.isDirty = false;
     }
 }
 

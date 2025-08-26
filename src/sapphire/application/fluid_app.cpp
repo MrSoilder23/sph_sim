@@ -34,9 +34,14 @@ void FluidApp::System(float deltaTime) {
     static GPUSphereDataSystem gpuToSphereDataSystem(mRegistry);
     static quartz::UiRendererSystem uiRenderer;
     static quartz::ButtonSystem buttonSystem;
+    static quartz::StyleSetupSystem styleSystem(mFontManager, mWindowData.mScreenWidth, mWindowData.mScreenHeight);
+    static quartz::GuiVertexSetupSystem guiVertexSystem;
     // static SphereDataSystem sphereDataSystem;
     // static ForceToPosSystem forceToPosSystem;
     // static PosToSpatialSystem posToSpatialSystem;
+    
+    styleSystem.Update(mRegistry);
+    guiVertexSystem.Update(mRegistry);
 
     cameraSystem.Update(mRegistry);
     guiCameraSystem.Update(mRegistry);
@@ -303,11 +308,6 @@ void FluidApp::InitInterface() {
         fontSize2,
         particleSettings.velocity.z
     );
-
-    quartz::StyleSetupSystem styleSystem(mFontManager, mWindowData.mScreenWidth, mWindowData.mScreenHeight);
-    quartz::GuiVertexSetupSystem guiVertexSystem;
-    styleSystem.Update(mRegistry);
-    guiVertexSystem.Update(mRegistry);
 }
 
 void FluidApp::CreateRowGui(
@@ -361,11 +361,14 @@ void FluidApp::CreateRowGui(
     buttonUObject.zLayer = -0.3f;
 
     buttonU.onClick = [this, &valueRef, valueEntity](){
-        auto& labelPool = mRegistry.GetComponentPool<TextMeshComponent>();
-        auto& label     = labelPool.GetComponent(valueEntity);
+        auto& labelPool  = mRegistry.GetComponentPool<TextMeshComponent>();
+        auto& objectPool = mRegistry.GetComponentPool<GuiObjectComponent>();
+        auto& label      = labelPool.GetComponent(valueEntity);
+        auto& object     = objectPool.GetComponent(valueEntity);
+        object.isDirty = true;
         
         valueRef++;
-        label.content = std::to_string(valueRef);
+        label.content = std::format("{:.2f}", valueRef);
     };
 
     // Button Down
@@ -374,9 +377,12 @@ void FluidApp::CreateRowGui(
     buttonDObject.zLayer = -0.3f;
 
     buttonD.onClick = [this, &valueRef, valueEntity](){
-        auto& labelPool = mRegistry.GetComponentPool<TextMeshComponent>();
-        auto& label     = labelPool.GetComponent(valueEntity);
-        
+        auto& labelPool  = mRegistry.GetComponentPool<TextMeshComponent>();
+        auto& objectPool = mRegistry.GetComponentPool<GuiObjectComponent>();
+        auto& label      = labelPool.GetComponent(valueEntity);
+        auto& object     = objectPool.GetComponent(valueEntity);
+        object.isDirty = true;
+
         valueRef--;
         label.content = std::to_string(valueRef);
     };

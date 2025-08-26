@@ -11,4 +11,5 @@ struct GuiObjectComponent {
     float zLayer = -1.0f;
 
     bismuth::EntityID parentID = bismuth::INVALID_INDEX;
+    bool isDirty = true;
 };
