@@ -9,6 +9,9 @@
 
 namespace bismuth {
 
+using EntityID = uint32_t;
+static constexpr uint32_t INVALID_INDEX = std::numeric_limits<uint32_t>::max();
+
 class ISparseSet {
     public:
         using EntityID = uint32_t;
@@ -20,8 +23,6 @@ class ISparseSet {
 template<typename ComponentType>
 class ComponentPool : public ISparseSet{
     public:
-        using EntityID = uint32_t;
-        static constexpr uint32_t INVALID_INDEX = std::numeric_limits<uint32_t>::max();
 
         inline ComponentType& GetComponent(const EntityID& entity) {
             assert(HasComponent(entity) && "No entity with such component");
