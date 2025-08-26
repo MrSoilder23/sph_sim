@@ -118,14 +118,15 @@ void FluidApp::SpawnParticles(int mouseX, int mouseY) {
     float t = -40.0f / rayWorld.z;
     glm::vec3 worldPoint = glm::vec3(0.0f) + t * rayWorld;
 
+    int middle = std::floor(particleSettings.radius/2.0f);
     
     for(int x = 0; x < particleSettings.radius; x++) {
         for(int y = 0; y < particleSettings.radius; y++) {
             for(int z = 0; z < particleSettings.radius; z++) {
                 mParticleSystem.CreateParticle(
-                    x+worldPoint.x-1, 
-                    y+worldPoint.y-1, 
-                    z+worldPoint.z-1, 
+                    x+worldPoint.x-middle, 
+                    y+worldPoint.y-middle, 
+                    z+worldPoint.z-middle, 
                     particleSettings.mass, 
                     particleSettings.velocity
                 );
