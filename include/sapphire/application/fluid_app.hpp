@@ -59,11 +59,10 @@ class FluidApp {
         void CreateRowGui(
             bismuth::EntityID  parentID, 
             std::string const& name,
-            std::string const& defaultValue,
             glm::vec4   const& bgColor,
             glm::vec4   const& fontColor,
             float              fontSize,
-            std::function<void(bismuth::EntityID)> onClick
+            float            & valueRef
         );
         
     private:

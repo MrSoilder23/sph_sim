@@ -195,12 +195,8 @@ void FluidApp::InitInterface() {
     bismuth::EntityID horizontalGui1Entity = mRegistry.CreateEntity();
     bismuth::EntityID horizontalGui2Entity = mRegistry.CreateEntity();
     bismuth::EntityID horizontalGui3Entity = mRegistry.CreateEntity();
-
-    bismuth::EntityID massEntity           = mRegistry.CreateEntity();
-    bismuth::EntityID velocityEntity       = mRegistry.CreateEntity();
-    
-    bismuth::EntityID massButtonEntity     = mRegistry.CreateEntity();
-    bismuth::EntityID velocityButtonEntity = mRegistry.CreateEntity();
+    bismuth::EntityID horizontalGui4Entity = mRegistry.CreateEntity();
+    bismuth::EntityID horizontalGui5Entity = mRegistry.CreateEntity();
 
     glm::vec4 backgroundColor = {0.13f, 0.13f, 0.13f, 1.0f};
     glm::vec4 fontColor       = {0.9f, 0.9f, 0.9f, 1.0f};
@@ -240,25 +236,10 @@ void FluidApp::InitInterface() {
     horizontalGui1.style.Set(quartz::Properties::margin_bottom,   quartz::Dimension{1.5f, quartz::Unit::Percent});
     horizontalGui1.style.Set(quartz::Properties::layout,          quartz::Layouts::horizontal);
     horizontalGui1.style.Set(quartz::Properties::background_color, backgroundColor);
-
-    GuiObjectComponent horizontalGui2;
-    horizontalGui2.style.Set(quartz::Properties::height,          quartz::Dimension{5.0f, quartz::Unit::Percent});
-    horizontalGui2.style.Set(quartz::Properties::padding_top,     quartz::Dimension{1.5f, quartz::Unit::Percent});
-    horizontalGui2.style.Set(quartz::Properties::padding_bottom,  quartz::Dimension{1.5f, quartz::Unit::Percent});
-    horizontalGui2.style.Set(quartz::Properties::layout,          quartz::Layouts::horizontal);
-    horizontalGui2.style.Set(quartz::Properties::background_color, backgroundColor);
-
-    GuiObjectComponent horizontalGui3;
-    horizontalGui3.style.Set(quartz::Properties::height,          quartz::Dimension{5.0f, quartz::Unit::Percent});
-    horizontalGui3.style.Set(quartz::Properties::padding_top,     quartz::Dimension{1.5f, quartz::Unit::Percent});
-    horizontalGui3.style.Set(quartz::Properties::padding_bottom,  quartz::Dimension{1.5f, quartz::Unit::Percent});
-    horizontalGui3.style.Set(quartz::Properties::layout,          quartz::Layouts::horizontal);
-    horizontalGui3.style.Set(quartz::Properties::background_color, backgroundColor);
+    horizontalGui1.zLayer = -0.4f;
 
     labelObject.parentID    = backgroundEntity;
     horizontalGui1.parentID = backgroundEntity;
-    horizontalGui2.parentID = backgroundEntity;
-    horizontalGui3.parentID = backgroundEntity;
 
     mRegistry.EmplaceComponent<GuiObjectComponent>(backgroundEntity, background);
     mRegistry.EmplaceComponent<GuiMeshComponent>(backgroundEntity);
@@ -267,45 +248,60 @@ void FluidApp::InitInterface() {
     mRegistry.EmplaceComponent<TextMeshComponent>(labelEntity, label);
     mRegistry.EmplaceComponent<GuiMeshComponent>(labelEntity);
 
-    mRegistry.EmplaceComponent<GuiObjectComponent>(horizontalGui1Entity, horizontalGui1);
+    mRegistry.EmplaceComponent<GuiObjectComponent>(horizontalGui1Entity, GuiObjectComponent(horizontalGui1));
     mRegistry.EmplaceComponent<GuiMeshComponent>(horizontalGui1Entity);
-    mRegistry.EmplaceComponent<GuiObjectComponent>(horizontalGui2Entity, horizontalGui2);
+    mRegistry.EmplaceComponent<GuiObjectComponent>(horizontalGui2Entity, GuiObjectComponent(horizontalGui1));
     mRegistry.EmplaceComponent<GuiMeshComponent>(horizontalGui2Entity);
-    mRegistry.EmplaceComponent<GuiObjectComponent>(horizontalGui3Entity, horizontalGui3);
+    mRegistry.EmplaceComponent<GuiObjectComponent>(horizontalGui3Entity, GuiObjectComponent(horizontalGui1));
     mRegistry.EmplaceComponent<GuiMeshComponent>(horizontalGui3Entity);
-
-    auto templateFunction = [](bismuth::EntityID entityID){
-        std::cout << entityID << std::endl;
-    };
+    mRegistry.EmplaceComponent<GuiObjectComponent>(horizontalGui4Entity, GuiObjectComponent(horizontalGui1));
+    mRegistry.EmplaceComponent<GuiMeshComponent>(horizontalGui4Entity);
+    mRegistry.EmplaceComponent<GuiObjectComponent>(horizontalGui5Entity, GuiObjectComponent(horizontalGui1));
+    mRegistry.EmplaceComponent<GuiMeshComponent>(horizontalGui5Entity);
+    
+    auto& particleSettings = mRegistry.GetSingleton<ParticleSettingsComponent>();
 
     CreateRowGui(
         horizontalGui1Entity,
         "Radius",
-        "30",
         backgroundColor,
         fontColor,
         fontSize2,
-        templateFunction
+        particleSettings.radius
     );
 
     CreateRowGui(
         horizontalGui2Entity,
         "Mass",
-        "30",
         backgroundColor,
         fontColor,
         fontSize2,
-        templateFunction
+        particleSettings.mass
     );
 
     CreateRowGui(
         horizontalGui3Entity,
-        "Velocity",
-        "300",
+        "VelocityX",
         backgroundColor,
         fontColor,
         fontSize2,
-        templateFunction
+        particleSettings.velocity.x
+    );
+    CreateRowGui(
+        horizontalGui4Entity,
+        "VelocityY",
+        backgroundColor,
+        fontColor,
+        fontSize2,
+        particleSettings.velocity.y
+    );
+    CreateRowGui(
+        horizontalGui5Entity,
+        "VelocityZ",
+        backgroundColor,
+        fontColor,
+        fontSize2,
+        particleSettings.velocity.z
     );
 
     quartz::StyleSetupSystem styleSystem(mFontManager, mWindowData.mScreenWidth, mWindowData.mScreenHeight);
@@ -317,20 +313,29 @@ void FluidApp::InitInterface() {
 void FluidApp::CreateRowGui(
     bismuth::EntityID  parentID, 
     std::string const& name,
-    std::string const& defaultValue,
     glm::vec4   const& bgColor,
     glm::vec4   const& fontColor,
     float              fontSize,
-    std::function<void(bismuth::EntityID)> onClick
+    float            & valueRef
 ) {
-    bismuth::EntityID labelEntity  = mRegistry.CreateEntity();
-    bismuth::EntityID buttonEntity = mRegistry.CreateEntity();
+    bismuth::EntityID labelEntity    = mRegistry.CreateEntity();
+    bismuth::EntityID valueEntity    = mRegistry.CreateEntity();
+    bismuth::EntityID verticalEntity = mRegistry.CreateEntity();
+    bismuth::EntityID buttonUEntity  = mRegistry.CreateEntity();
+    bismuth::EntityID buttonDEntity  = mRegistry.CreateEntity();
 
     GuiObjectComponent labelObject;
     TextMeshComponent labelName;
-    GuiObjectComponent buttonObject;
-    TextMeshComponent buttonLabelName;
-    ButtonComponent button;
+
+    GuiObjectComponent valueObject;
+    TextMeshComponent valueLabelName;
+    
+    GuiObjectComponent verticalObject;
+    
+    GuiObjectComponent buttonUObject;
+    ButtonComponent buttonU;
+    GuiObjectComponent buttonDObject;
+    ButtonComponent buttonD;
 
     // Label
     labelObject.style.Set(quartz::Properties::width,          quartz::Dimension{50.0f, quartz::Unit::Percent});
@@ -344,28 +349,70 @@ void FluidApp::CreateRowGui(
 
     labelName.content = name;
 
-    // Button
-    buttonObject.style.Set(quartz::Properties::width,          quartz::Dimension{50.0f, quartz::Unit::Percent});
-    buttonObject.style.Set(quartz::Properties::margin_top,     quartz::Dimension{30u, quartz::Unit::Pixels});
-    buttonObject.style.Set(quartz::Properties::background_color, glm::vec4(1.0f,1.0f,0.0f,1.0f));
-    buttonObject.style.Set(quartz::Properties::color,          glm::vec4(0.0f,1.0f,1.0f,1.0f));
-    buttonObject.zLayer = -0.4f;
-    
-    buttonLabelName.content = defaultValue;
+    // Buttons
+    verticalObject.style.Set(quartz::Properties::width,       quartz::Dimension{10.0f, quartz::Unit::Percent});
+    verticalObject.style.Set(quartz::Properties::layout,      quartz::Layouts::vertical);
+    verticalObject.style.Set(quartz::Properties::background_color, glm::vec4(1.0f));
+    verticalObject.zLayer = -0.35f;
 
-    button.onClick = [onClick, buttonEntity](){
-        onClick(buttonEntity);
+    // Button Up
+    buttonUObject.style.Set(quartz::Properties::height,       quartz::Dimension{50.0f, quartz::Unit::Percent});
+    buttonUObject.style.Set(quartz::Properties::background_color, glm::vec4(0.0f,1.0f,0.0f,1.0f));
+    buttonUObject.zLayer = -0.3f;
+
+    buttonU.onClick = [this, &valueRef, valueEntity](){
+        auto& labelPool = mRegistry.GetComponentPool<TextMeshComponent>();
+        auto& label     = labelPool.GetComponent(valueEntity);
+        
+        valueRef++;
+        label.content = std::to_string(valueRef);
     };
 
-    labelObject.parentID   = parentID;
-    buttonObject.parentID  = parentID;
+    // Button Down
+    buttonDObject.style.Set(quartz::Properties::height,       quartz::Dimension{50.0f, quartz::Unit::Percent});
+    buttonDObject.style.Set(quartz::Properties::background_color, glm::vec4(1.0f,0.0f,0.0f,1.0f));
+    buttonDObject.zLayer = -0.3f;
+
+    buttonD.onClick = [this, &valueRef, valueEntity](){
+        auto& labelPool = mRegistry.GetComponentPool<TextMeshComponent>();
+        auto& label     = labelPool.GetComponent(valueEntity);
+        
+        valueRef--;
+        label.content = std::to_string(valueRef);
+    };
+
+    // Value
+    valueObject.style.Set(quartz::Properties::width,          quartz::Dimension{50.0f, quartz::Unit::Percent});
+    valueObject.style.Set(quartz::Properties::margin_top,     quartz::Dimension{30u, quartz::Unit::Pixels});
+    valueObject.style.Set(quartz::Properties::background_color, bgColor);
+    valueObject.style.Set(quartz::Properties::color,          fontColor);
+    valueObject.zLayer = -0.4f;
+    
+    valueLabelName.content = std::to_string(valueRef);
+
+    labelObject.parentID    = parentID;
+    valueObject.parentID    = parentID;
+    verticalObject.parentID = parentID;
+
+    buttonUObject.parentID = verticalEntity;
+    buttonDObject.parentID = verticalEntity;
 
     mRegistry.EmplaceComponent<GuiObjectComponent>(labelEntity, labelObject);
     mRegistry.EmplaceComponent<GuiMeshComponent>(labelEntity);
     mRegistry.EmplaceComponent<TextMeshComponent>(labelEntity, labelName);
 
-    mRegistry.EmplaceComponent<GuiObjectComponent>(buttonEntity, buttonObject);
-    mRegistry.EmplaceComponent<GuiMeshComponent>(buttonEntity);
-    mRegistry.EmplaceComponent<TextMeshComponent>(buttonEntity, buttonLabelName);
-    mRegistry.EmplaceComponent<ButtonComponent>(buttonEntity, button);
+    mRegistry.EmplaceComponent<GuiObjectComponent>(verticalEntity, verticalObject);
+    mRegistry.EmplaceComponent<GuiMeshComponent>(verticalEntity);
+
+    mRegistry.EmplaceComponent<GuiObjectComponent>(valueEntity, valueObject);
+    mRegistry.EmplaceComponent<GuiMeshComponent>(valueEntity);
+    mRegistry.EmplaceComponent<TextMeshComponent>(valueEntity, valueLabelName);
+
+    mRegistry.EmplaceComponent<GuiObjectComponent>(buttonUEntity, buttonUObject);
+    mRegistry.EmplaceComponent<GuiMeshComponent>(buttonUEntity);
+    mRegistry.EmplaceComponent<ButtonComponent>(buttonUEntity, buttonU);
+
+    mRegistry.EmplaceComponent<GuiObjectComponent>(buttonDEntity, buttonDObject);
+    mRegistry.EmplaceComponent<GuiMeshComponent>(buttonDEntity);
+    mRegistry.EmplaceComponent<ButtonComponent>(buttonDEntity, buttonD);
 }
