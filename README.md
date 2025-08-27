@@ -14,6 +14,8 @@ Default example scene: 15625 particles in a no-gravity environment.
 &nbsp;
 # **Installation**
 
+Install already [released](https://github.com/MrSoilder23/sph_sim/releases) version or build it yourself.
+
 ## **Build**
 ```
 cmake -S . -B build "-DCMAKE_TOOLCHAIN_FILE=./vcpkg/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=x64-windows -DVCPKG_MANIFEST_INSTALL=ON -G Ninja 
