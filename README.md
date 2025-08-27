@@ -1,5 +1,5 @@
 # **Sph Simulation**
-SPH planetary collision simulation. Built on **Bismuth**, a custom Entity-Component-System (ECS) engine. Simulation runs on the GPU and includes an interactive GUI to control spawn parameters.
+SPH planetary collision simulation ( Not 100% correct. Lacks extra math ). Built on **Bismuth**, a custom Entity-Component-System (ECS) engine. Simulation runs on the GPU and includes an interactive GUI to control spawn parameters.
 
 &nbsp;
 # **Description**
