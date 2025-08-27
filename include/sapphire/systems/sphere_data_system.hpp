@@ -1,4 +1,7 @@
 #pragma once
+// C++ standard libraries
+#include <cstring>
+
 // Third_party libraries
 #include <glm/glm.hpp>
 
