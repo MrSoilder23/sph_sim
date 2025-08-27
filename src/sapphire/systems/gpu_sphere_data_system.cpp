@@ -168,7 +168,7 @@ void GPUSphereDataSystem::ComputePos(const std::vector<uint32_t>& denseEntities,
     
     int uTimeStep = shader::FindUniformLocation(mPosProgram, "uTimeStep");
 
-    glUniform1f(uTimeStep, 0.01f);
+    glUniform1f(uTimeStep, sapphire_config::TIME_STEP);
 
     glDispatchCompute((denseEntities.size() + sapphire_config::WORKGROUP_SIZE-1) / sapphire_config::WORKGROUP_SIZE, 1, 1);
     glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
