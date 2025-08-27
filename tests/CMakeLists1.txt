@@ -1,0 +1,23 @@
+file(GLOB_RECURSE TEST_SOURCES CONFIGURE_DEPENDS "*.cpp")
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/tests")
+
+foreach(_src IN LISTS TEST_SOURCES)
+    get_filename_component(_name ${_src} NAME_WE)
+
+    add_executable(${_name} ${_src})
+
+    target_include_directories(${_name} PRIVATE
+        ${CMAKE_SOURCE_DIR}/include
+        ${CMAKE_SOURCE_DIR}/third_party    
+    )
+    target_link_libraries(${_name} PRIVATE 
+        glad    
+        nlohmann_json::nlohmann_json
+        SDL3::SDL3
+        OpenMP::OpenMP_C
+        OpenMP::OpenMP_CXX
+    )
+
+    add_test(NAME ${_name} COMMAND ${_name})
+endforeach()
